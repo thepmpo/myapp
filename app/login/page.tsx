@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/app/lib/supabase";
+import { createClientInstance } from "@/app/lib/supabase";
 
 export default function Login() {
-  const supabase = createClient();
+  const supabase = createClientInstance();
 
   const [email, setEmail] = useState("");
 
   const handleLogin = async () => {
-    alert("클릭됨"); // 🔥 이거 추가 (테스트용)
+    alert("클릭됨");
 
     if (!email) {
       alert("이메일 입력해주세요");
@@ -18,12 +18,16 @@ export default function Login() {
 
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
     });
 
     if (error) {
+      console.error(error);
       alert("로그인 실패");
     } else {
-      alert("이메일 확인해주세요!");
+      alert("이메일 확인 후 링크 클릭하면 로그인됩니다");
     }
   };
 
