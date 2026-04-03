@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [title, setTitle] = useState("");
   const [user, setUser] = useState<any>(null);
+  const router = useRouter();
 
-  // 🔥 로그인 유저 가져오기 (페이지 들어올 때)
   useEffect(() => {
     const getUser = async () => {
       const {
@@ -48,6 +49,15 @@ export default function Home() {
       <h1>게시글 목록</h1>
 
       <p>현재 로그인: {user?.email || "없음"}</p>
+
+      {/* 🔥 로그인 버튼 추가 */}
+      {!user && (
+        <button onClick={() => router.push("/login")}>
+          로그인 하러가기
+        </button>
+      )}
+
+      <br /><br />
 
       <input
         placeholder="글 제목 입력"
