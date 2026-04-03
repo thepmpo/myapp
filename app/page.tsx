@@ -6,19 +6,25 @@ import { supabase } from './lib/supabase';
 export default function Home() {
   const [title, setTitle] = useState('');
   const [posts, setPosts] = useState<any[]>([]);
-  const [user, setUser] = useState('');
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    checkUser();
+    fetchPosts();
+  }, []);
 
-    if (!savedUser) {
+  const checkUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
       window.location.href = '/login';
       return;
     }
 
-    setUser(savedUser);
-    fetchPosts();
-  }, []);
+    setUser(user);
+  };
 
   const fetchPosts = async () => {
     const { data } = await supabase
@@ -30,12 +36,13 @@ export default function Home() {
   };
 
   const addPost = async () => {
-    if (!title) return;
+    if (!title || !user) return;
 
     await supabase.from('posts').insert([
       {
         title,
-        author: user,
+        author: user.email,
+        user_id: user.id,
       },
     ]);
 
@@ -43,8 +50,8 @@ export default function Home() {
     fetchPosts();
   };
 
-  const logout = () => {
-    localStorage.removeItem('user');
+  const logout = async () => {
+    await supabase.auth.signOut();
     window.location.href = '/login';
   };
 
@@ -52,7 +59,7 @@ export default function Home() {
     <div style={{ padding: 20 }}>
       <h1>게시글 목록</h1>
 
-      <p>현재 사용자: {user}</p>
+      <p>현재 사용자: {user?.email}</p>
 
       <button onClick={logout}>로그아웃</button>
 

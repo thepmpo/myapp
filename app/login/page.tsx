@@ -1,17 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { supabase } from '../lib/supabase';
 
 export default function Login() {
-  const [name, setName] = useState('');
-  const router = useRouter();
+  const [email, setEmail] = useState('');
 
-  const handleLogin = () => {
-    if (!name) return;
+  const handleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+    });
 
-    localStorage.setItem('user', name);
-    router.push('/');
+    if (!error) {
+      alert('이메일로 로그인 링크가 전송되었습니다');
+    }
   };
 
   return (
@@ -19,9 +21,9 @@ export default function Login() {
       <h1>로그인</h1>
 
       <input
-        placeholder="이름 입력"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        placeholder="이메일 입력"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
 
       <button onClick={handleLogin}>로그인</button>
