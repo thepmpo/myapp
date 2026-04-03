@@ -45,4 +45,5 @@ export default function Home() {
       <button onClick={addPost}>추가</button>
     </div>
   );
-}
+} 
+/
