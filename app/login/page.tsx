@@ -17,7 +17,7 @@ export default function Login() {
     });
 
     if (error) {
-      alert("로그인 실패");
+      alert(error.message);
     } else {
       alert("이메일 확인하세요");
     }
@@ -37,3 +37,4 @@ export default function Login() {
     </div>
   );
 }
+/
