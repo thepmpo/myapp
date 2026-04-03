@@ -34,6 +34,10 @@ export default function Home() {
     <div style={{ padding: 40 }}>
       <h1>게시글 목록</h1>
 
+      <p style={{ color: "red" }}>
+        ※ 현재는 임시 로그인 상태입니다. 실제 로그인은 추후 적용됩니다.
+      </p>
+
       <p>현재 로그인: {user.email} (임시)</p>
 
       <input
@@ -45,4 +49,4 @@ export default function Home() {
       <button onClick={addPost}>추가</button>
     </div>
   );
-} 
+}
