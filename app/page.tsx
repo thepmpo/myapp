@@ -1,86 +1,53 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { supabase } from './lib/supabase';
+import { useState } from "react";
+import { createClient } from "@/app/lib/supabase";
 
 export default function Home() {
-  const [title, setTitle] = useState('');
-  const [posts, setPosts] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
 
-  useEffect(() => {
-    checkUser();
-    fetchPosts();
-  }, []);
+  const [title, setTitle] = useState("");
 
-  const checkUser = async () => {
+  const addPost = async () => {
+    // 🔥 로그인 유저 가져오기
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) {
-      window.location.href = '/login';
+      alert("로그인 먼저 해주세요");
       return;
     }
 
-    setUser(user);
-  };
-
-  const fetchPosts = async () => {
-    const { data } = await supabase
-      .from('posts')
-      .select('*')
-      .order('id', { ascending: false });
-
-    if (data) setPosts(data);
-  };
-
-  const addPost = async () => {
-    if (!title || !user) return;
-
-    await supabase.from('posts').insert([
+    // 🔥 DB 저장 (user_id 포함)
+    const { error } = await supabase.from("posts").insert([
       {
-        title,
+        title: title,
         author: user.email,
         user_id: user.id,
       },
     ]);
 
-    setTitle('');
-    fetchPosts();
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    window.location.href = '/login';
+    if (error) {
+      console.error(error);
+      alert("실패");
+    } else {
+      alert("성공");
+      location.reload();
+    }
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 40 }}>
       <h1>게시글 목록</h1>
 
-      <p>현재 사용자: {user?.email}</p>
+      <input
+        placeholder="글 제목 입력"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
 
-      <button onClick={logout}>로그아웃</button>
-
-      <div style={{ marginTop: 20 }}>
-        <input
-          placeholder="글 제목 입력"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <button onClick={addPost}>추가</button>
-      </div>
-
-      <ul style={{ marginTop: 20 }}>
-        {posts.map((post) => (
-          <li key={post.id}>
-            <a href={`/post/${post.id}`}>
-              {post.title} ({post.author})
-            </a>
-          </li>
-        ))}
-      </ul>
+      <button onClick={addPost}>추가</button>
     </div>
   );
 }
