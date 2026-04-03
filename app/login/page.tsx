@@ -3,49 +3,45 @@
 import { useState } from "react";
 import { createClientInstance } from "@/app/lib/supabase";
 
-export default function Home() {
+export default function Login() {
   const supabase = createClientInstance();
 
-  const [title, setTitle] = useState("");
+  const [email, setEmail] = useState("");
 
-  const addPost = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const handleLogin = async () => {
+    alert("클릭됨");
 
-    if (!user) {
-      alert("로그인 먼저 해주세요");
+    if (!email) {
+      alert("이메일 입력해주세요");
       return;
     }
 
-    const { error } = await supabase.from("posts").insert([
-      {
-        title: title,
-        author: user.email,
-        user_id: user.id,
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email,
+      options: {
+        emailRedirectTo: window.location.origin,
       },
-    ]);
+    });
 
     if (error) {
       console.error(error);
-      alert("실패");
+      alert("로그인 실패");
     } else {
-      alert("성공");
-      location.reload();
+      alert("이메일 확인 후 링크 클릭하면 로그인됩니다");
     }
   };
 
   return (
     <div style={{ padding: 40 }}>
-      <h1>게시글 목록</h1>
+      <h1>로그인</h1>
 
       <input
-        placeholder="글 제목 입력"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        placeholder="이메일 입력"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
 
-      <button onClick={addPost}>추가</button>
+      <button onClick={handleLogin}>로그인</button>
     </div>
   );
 }
