@@ -31,7 +31,7 @@ export default function Home() {
 
   // 🔥 글 추가 (로그인 제거 버전)
   const addPost = async () => {
-    const { error } = await supabase.from("posts").insert([
+    const { data, error } = await supabase.from("posts").insert([
       {
         title: title,
         author: "test@test.com",
@@ -40,8 +40,10 @@ export default function Home() {
     ]);
 
     if (error) {
-      alert(error.message); // 🔥 진짜 에러 확인
+      console.log("에러 상세:", error);
+      alert(error.message); // 🔥 진짜 에러 확인 (핵심)
     } else {
+      console.log("성공 데이터:", data);
       alert("성공");
       setTitle("");
       getPosts();
