@@ -13,6 +13,8 @@ type Post = {
 export default function Home() {
   const [title, setTitle] = useState("");
   const [posts, setPosts] = useState<Post[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   const getPosts = async () => {
     const { data, error } = await supabase
@@ -59,6 +61,31 @@ export default function Home() {
     if (error) {
       alert(error.message);
     } else {
+      await getPosts();
+    }
+  };
+
+  const startEdit = (post: Post) => {
+    setEditingId(post.id);
+    setEditTitle(post.title);
+  };
+
+  const updatePost = async (id: number) => {
+    if (!editTitle) {
+      alert("수정할 내용을 입력하세요");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("posts")
+      .update({ title: editTitle })
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      setEditingId(null);
+      setEditTitle("");
       await getPosts();
     }
   };
@@ -122,28 +149,88 @@ export default function Home() {
               boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
             }}
           >
-            <div style={{ fontWeight: "bold", fontSize: 16 }}>
-              {post.title}
-            </div>
+            {editingId === post.id ? (
+              <>
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: 8,
+                    border: "1px solid #ddd",
+                    borderRadius: 6,
+                  }}
+                />
 
-            <div style={{ color: "#666", marginTop: 6 }}>
-              {post.author}
-            </div>
+                <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => updatePost(post.id)}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "none",
+                      backgroundColor: "#000",
+                      color: "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    저장
+                  </button>
 
-            <button
-              onClick={() => deletePost(post.id)}
-              style={{
-                marginTop: 10,
-                padding: "6px 10px",
-                borderRadius: 6,
-                border: "none",
-                backgroundColor: "#ff4d4f",
-                color: "#fff",
-                cursor: "pointer",
-              }}
-            >
-              삭제
-            </button>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                      background: "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    취소
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontWeight: "bold", fontSize: 16 }}>
+                  {post.title}
+                </div>
+
+                <div style={{ color: "#666", marginTop: 6 }}>
+                  {post.author}
+                </div>
+
+                <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+                  <button
+                    onClick={() => startEdit(post)}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "1px solid #ccc",
+                      background: "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    수정
+                  </button>
+
+                  <button
+                    onClick={() => deletePost(post.id)}
+                    style={{
+                      padding: "6px 10px",
+                      borderRadius: 6,
+                      border: "none",
+                      backgroundColor: "#ff4d4f",
+                      color: "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    삭제
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>
