@@ -53,36 +53,78 @@ export default function Home() {
     } else {
       alert("성공");
       setTitle("");
-
       await getPosts();
     }
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>게시글 목록</h1>
+    <div style={{ maxWidth: 600, margin: "0 auto", padding: 20 }}>
+      <h1 style={{ marginBottom: 20 }}>게시글 목록</h1>
 
-      <input
-        placeholder="글 제목 입력"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+        <input
+          placeholder="글 제목 입력"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          style={{
+            flex: 1,
+            padding: 10,
+            border: "1px solid #ddd",
+            borderRadius: 8,
+          }}
+        />
 
-      <button onClick={addPost}>추가</button>
+        <button
+          onClick={addPost}
+          style={{
+            padding: "10px 16px",
+            borderRadius: 8,
+            backgroundColor: "#000",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          추가
+        </button>
+      </div>
 
-      {/* 테스트 버튼 */}
-      <button onClick={getPosts}>강제 새로고침</button>
-
-      <hr />
+      <button
+        onClick={getPosts}
+        style={{
+          marginBottom: 20,
+          padding: "6px 12px",
+          borderRadius: 6,
+          border: "1px solid #ccc",
+          background: "#f9f9f9",
+          cursor: "pointer",
+        }}
+      >
+        🔄 새로고침
+      </button>
 
       {posts.length === 0 && <p>❌ 데이터 없음</p>}
 
-      {posts.map((post) => (
-        <div key={post.id}>
-          <b>{post.title}</b>
-          <p>{post.author}</p>
-        </div>
-      ))}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {posts.map((post) => (
+          <div
+            key={post.id}
+            style={{
+              border: "1px solid #eee",
+              borderRadius: 12,
+              padding: 16,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+            }}
+          >
+            <div style={{ fontWeight: "bold", fontSize: 16 }}>
+              {post.title}
+            </div>
+            <div style={{ color: "#666", marginTop: 6 }}>
+              {post.author}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
