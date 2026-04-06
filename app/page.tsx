@@ -16,20 +16,26 @@ export default function Home() {
 
   // 🔥 글 가져오기
   const getPosts = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("posts")
       .select("*")
       .order("id", { ascending: false });
 
+    console.log("🔥 가져온 데이터:", data);
+
+    if (error) {
+      console.log("❌ 조회 에러:", error);
+      alert(error.message);
+    }
+
     setPosts((data as Post[]) || []);
   };
 
-  // 🔥 처음 실행
   useEffect(() => {
     getPosts();
   }, []);
 
-  // 🔥 글 추가 (로그인 제거 버전)
+  // 🔥 글 추가
   const addPost = async () => {
     const { data, error } = await supabase.from("posts").insert([
       {
@@ -39,11 +45,12 @@ export default function Home() {
       },
     ]);
 
+    console.log("🔥 insert 결과:", data);
+
     if (error) {
-      console.log("에러 상세:", error);
-      alert(error.message); // 🔥 진짜 에러 확인 (핵심)
+      console.log("❌ insert 에러:", error);
+      alert(error.message);
     } else {
-      console.log("성공 데이터:", data);
       alert("성공");
       setTitle("");
       getPosts();
@@ -54,8 +61,6 @@ export default function Home() {
     <div style={{ padding: 40 }}>
       <h1>게시글 목록</h1>
 
-      <p>현재 상태: 로그인 없이 테스트 중</p>
-
       <input
         placeholder="글 제목 입력"
         value={title}
@@ -65,6 +70,8 @@ export default function Home() {
       <button onClick={addPost}>추가</button>
 
       <hr />
+
+      {posts.length === 0 && <p>❌ 데이터 없음</p>}
 
       {posts.map((post) => (
         <div key={post.id}>
