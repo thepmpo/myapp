@@ -14,8 +14,9 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [posts, setPosts] = useState<Post[]>([]);
 
-  // 🔥 글 가져오기
   const getPosts = async () => {
+    console.log("🔥 getPosts 실행됨");
+
     const { data, error } = await supabase
       .from("posts")
       .select("*")
@@ -26,16 +27,15 @@ export default function Home() {
     if (error) {
       console.log("❌ 조회 에러:", error);
       alert(error.message);
+    } else {
+      setPosts((data as Post[]) || []);
     }
-
-    setPosts((data as Post[]) || []);
   };
 
   useEffect(() => {
     getPosts();
   }, []);
 
-  // 🔥 글 추가
   const addPost = async () => {
     const { data, error } = await supabase.from("posts").insert([
       {
@@ -53,7 +53,8 @@ export default function Home() {
     } else {
       alert("성공");
       setTitle("");
-      getPosts();
+
+      await getPosts();
     }
   };
 
@@ -68,6 +69,9 @@ export default function Home() {
       />
 
       <button onClick={addPost}>추가</button>
+
+      {/* 테스트 버튼 */}
+      <button onClick={getPosts}>강제 새로고침</button>
 
       <hr />
 
