@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabase";
 
-// ✅ 타입 정의 (이게 핵심)
 type Post = {
   id: number;
   title: string;
@@ -15,12 +14,6 @@ export default function Home() {
   const [title, setTitle] = useState("");
   const [posts, setPosts] = useState<Post[]>([]);
 
-  // 임시 로그인 유저
-  const user = {
-    id: "test-user-123",
-    email: "test@test.com",
-  };
-
   // 🔥 글 가져오기
   const getPosts = async () => {
     const { data } = await supabase
@@ -28,26 +21,26 @@ export default function Home() {
       .select("*")
       .order("id", { ascending: false });
 
-    // ✅ 타입 맞춰서 넣기
     setPosts((data as Post[]) || []);
   };
 
-  // 🔥 처음 들어오면 실행
+  // 🔥 처음 실행
   useEffect(() => {
     getPosts();
   }, []);
 
+  // 🔥 글 추가 (로그인 제거 버전)
   const addPost = async () => {
     const { error } = await supabase.from("posts").insert([
       {
         title: title,
-        author: user.email,
-        user_id: user.id,
+        author: "test@test.com",
+        user_id: "test-user",
       },
     ]);
 
     if (error) {
-      alert("실패");
+      alert(error.message); // 🔥 진짜 에러 확인
     } else {
       alert("성공");
       setTitle("");
@@ -59,11 +52,7 @@ export default function Home() {
     <div style={{ padding: 40 }}>
       <h1>게시글 목록</h1>
 
-      <p style={{ color: "red" }}>
-        ※ 현재는 임시 로그인 상태입니다.
-      </p>
-
-      <p>현재 로그인: {user.email}</p>
+      <p>현재 상태: 로그인 없이 테스트 중</p>
 
       <input
         placeholder="글 제목 입력"
