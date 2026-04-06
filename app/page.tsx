@@ -3,9 +3,17 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabase";
 
+// ✅ 타입 정의 (이게 핵심)
+type Post = {
+  id: number;
+  title: string;
+  author: string;
+  user_id: string;
+};
+
 export default function Home() {
   const [title, setTitle] = useState("");
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   // 임시 로그인 유저
   const user = {
@@ -20,7 +28,8 @@ export default function Home() {
       .select("*")
       .order("id", { ascending: false });
 
-    setPosts(data || []);
+    // ✅ 타입 맞춰서 넣기
+    setPosts((data as Post[]) || []);
   };
 
   // 🔥 처음 들어오면 실행
@@ -42,7 +51,7 @@ export default function Home() {
     } else {
       alert("성공");
       setTitle("");
-      getPosts(); // 🔥 다시 불러오기
+      getPosts();
     }
   };
 
@@ -66,7 +75,6 @@ export default function Home() {
 
       <hr />
 
-      {/* 🔥 여기부터가 핵심 (글 보여주는 부분) */}
       {posts.map((post) => (
         <div key={post.id}>
           <b>{post.title}</b>
