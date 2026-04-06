@@ -15,17 +15,12 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
 
   const getPosts = async () => {
-    console.log("🔥 getPosts 실행됨");
-
     const { data, error } = await supabase
       .from("posts")
       .select("*")
       .order("id", { ascending: false });
 
-    console.log("🔥 가져온 데이터:", data);
-
     if (error) {
-      console.log("❌ 조회 에러:", error);
       alert(error.message);
     } else {
       setPosts((data as Post[]) || []);
@@ -37,7 +32,12 @@ export default function Home() {
   }, []);
 
   const addPost = async () => {
-    const { data, error } = await supabase.from("posts").insert([
+    if (!title) {
+      alert("제목을 입력하세요");
+      return;
+    }
+
+    const { error } = await supabase.from("posts").insert([
       {
         title: title,
         author: "test@test.com",
@@ -45,14 +45,20 @@ export default function Home() {
       },
     ]);
 
-    console.log("🔥 insert 결과:", data);
-
     if (error) {
-      console.log("❌ insert 에러:", error);
       alert(error.message);
     } else {
-      alert("성공");
       setTitle("");
+      await getPosts();
+    }
+  };
+
+  const deletePost = async (id: number) => {
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+
+    if (error) {
+      alert(error.message);
+    } else {
       await getPosts();
     }
   };
@@ -119,9 +125,25 @@ export default function Home() {
             <div style={{ fontWeight: "bold", fontSize: 16 }}>
               {post.title}
             </div>
+
             <div style={{ color: "#666", marginTop: 6 }}>
               {post.author}
             </div>
+
+            <button
+              onClick={() => deletePost(post.id)}
+              style={{
+                marginTop: 10,
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "none",
+                backgroundColor: "#ff4d4f",
+                color: "#fff",
+                cursor: "pointer",
+              }}
+            >
+              삭제
+            </button>
           </div>
         ))}
       </div>
