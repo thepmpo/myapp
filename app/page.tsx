@@ -12,6 +12,14 @@ type Post = {
   is_question: boolean;
 };
 
+type PreviewComment = {
+  id: number;
+  post_id: number;
+  author: string;
+  content: string;
+  likeCount: number;
+};
+
 export default function Home() {
   const [title, setTitle] = useState("");
   const [isQuestion, setIsQuestion] = useState(false);
@@ -20,6 +28,7 @@ export default function Home() {
   const [editTitle, setEditTitle] = useState("");
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
   const [questionOnly, setQuestionOnly] = useState(false);
+  const [topCommentsByPost, setTopCommentsByPost] = useState<Record<number, PreviewComment[]>>({});
 
   useEffect(() => {
     const loadUser = async () => {
@@ -42,8 +51,64 @@ export default function Home() {
     if (error) {
       alert(error.message);
     } else {
-      setPosts((data as Post[]) || []);
+      const fetchedPosts = (data as Post[]) || [];
+      setPosts(fetchedPosts);
+      await fetchTopComments(fetchedPosts.map((p) => p.id));
     }
+  };
+
+  const fetchTopComments = async (postIds: number[]) => {
+    if (postIds.length === 0) {
+      setTopCommentsByPost({});
+      return;
+    }
+
+    const { data: commentsData, error: commentsError } = await supabase
+      .from("comments")
+      .select("id, post_id, author, content")
+      .in("post_id", postIds);
+
+    if (commentsError || !commentsData || commentsData.length === 0) {
+      setTopCommentsByPost({});
+      return;
+    }
+
+    const commentIds = commentsData.map((c) => c.id);
+
+    const { data: likesData } = await supabase
+      .from("likes")
+      .select("comment_id")
+      .in("comment_id", commentIds);
+
+    const likeCountByComment: Record<number, number> = {};
+    (likesData || []).forEach((l: { comment_id: number | null }) => {
+      if (l.comment_id != null) {
+        likeCountByComment[l.comment_id] = (likeCountByComment[l.comment_id] || 0) + 1;
+      }
+    });
+
+    const withCounts: PreviewComment[] = commentsData.map((c) => ({
+      id: c.id,
+      post_id: c.post_id,
+      author: c.author,
+      content: c.content,
+      likeCount: likeCountByComment[c.id] || 0,
+    }));
+
+    const grouped: Record<number, PreviewComment[]> = {};
+    withCounts.forEach((c) => {
+      if (!grouped[c.post_id]) grouped[c.post_id] = [];
+      grouped[c.post_id].push(c);
+    });
+
+    Object.keys(grouped).forEach((key) => {
+      const postId = Number(key);
+      grouped[postId] = grouped[postId]
+        .sort((a, b) => b.likeCount - a.likeCount)
+        .slice(0, 2);
+    });
+
+    setTopCommentsByPost(grouped);
   };
 
   useEffect(() => {
@@ -298,6 +363,19 @@ export default function Home() {
                     >
                       삭제
                     </button>
+                  </div>
+                )}
+
+                {(topCommentsByPost[post.id] || []).length > 0 && (
+                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #eee", display: "flex", flexDirection: "column", gap: 6 }}>
+                    {topCommentsByPost[post.id].map((c) => (
+                      <div key={c.id} style={{ fontSize: 13, color: "#5B6472" }}>
+                        💬 <strong>{c.author}</strong> {c.content}
+                        {c.likeCount > 0 && (
+                          <span style={{ color: "#999", marginLeft: 6 }}>❤️ {c.likeCount}</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </>
