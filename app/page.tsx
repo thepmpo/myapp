@@ -28,7 +28,9 @@ export default function Home() {
   const [editTitle, setEditTitle] = useState("");
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
   const [questionOnly, setQuestionOnly] = useState(false);
+  const [unansweredQuestionOnly, setUnansweredQuestionOnly] = useState(false);
   const [topCommentsByPost, setTopCommentsByPost] = useState<Record<number, PreviewComment[]>>({});
+  const [commentCountByPost, setCommentCountByPost] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const loadUser = async () => {
@@ -60,6 +62,7 @@ export default function Home() {
   const fetchTopComments = async (postIds: number[]) => {
     if (postIds.length === 0) {
       setTopCommentsByPost({});
+      setCommentCountByPost({});
       return;
     }
 
@@ -70,8 +73,15 @@ export default function Home() {
 
     if (commentsError || !commentsData || commentsData.length === 0) {
       setTopCommentsByPost({});
+      setCommentCountByPost({});
       return;
     }
+
+    const counts: Record<number, number> = {};
+    commentsData.forEach((c) => {
+      counts[c.post_id] = (counts[c.post_id] || 0) + 1;
+    });
+    setCommentCountByPost(counts);
 
     const commentIds = commentsData.map((c) => c.id);
 
@@ -248,6 +258,20 @@ export default function Home() {
         >
           🙋 질문만 보기
         </button>
+
+        <button
+          onClick={() => setUnansweredQuestionOnly((v) => !v)}
+          style={{
+            padding: "6px 12px",
+            borderRadius: 6,
+            border: unansweredQuestionOnly ? "1px solid #E2A33B" : "1px solid #ccc",
+            background: unansweredQuestionOnly ? "#FBF0DB" : "#f9f9f9",
+            color: unansweredQuestionOnly ? "#8A5B0E" : "#000",
+            cursor: "pointer",
+          }}
+        >
+          🙋 답변 없는 질문만
+        </button>
       </div>
 
       {posts.length === 0 && <p>❌ 데이터 없음</p>}
@@ -255,6 +279,11 @@ export default function Home() {
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {posts
           .filter((post) => !questionOnly || post.is_question)
+          .filter(
+            (post) =>
+              !unansweredQuestionOnly ||
+              (post.is_question && (commentCountByPost[post.id] || 0) === 0)
+          )
           .map((post) => (
           <div
             key={post.id}
