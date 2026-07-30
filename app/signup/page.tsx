@@ -28,10 +28,6 @@ export default function Signup() {
     setAgreeMarketing(checked);
   };
 
-  const showTermsPlaceholder = () => {
-    alert("약관 페이지는 준비 중입니다");
-  };
-
   const handleSignup = async () => {
     if (!email || !password || !nickname) {
       setError("이메일, 비밀번호, 닉네임을 모두 입력해주세요");
@@ -152,7 +148,7 @@ export default function Signup() {
             onChange={(e) => setAgreeTerms(e.target.checked)}
           />
           [필수] 이용약관 동의{" "}
-          <a href="#" onClick={(e) => { e.preventDefault(); showTermsPlaceholder(); }}>
+          <a href="/terms" target="_blank" rel="noopener noreferrer">
             보기
           </a>
         </label>
@@ -164,7 +160,7 @@ export default function Signup() {
             onChange={(e) => setAgreePrivacy(e.target.checked)}
           />
           [필수] 개인정보처리방침 동의{" "}
-          <a href="#" onClick={(e) => { e.preventDefault(); showTermsPlaceholder(); }}>
+          <a href="/privacy" target="_blank" rel="noopener noreferrer">
             보기
           </a>
         </label>
