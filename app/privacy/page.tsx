@@ -11,7 +11,6 @@ export default function PrivacyPolicy() {
 
       <p style={{ color: "#999", fontSize: 13, marginBottom: 24 }}>
         본 방침은 초안이며, 정식 게시 전 변호사 등 법률 전문가의 검토가 필요합니다.
-        시행일, 운영자(개인정보보호책임자) 연락처 등 [ ] 표시된 항목은 검토 후 확정해주세요.
       </p>
 
       <section style={{ marginBottom: 20 }}>
@@ -98,8 +97,8 @@ export default function PrivacyPolicy() {
         <p style={{ color: "#666" }}>
           회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 이용자의
           불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보보호책임자를 지정하고 있습니다.<br />
-          - 성명: [ ]<br />
-          - 이메일: [ ]
+          - 성명: 김상현<br />
+          - 이메일: thepmpo.official@gmail.com
         </p>
       </section>
 
@@ -108,8 +107,8 @@ export default function PrivacyPolicy() {
         <p style={{ color: "#666" }}>
           현 개인정보처리방침 내용 추가, 삭제 및 수정이 있을 경우 개정 최소 7일 전부터 서비스
           내 공지사항을 통해 고지할 것입니다.<br />
-          - 공고일자: [ ]<br />
-          - 시행일자: [ ]
+          - 공고일자: 2026년 8월 2일<br />
+          - 시행일자: 2026년 8월 2일
         </p>
       </section>
     </div>

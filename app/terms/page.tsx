@@ -11,7 +11,6 @@ export default function TermsOfService() {
 
       <p style={{ color: "#999", fontSize: 13, marginBottom: 24 }}>
         본 약관은 초안이며, 정식 게시 전 변호사 등 법률 전문가의 검토가 필요합니다.
-        시행일 및 회사(운영자) 정보 등은 검토 후 확정해주세요.
       </p>
 
       <section style={{ marginBottom: 20 }}>
@@ -103,12 +102,17 @@ export default function TermsOfService() {
         </p>
       </section>
 
-      <section>
+      <section style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 15, marginBottom: 8 }}>제9조 (분쟁해결 및 준거법)</h2>
         <p style={{ color: "#666" }}>
           이 약관은 대한민국 법령에 따라 규율되고 해석되며, 서비스 이용과 관련하여 분쟁이
           발생한 경우 민사소송법상의 관할법원에 소를 제기할 수 있습니다.
         </p>
+      </section>
+
+      <section>
+        <h2 style={{ fontSize: 15, marginBottom: 8 }}>부칙</h2>
+        <p style={{ color: "#666" }}>이 약관은 2026년 8월 2일부터 시행합니다.</p>
       </section>
     </div>
   );
