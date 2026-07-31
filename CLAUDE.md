@@ -236,11 +236,11 @@ PRD/IA 요구사항 대비 기능 구현 완료: 카테고리 탭(프로덕트/P
 - **해결됨(2026-07-30)**: 커뮤니티 목록(화면1) PRD Must-have 4 "'질문' 태그된 글 중 댓글 없는 것만 보기" 조합 필터 구현 완료 — 기존 "질문만 보기" 토글과 별개로 "🙋 답변 없는 질문만" 토글 추가, `is_question === true && 댓글 수 === 0` 조건으로 필터링(`app/page.tsx`). 라이브로 답변없는질문/답변있는질문/질문아닌글 3종 생성해 토글 시 답변없는질문만 노출되는 것 확인 후 테스트 데이터 정리 완료 — **화면1 PRD 요구사항 전부 구현 완료**
 - **해결됨(2026-07-31)**: 사이트 전체 공용 내비게이션 + UI 디자인 시스템 실제 적용 완료 — `app/components/Sidebar.tsx`(커뮤니티/정보게시판 메뉴, 마이페이지 진입용 프로필 카드), `app/components/AppShell.tsx`(로그인/회원가입만 사이드바 없는 독립 카드, 나머지는 좌측 사이드바+본문 레이아웃) 신설. `PMPO_UI디자인시스템_v0.3.md`/`wireframe_images` 기준 컬러 토큰(Paper/Surface/Ink/Cobalt/Amber/Sage), Noto Sans KR 폰트, 카드 그림자, "질문있어요" 포스트잇 clip-path를 `globals.css`/`layout.tsx`에 등록하고 커뮤니티·정보게시판·로그인/회원가입·마이페이지·관리자·약관/개인정보처리방침까지 전 페이지의 inline style을 교체(기능 로직 변경 없음). 그 전까지는 기능만 구현되고 디자인은 전혀 입혀지지 않은 상태였음
 - **해결됨(2026-07-31)**: 도메인(`thepmpo.com`) 전파 완료 — 네임서버 전파, Vercel A 레코드 발급, HTTPS 접속(200 OK) 전부 확인. Supabase Auth의 Site URL을 `https://thepmpo.com`으로 갱신, Redirect URLs에 `https://thepmpo.com/**` 추가(기존 `myapp-taupe-seven.vercel.app`도 유지) 완료 — **배포 전 도메인/인증 URL 작업 전부 종료**
+- **해결됨(2026-07-31)**: 회원가입 이메일 발송 종단 테스트 완료 + 커스텀 SMTP(Resend) 연동 완료. 실제 원인은 기존에 추정했던 "시간당 발송 한도"가 아니라 두 가지였음: (1) Supabase Auth의 "Confirm email" 옵션이 꺼져 있어서 확인 메일 발송 자체가 시도되지 않고 가입 즉시 자동 확인 처리되던 버그 발견 → 다시 켬. (2) 다시 켜고 나니 Supabase 기본 메일 발송이 "프로젝트 소유자 본인 이메일로만" 테스트 발송을 허용하는 샌드박스 제한이라 실제 가입자에게는 영원히 발송이 불가능한 구조였음(로그: `gomail: could not send email... You can only send testing emails to your own email address`). Resend에 `thepmpo.com` 도메인을 추가하고 DKIM/SPF/DMARC/MX 레코드를 Vercel DNS에 등록해 도메인 인증 완료, Supabase Auth SMTP 발신 주소를 샌드박스용 `onboarding@resend.dev`에서 인증된 `noreply@thepmpo.com`으로 교체. 실제 가입 → 확인 메일 수신 → 링크 클릭 → 로그인 세션 생성까지 라이브로 전체 플로우 검증 완료(발신자가 `noreply@thepmpo.com`으로 정상 표시됨) — **회원가입 플로우 배포 전 마지막 블로커 해소**
 
 ### 다음 개발 액션 우선순위
 
-1. 회원가입 이메일 발송까지 걸친 종단 테스트(실제 이메일 확인 링크 클릭까지) — Supabase 무료 플랜 시간당 발송 한도 때문에 아직 미완료
-2. 운영용 Supabase 이메일 발송 한도/커스텀 SMTP 검토, 로컬 `.env.local`과 Vercel 환경변수 값 일치 확인
+1. 로컬 `.env.local`과 Vercel 환경변수 값 일치 확인
 
 ### 개발 액션 아님 (운영자가 직접 처리)
 
