@@ -19,6 +19,7 @@ export default function ProfileEdit() {
   const [passwordSaved, setPasswordSaved] = useState(false);
 
   const [withdrawing, setWithdrawing] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -107,18 +108,13 @@ export default function ProfileEdit() {
   };
 
   const withdraw = async () => {
-    const confirmed = window.confirm(
-      "정말 탈퇴하시겠습니까?\n닉네임과 작성한 게시글/댓글은 삭제되지 않고 그대로 유지됩니다."
-    );
-
-    if (!confirmed) return;
-
     setWithdrawing(true);
 
     const { error } = await supabase.rpc("delete_own_account");
 
     if (error) {
       setWithdrawing(false);
+      setShowWithdrawModal(false);
       alert(error.message);
       return;
     }
@@ -200,13 +196,51 @@ export default function ProfileEdit() {
 
       <div className="mt-14 pt-4 border-t border-border flex justify-end">
         <button
-          onClick={withdraw}
-          disabled={withdrawing}
-          className="text-xs text-ink-soft/70 bg-transparent border-none cursor-pointer hover:text-red-500 disabled:opacity-60"
+          onClick={() => setShowWithdrawModal(true)}
+          className="text-xs text-ink-soft/70 bg-transparent border-none cursor-pointer hover:text-red-500"
         >
-          {withdrawing ? "탈퇴 처리 중..." : "회원 탈퇴"}
+          회원 탈퇴
         </button>
       </div>
+
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-[380px] bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-6">
+            <div className="flex items-center gap-2 text-red-500 mb-3">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+              <h2 className="text-base font-bold">정말 탈퇴하시겠어요?</h2>
+            </div>
+
+            <p className="text-sm text-ink-soft mb-1.5">
+              이 작업은 <strong className="text-ink">되돌릴 수 없습니다.</strong>
+            </p>
+            <p className="text-sm text-ink-soft mb-6">
+              닉네임은 그대로 유지되고, 작성하신 게시글과 댓글도 삭제되지 않습니다. 프로필 사진만 기본 이미지로 초기화됩니다.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowWithdrawModal(false)}
+                disabled={withdrawing}
+                className="flex-1 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03] disabled:opacity-60"
+              >
+                취소
+              </button>
+              <button
+                onClick={withdraw}
+                disabled={withdrawing}
+                className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium cursor-pointer hover:bg-red-600 disabled:opacity-60"
+              >
+                {withdrawing ? "탈퇴 처리 중..." : "탈퇴하기"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,15 @@ import { supabase } from "@/app/lib/supabase";
 
 const BADGE_THRESHOLD = 30;
 
+function BadgeIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="6" />
+      <path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5" />
+    </svg>
+  );
+}
+
 export default function Profile() {
   const params = useParams();
   const userId = params.userId as string;
@@ -110,13 +119,14 @@ export default function Profile() {
   return (
     <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
       <div className="flex flex-col items-center">
-        <div className="w-20 h-20 rounded-full bg-black/10" />
+        <div className="w-20 h-20 rounded-full bg-border" />
 
         <h1 className="mt-4 text-lg font-bold text-ink">{nickname}</h1>
 
         {hasBadge ? (
-          <span className="mt-3 inline-block px-2.5 py-1 rounded bg-sage text-white text-xs font-bold">
-            🏅 팔로우 {BADGE_THRESHOLD}명 이상 뱃지
+          <span className="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded bg-sage text-white text-xs font-bold">
+            <BadgeIcon />
+            팔로우 {BADGE_THRESHOLD}명 이상 뱃지
           </span>
         ) : (
           <p className="mt-3 text-sm text-ink-soft">아직 획득한 뱃지가 없어요</p>

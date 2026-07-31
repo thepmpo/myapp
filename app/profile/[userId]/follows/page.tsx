@@ -148,7 +148,7 @@ export default function FollowList() {
               href={`/profile/${item.userId}`}
               className="flex items-center gap-3 text-sm font-medium text-ink hover:text-cobalt"
             >
-              <span className="w-9 h-9 rounded-full bg-black/10 shrink-0" />
+              <span className="w-9 h-9 rounded-full bg-border shrink-0" />
               {item.nickname}
             </Link>
 

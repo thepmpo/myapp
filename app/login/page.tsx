@@ -68,9 +68,14 @@ export default function Login() {
           {loading ? "로그인 중..." : "로그인"}
         </button>
 
-        <a href="/signup" className="text-sm text-ink-soft hover:text-cobalt text-center">
-          회원가입
-        </a>
+        <div className="flex items-center justify-between text-sm">
+          <a href="/reset" className="text-ink-soft hover:text-cobalt">
+            비밀번호를 잊으셨나요?
+          </a>
+          <a href="/signup" className="text-ink-soft hover:text-cobalt">
+            회원가입
+          </a>
+        </div>
       </div>
     </div>
   );

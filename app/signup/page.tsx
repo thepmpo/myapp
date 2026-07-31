@@ -108,7 +108,8 @@ export default function Signup() {
 
   return (
     <div className="bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8 w-full max-w-[400px]">
-      <h1 className="text-xl font-bold text-ink text-center mb-6">회원가입</h1>
+      <h1 className="text-xl font-bold text-ink text-center mb-1">The PMPO</h1>
+      <p className="text-sm text-ink-soft text-center mb-6">회원가입</p>
 
       <div className="flex flex-col gap-4">
         <div>
