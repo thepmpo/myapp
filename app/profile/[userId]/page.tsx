@@ -103,50 +103,72 @@ export default function Profile() {
     window.location.href = "/";
   };
 
-  if (loading) return <div style={{ padding: 40 }}>로딩중...</div>;
+  if (loading) return <p className="text-sm text-ink-soft">로딩중...</p>;
 
   const hasBadge = followerCount >= BADGE_THRESHOLD;
 
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", padding: 40 }}>
-      <h1 style={{ marginBottom: 16 }}>{nickname}</h1>
+    <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
+      <div className="flex flex-col items-center">
+        <div className="w-20 h-20 rounded-full bg-black/10" />
 
-      {hasBadge ? (
-        <span
-          style={{
-            display: "inline-block",
-            marginBottom: 16,
-            padding: "4px 10px",
-            borderRadius: 4,
-            background: "#5C8A72",
-            color: "#fff",
-            fontSize: 12,
-            fontWeight: "bold",
-          }}
+        <h1 className="mt-4 text-lg font-bold text-ink">{nickname}</h1>
+
+        {hasBadge ? (
+          <span className="mt-3 inline-block px-2.5 py-1 rounded bg-sage text-white text-xs font-bold">
+            🏅 팔로우 {BADGE_THRESHOLD}명 이상 뱃지
+          </span>
+        ) : (
+          <p className="mt-3 text-sm text-ink-soft">아직 획득한 뱃지가 없어요</p>
+        )}
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-border flex items-center justify-center gap-10">
+        <Link
+          href={`/profile/${userId}/follows?tab=followers`}
+          className="text-center text-ink hover:text-cobalt"
         >
-          🏅 팔로우 {BADGE_THRESHOLD}명 이상 뱃지
-        </span>
-      ) : (
-        <p style={{ color: "#666", fontSize: 13, marginBottom: 16 }}>아직 획득한 뱃지가 없어요</p>
-      )}
-
-      <div style={{ display: "flex", gap: 20, marginBottom: 20 }}>
-        <Link href={`/profile/${userId}/follows?tab=followers`}>
-          팔로워 {followerCount}
+          <div className="text-base font-bold">{followerCount}</div>
+          <div className="text-xs text-ink-soft">팔로워</div>
         </Link>
-        <Link href={`/profile/${userId}/follows?tab=following`}>
-          팔로잉 {followingCount}
+        <Link
+          href={`/profile/${userId}/follows?tab=following`}
+          className="text-center text-ink hover:text-cobalt"
+        >
+          <div className="text-base font-bold">{followingCount}</div>
+          <div className="text-xs text-ink-soft">팔로잉</div>
         </Link>
       </div>
 
-      {isOwnProfile ? (
-        <div style={{ display: "flex", gap: 8 }}>
-          <Link href="/profile/edit">정보 수정</Link>
-          <button onClick={logout}>로그아웃</button>
-        </div>
-      ) : (
-        <button onClick={toggleFollow}>{isFollowing ? "팔로잉" : "팔로우"}</button>
-      )}
+      <div className="mt-6 pt-6 border-t border-border">
+        {isOwnProfile ? (
+          <div className="flex gap-2">
+            <Link
+              href="/profile/edit"
+              className="flex-1 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink text-center hover:bg-black/[0.03]"
+            >
+              정보 수정
+            </Link>
+            <button
+              onClick={logout}
+              className="flex-1 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03]"
+            >
+              로그아웃
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={toggleFollow}
+            className={`w-full py-2.5 rounded-lg text-sm font-medium cursor-pointer ${
+              isFollowing
+                ? "border border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+                : "bg-cobalt text-white shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark"
+            }`}
+          >
+            {isFollowing ? "팔로잉" : "팔로우"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

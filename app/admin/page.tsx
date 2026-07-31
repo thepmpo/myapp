@@ -270,117 +270,156 @@ export default function AdminPage() {
     }
   };
 
-  if (loading) return <div style={{ padding: 20 }}>로딩중...</div>;
+  if (loading) return <div className="text-sm text-ink-soft">로딩중...</div>;
 
   if (!currentUser?.isAdmin) {
     return (
-      <div style={{ padding: 20 }}>
-        <p>관리자만 접근할 수 있습니다</p>
-        <Link href="/">← 홈으로</Link>
+      <div>
+        <p className="text-sm text-ink-soft mb-3">관리자만 접근할 수 있습니다</p>
+        <Link href="/" className="text-sm text-cobalt hover:underline">
+          ← 홈으로
+        </Link>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 700, margin: "0 auto", padding: 20 }}>
-      <div style={{ marginBottom: 20 }}>
-        <Link href="/">← 커뮤니티로</Link>
+    <div className="max-w-[720px]">
+      <div className="mb-5">
+        <Link href="/" className="text-sm text-ink-soft hover:text-cobalt">
+          ← 커뮤니티로
+        </Link>
       </div>
 
-      <h1 style={{ marginBottom: 20 }}>관리자 페이지</h1>
+      <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 16, marginBottom: 12 }}>신고 목록 ({reports.length})</h2>
+      <section className="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)] mb-6">
+        <h2 className="text-base font-bold text-ink mb-4">신고 목록 ({reports.length})</h2>
 
-        {reports.length === 0 && <p style={{ color: "#999" }}>접수된 신고가 없습니다</p>}
+        {reports.length === 0 && <p className="text-sm text-ink-soft">접수된 신고가 없습니다</p>}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {reports.map((r) => (
-            <div key={r.id} style={{ border: "1px solid #eee", borderRadius: 8, padding: 12 }}>
-              <div style={{ fontSize: 12, color: "#666", marginBottom: 4 }}>
+        <div className="flex flex-col">
+          {reports.map((r, i) => (
+            <div
+              key={r.id}
+              className={`py-3 ${i !== reports.length - 1 ? "border-b border-border" : ""}`}
+            >
+              <div className="text-xs font-mono text-ink-soft mb-1.5">
                 {r.targetType} · 신고자: {nicknames[r.reporter_id] ?? r.reporter_id}
               </div>
 
-              <div style={{ marginBottom: 8 }}>
+              <div className="text-sm text-ink mb-2">
                 {r.targetLink ? (
-                  <Link href={r.targetLink}>{r.targetLabel}</Link>
+                  <Link href={r.targetLink} className="hover:text-cobalt hover:underline">
+                    {r.targetLabel}
+                  </Link>
                 ) : (
                   r.targetLabel
                 )}
               </div>
 
               {r.targetAuthorId && (
-                <div style={{ fontSize: 12, color: "#666", marginBottom: 8 }}>
+                <div className="text-xs font-mono text-ink-soft mb-2">
                   작성자: {nicknames[r.targetAuthorId] ?? r.targetAuthorId}
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 8 }}>
+              <div className="flex gap-2">
                 {r.targetAuthorId && (
-                  <button onClick={() => blockAuthor(r.targetAuthorId as string)}>작성자 차단</button>
+                  <button
+                    onClick={() => blockAuthor(r.targetAuthorId as string)}
+                    className="px-2.5 py-1.5 rounded-md bg-red-500 text-white text-xs cursor-pointer hover:bg-red-600"
+                  >
+                    작성자 차단
+                  </button>
                 )}
-                <button onClick={() => deleteReportedContent(r)}>콘텐츠 삭제</button>
-                <button onClick={() => dismissReport(r.id)}>신고 무시</button>
+                <button
+                  onClick={() => deleteReportedContent(r)}
+                  className="px-2.5 py-1.5 rounded-md bg-red-500 text-white text-xs cursor-pointer hover:bg-red-600"
+                >
+                  콘텐츠 삭제
+                </button>
+                <button
+                  onClick={() => dismissReport(r.id)}
+                  className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-ink-soft text-xs cursor-pointer hover:bg-black/[0.03]"
+                >
+                  신고 무시
+                </button>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2 style={{ fontSize: 16, marginBottom: 12 }}>차단된 유저 ({blockedUsers.length})</h2>
+      <section className="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)] mb-6">
+        <h2 className="text-base font-bold text-ink mb-4">차단된 유저 ({blockedUsers.length})</h2>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <div className="flex gap-2 mb-4">
           <input
             placeholder="닉네임으로 차단"
             value={blockSearch}
             onChange={(e) => setBlockSearch(e.target.value)}
-            style={{ flex: 1, padding: 8, border: "1px solid #ddd", borderRadius: 6 }}
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
           />
-          <button onClick={blockByNickname}>차단</button>
+          <button
+            onClick={blockByNickname}
+            className="px-4 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium cursor-pointer hover:bg-red-600"
+          >
+            차단
+          </button>
         </div>
 
-        {blockedUsers.length === 0 && <p style={{ color: "#999" }}>차단된 유저가 없습니다</p>}
+        {blockedUsers.length === 0 && <p className="text-sm text-ink-soft">차단된 유저가 없습니다</p>}
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {blockedUsers.map((u) => (
-            <div key={u.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", border: "1px solid #eee", borderRadius: 8, padding: 10 }}>
-              <span>{u.nickname}</span>
-              <button onClick={() => unblockUser(u.id)}>차단 해제</button>
+        <div className="flex flex-col">
+          {blockedUsers.map((u, i) => (
+            <div
+              key={u.id}
+              className={`flex justify-between items-center py-2.5 ${
+                i !== blockedUsers.length - 1 ? "border-b border-border" : ""
+              }`}
+            >
+              <span className="text-sm text-ink">{u.nickname}</span>
+              <button
+                onClick={() => unblockUser(u.id)}
+                className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-ink-soft text-xs cursor-pointer hover:bg-black/[0.03]"
+              >
+                차단 해제
+              </button>
             </div>
           ))}
         </div>
       </section>
 
-      <section>
-        <h2 style={{ fontSize: 16, marginBottom: 12 }}>금지 키워드 ({keywords.length})</h2>
+      <section className="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
+        <h2 className="text-base font-bold text-ink mb-4">금지 키워드 ({keywords.length})</h2>
 
-        <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+        <div className="flex gap-2 mb-4">
           <input
             placeholder="새 금지 키워드"
             value={newKeyword}
             onChange={(e) => setNewKeyword(e.target.value)}
-            style={{ flex: 1, padding: 8, border: "1px solid #ddd", borderRadius: 6 }}
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
           />
-          <button onClick={addKeyword}>추가</button>
+          <button
+            onClick={addKeyword}
+            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+          >
+            추가
+          </button>
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <div className="flex flex-wrap gap-2">
           {keywords.map((k) => (
             <span
               key={k.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "4px 10px",
-                border: "1px solid #ddd",
-                borderRadius: 16,
-                fontSize: 13,
-              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-surface text-xs text-ink-soft"
             >
               {k.keyword}
-              <button onClick={() => deleteKeyword(k.id)} style={{ border: "none", background: "none", cursor: "pointer" }}>
+              <button
+                onClick={() => deleteKeyword(k.id)}
+                className="border-none bg-transparent cursor-pointer text-ink-soft hover:text-red-500"
+              >
                 ✕
               </button>
             </span>

@@ -305,85 +305,83 @@ export default function ArticleDetail() {
     }
   };
 
-  if (!article) return <div>로딩중...</div>;
+  if (!article) return <div className="text-sm text-ink-soft">로딩중...</div>;
 
   return (
-    <div style={{ padding: 20 }}>
-      <div style={{ marginBottom: 12 }}>
-        <Link href="/articles">← 정보게시판으로</Link>
-      </div>
+    <div className="max-w-[640px]">
+      <Link href="/articles" className="inline-block mb-4 text-sm text-ink-soft hover:text-cobalt">
+        ← 정보게시판으로
+      </Link>
 
-      <span
-        style={{
-          display: 'inline-block',
-          marginBottom: 8,
-          padding: '2px 8px',
-          borderRadius: 4,
-          background: '#EAEEF7',
-          color: '#2E4A8F',
-          fontSize: 12,
-          fontWeight: 'bold',
-        }}
-      >
+      <span className="inline-block mb-3 px-2 py-0.5 rounded bg-cobalt/10 text-cobalt text-xs font-bold">
         {CATEGORY_LABELS[article.category]}
       </span>
 
-      <h1>{article.title}</h1>
+      <h1 className="text-2xl font-bold text-ink mb-2">{article.title}</h1>
+
+      <div className="flex items-center gap-1.5 mb-5 text-sm font-mono text-ink-soft">
+        <Link href={`/profile/${article.author_id}`} className="hover:text-cobalt">
+          {authorNickname}
+        </Link>
+        <span>·</span>
+        <span>{new Date(article.created_at).toLocaleDateString('ko-KR')}</span>
+        <span>·</span>
+        <span>조회 {viewCount}회</span>
+      </div>
 
       {article.image_url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={article.image_url}
-          alt=""
-          style={{ maxWidth: '100%', borderRadius: 8, marginBottom: 12 }}
-        />
+        <img src={article.image_url} alt="" className="w-full rounded-lg mb-4 object-cover" />
       )}
 
-      <p style={{ whiteSpace: 'pre-wrap' }}>{article.content}</p>
+      <p className="text-[15px] leading-relaxed text-ink whitespace-pre-wrap mb-5">{article.content}</p>
 
-      <p>
-        작성자: <Link href={`/profile/${article.author_id}`}>{authorNickname}</Link>
-      </p>
+      <div className="flex items-center gap-2 mb-5">
+        <button
+          onClick={toggleArticleLike}
+          className="px-3 py-1.5 rounded-md border border-border bg-surface text-sm text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+        >
+          {articleLikes.some((l) => l.user_id === currentUser?.id) ? '❤️' : '🤍'} 좋아요 {articleLikes.length}
+        </button>
 
-      <p style={{ color: '#999', fontSize: 13 }}>조회 {viewCount}회</p>
-
-      <button onClick={toggleArticleLike}>
-        {articleLikes.some((l) => l.user_id === currentUser?.id) ? '❤️' : '🤍'} 좋아요 {articleLikes.length}
-      </button>
-
-      {currentUser && currentUser.id !== article.author_id && (
-        <button onClick={reportArticle} style={{ marginLeft: 8 }}>🚨 신고</button>
-      )}
-
-      <hr style={{ margin: '24px 0' }} />
-
-      <h2 style={{ fontSize: 16, marginBottom: 12 }}>댓글 {comments.length}개</h2>
-
-      {comments.length === 0 && <p>아직 답변이 없어요. 첫 답변을 남겨보세요</p>}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            style={{
-              border: '1px solid #eee',
-              borderRadius: 8,
-              padding: 10,
-            }}
+        {currentUser && currentUser.id !== article.author_id && (
+          <button
+            onClick={reportArticle}
+            className="px-3 py-1.5 rounded-md border border-border bg-surface text-sm text-ink-soft hover:bg-black/[0.03] cursor-pointer"
           >
-            <div>{comment.content}</div>
-            <div style={{ color: '#666', fontSize: 12, marginTop: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            🚨 신고
+          </button>
+        )}
+      </div>
+
+      <hr className="border-border my-6" />
+
+      <h2 className="text-base font-bold text-ink mb-3">댓글 {comments.length}개</h2>
+
+      {comments.length === 0 && (
+        <p className="text-sm text-ink-soft mb-4">아직 답변이 없어요. 첫 답변을 남겨보세요</p>
+      )}
+
+      <div className="flex flex-col gap-2.5 mb-4">
+        {comments.map((comment) => (
+          <div key={comment.id} className="bg-surface rounded-lg border border-border p-3">
+            <div className="text-sm text-ink">{comment.content}</div>
+            <div className="mt-2 flex items-center justify-between text-xs font-mono text-ink-soft">
               <span>{commentNicknames[comment.user_id] ?? comment.author}</span>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <button onClick={() => toggleCommentLike(comment.id)}>
+              <div className="flex items-center gap-3">
+                <button onClick={() => toggleCommentLike(comment.id)} className="cursor-pointer hover:text-cobalt">
                   {commentLikes.some((l) => l.comment_id === comment.id && l.user_id === currentUser?.id) ? '❤️' : '🤍'}{' '}
                   {commentLikes.filter((l) => l.comment_id === comment.id).length}
                 </button>
                 {currentUser?.id === comment.user_id && (
-                  <button onClick={() => deleteComment(comment.id)}>삭제</button>
+                  <button onClick={() => deleteComment(comment.id)} className="cursor-pointer hover:text-cobalt">
+                    삭제
+                  </button>
                 )}
                 {currentUser && currentUser.id !== comment.user_id && (
-                  <button onClick={() => reportComment(comment.id)}>🚨 신고</button>
+                  <button onClick={() => reportComment(comment.id)} className="cursor-pointer hover:text-cobalt">
+                    🚨 신고
+                  </button>
                 )}
               </div>
             </div>
@@ -392,19 +390,26 @@ export default function ArticleDetail() {
       </div>
 
       {currentUser ? (
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className="flex gap-2">
           <input
             placeholder="댓글을 입력하세요"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            style={{ flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 6 }}
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
           />
-          <button onClick={addComment}>등록</button>
+          <button
+            onClick={addComment}
+            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+          >
+            등록
+          </button>
         </div>
       ) : (
-        <div>
-          <input placeholder="댓글을 입력하려면 로그인이 필요합니다" disabled style={{ flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 6, width: '100%' }} />
-        </div>
+        <input
+          placeholder="댓글을 입력하려면 로그인이 필요합니다"
+          disabled
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-paper text-sm text-ink-soft placeholder:text-ink-soft"
+        />
       )}
     </div>
   );

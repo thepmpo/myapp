@@ -172,17 +172,17 @@ export default function Articles() {
   const filteredArticles = articles.filter((a) => category === "all" || a.category === category);
 
   return (
-    <div style={{ maxWidth: 720, padding: 24 }}>
-      <h1 style={{ marginBottom: 20 }}>정보게시판</h1>
+    <div>
+      <h1 className="text-2xl font-bold text-ink mb-5">정보게시판</h1>
 
       {currentUser?.isAdmin && (
-        <div style={{ border: "1px solid #eee", borderRadius: 8, padding: 16, marginBottom: 20 }}>
-          <h2 style={{ fontSize: 14, marginBottom: 8 }}>새 글 작성 (관리자)</h2>
+        <div className="bg-surface rounded-xl border border-border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] mb-6">
+          <h2 className="text-sm font-bold text-ink mb-3">새 글 작성 (관리자)</h2>
 
           <select
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value as Article["category"])}
-            style={{ marginBottom: 8, padding: 6 }}
+            className="mb-2 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-cobalt/30"
           >
             <option value="product">프로덕트</option>
             <option value="trend">PM·PO 트렌드</option>
@@ -193,101 +193,87 @@ export default function Articles() {
             placeholder="글 제목 입력"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 8, marginBottom: 8 }}
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-cobalt/30"
           />
 
           <textarea
             placeholder="글 내용 입력"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            style={{ width: "100%", padding: 10, border: "1px solid #ddd", borderRadius: 8, marginBottom: 8, minHeight: 80 }}
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[96px] focus:outline-none focus:ring-2 focus:ring-cobalt/30"
           />
 
-          <div style={{ marginBottom: 8 }}>
-            <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] ?? null)} />
-            {imageFile && <span style={{ marginLeft: 8 }}>{imageFile.name}</span>}
-            {uploading && <span style={{ marginLeft: 8 }}>업로드 중...</span>}
+          <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="text-xs text-ink-soft file:mr-2 file:px-2.5 file:py-1.5 file:rounded-md file:border file:border-border file:bg-surface file:text-xs file:text-ink-soft file:cursor-pointer cursor-pointer"
+            />
+            {imageFile && <span>{imageFile.name}</span>}
+            {uploading && <span>업로드 중...</span>}
           </div>
 
           <button
             onClick={addArticle}
-            style={{ padding: "10px 16px", borderRadius: 8, backgroundColor: "#000", color: "#fff", border: "none", cursor: "pointer" }}
+            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
           >
             발행
           </button>
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+      <div className="flex gap-6 border-b border-border mb-6">
         {(["all", "product", "trend", "ai"] as const).map((c) => (
           <button
             key={c}
             onClick={() => setCategory(c)}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 6,
-              border: category === c ? "1px solid #2E4A8F" : "1px solid #ccc",
-              background: category === c ? "#EAEEF7" : "#f9f9f9",
-              color: category === c ? "#2E4A8F" : "#000",
-              cursor: "pointer",
-            }}
+            className={`-mb-px pb-3 text-sm cursor-pointer border-b-2 ${
+              category === c
+                ? "text-cobalt border-cobalt font-medium"
+                : "text-ink-soft border-transparent hover:text-ink"
+            }`}
           >
             {c === "all" ? "전체" : CATEGORY_LABELS[c]}
           </button>
         ))}
       </div>
 
-      {filteredArticles.length === 0 && <p>❌ 게시글 없음</p>}
+      {filteredArticles.length === 0 && <p className="text-sm text-ink-soft">❌ 게시글 없음</p>}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div className="flex flex-col gap-3">
         {filteredArticles.map((article) => (
           <Link
             key={article.id}
             href={`/articles/${article.id}`}
-            style={{
-              display: "block",
-              border: "1px solid #eee",
-              borderRadius: 12,
-              padding: 16,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-              color: "inherit",
-              textDecoration: "none",
-            }}
+            className="block bg-surface rounded-xl border border-border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] hover:border-cobalt/30"
           >
-            <span
-              style={{
-                display: "inline-block",
-                marginBottom: 8,
-                padding: "2px 8px",
-                borderRadius: 4,
-                background: "#EAEEF7",
-                color: "#2E4A8F",
-                fontSize: 12,
-                fontWeight: "bold",
-              }}
-            >
+            <span className="inline-block mb-2 px-2 py-0.5 rounded bg-cobalt/10 text-cobalt text-xs font-bold">
               {CATEGORY_LABELS[article.category]}
             </span>
 
-            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-              {article.image_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={article.image_url}
-                  alt=""
-                  style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
-                />
-              )}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-base text-ink">{article.title}</div>
 
-              <div style={{ fontWeight: "bold", fontSize: 16 }}>{article.title}</div>
-            </div>
+                <p className="mt-1.5 text-sm text-ink-soft line-clamp-2">{article.content}</p>
 
-            <div style={{ color: "#666", marginTop: 6, fontSize: 13 }}>
-              {nicknames[article.author_id] ?? article.author}
-            </div>
+                <div className="mt-2.5 text-sm font-mono text-ink-soft">
+                  {nicknames[article.author_id] ?? article.author}
+                </div>
 
-            <div style={{ color: "#999", marginTop: 6, fontSize: 12 }}>
-              ❤️ {likeCounts[article.id] || 0} · 💬 {commentCounts[article.id] || 0}
+                <div className="mt-1 text-xs font-mono text-ink-soft">
+                  {new Date(article.created_at).toLocaleDateString("ko-KR")} · ❤️ {likeCounts[article.id] || 0} · 💬{" "}
+                  {commentCounts[article.id] || 0}
+                </div>
+              </div>
+
+              <div className="w-20 h-20 rounded-lg bg-border shrink-0 overflow-hidden">
+                {article.image_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={article.image_url} alt="" className="w-full h-full object-cover" />
+                )}
+              </div>
             </div>
           </Link>
         ))}

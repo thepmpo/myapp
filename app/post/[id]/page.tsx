@@ -281,118 +281,187 @@ export default function PostDetail() {
     fetchPost();
   };
 
-  if (!post) return <div>로딩중...</div>;
+  if (!post) return <div className="text-sm text-ink-soft">로딩중...</div>;
+
+  const isPostLiked = postLikes.some((l) => l.user_id === currentUser?.id);
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>게시글 상세</h1>
+    <div className="max-w-[640px] flex flex-col gap-6">
+      <h1 className="text-2xl font-bold text-ink">게시글 상세</h1>
 
-      <p>글 ID: {post.id}</p>
-
-      {post.is_question && (
-        <span
-          style={{
-            display: "inline-block",
-            marginBottom: 8,
-            padding: "2px 8px",
-            borderRadius: 4,
-            background: "#FBF0DB",
-            color: "#8A5B0E",
-            fontSize: 12,
-            fontWeight: "bold",
-          }}
-        >
-          🙋 질문있어요
-        </span>
-      )}
-
-      {editMode ? (
-        <>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <button onClick={updatePost}>저장</button>
-        </>
-      ) : (
-        <p>제목: {post.title}</p>
-      )}
-
-      <p>
-        작성자: <Link href={`/profile/${post.user_id}`}>{post.author}</Link>
-        {currentUser && currentUser.id !== post.user_id && (
-          <button onClick={toggleFollowAuthor} style={{ marginLeft: 8 }}>
-            {isFollowingAuthor ? '팔로잉' : '팔로우'}
-          </button>
-        )}
-      </p>
-
-      <button onClick={togglePostLike}>
-        {postLikes.some((l) => l.user_id === currentUser?.id) ? '❤️' : '🤍'} 좋아요 {postLikes.length}
-      </button>
-
-      {currentUser?.id === post.user_id && (
-        <>
-          <button onClick={() => setEditMode(true)}>수정</button>
-          <button onClick={deletePost}>삭제</button>
-        </>
-      )}
-
-      {currentUser && currentUser.id !== post.user_id && (
-        <button onClick={reportPost} style={{ marginLeft: 8 }}>🚨 신고</button>
-      )}
-
-      <hr style={{ margin: '24px 0' }} />
-
-      <h2 style={{ fontSize: 16, marginBottom: 12 }}>댓글 {comments.length}개</h2>
-
-      {comments.length === 0 && <p>아직 답변이 없어요. 첫 답변을 남겨보세요</p>}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            style={{
-              border: '1px solid #eee',
-              borderRadius: 8,
-              padding: 10,
-            }}
-          >
-            <div>{comment.content}</div>
-            <div style={{ color: '#666', fontSize: 12, marginTop: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>{comment.author}</span>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <button onClick={() => toggleCommentLike(comment.id)}>
-                  {commentLikes.some((l) => l.comment_id === comment.id && l.user_id === currentUser?.id) ? '❤️' : '🤍'}{' '}
-                  {commentLikes.filter((l) => l.comment_id === comment.id).length}
-                </button>
-                {currentUser?.id === comment.user_id && (
-                  <button onClick={() => deleteComment(comment.id)}>삭제</button>
-                )}
-                {currentUser && currentUser.id !== comment.user_id && (
-                  <button onClick={() => reportComment(comment.id)}>🚨 신고</button>
-                )}
-              </div>
-            </div>
+      <div
+        className={`bg-surface rounded-xl border p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
+          post.is_question ? "border-border border-l-[3px] border-l-amber" : "border-border"
+        }`}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-border shrink-0" />
+            <Link
+              href={`/profile/${post.user_id}`}
+              className="text-sm font-mono text-ink-soft hover:text-cobalt"
+            >
+              {post.author}
+            </Link>
           </div>
-        ))}
+
+          {currentUser && currentUser.id !== post.user_id && (
+            <button
+              onClick={toggleFollowAuthor}
+              className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+                isFollowingAuthor
+                  ? "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+                  : "border-cobalt bg-cobalt text-white hover:bg-cobalt-dark"
+              }`}
+            >
+              {isFollowingAuthor ? "팔로잉" : "+ 팔로우"}
+            </button>
+          )}
+        </div>
+
+        <p className="font-mono text-xs text-ink-soft/60 mb-2">글 ID: {post.id}</p>
+
+        {post.is_question && (
+          <span className="tag-question inline-block mb-2 px-2 py-1 rounded bg-amber-bg text-amber-text text-xs font-bold">
+            🙋 질문있어요
+          </span>
+        )}
+
+        {editMode ? (
+          <div className="flex gap-2 mb-4">
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            />
+            <button
+              onClick={updatePost}
+              className="px-4 py-2 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+            >
+              저장
+            </button>
+          </div>
+        ) : (
+          <h2 className="text-xl font-bold text-ink mb-4">{post.title}</h2>
+        )}
+
+        <div className="flex items-center gap-4 pt-3 border-t border-border">
+          <button
+            onClick={togglePostLike}
+            className={`text-sm font-medium cursor-pointer ${
+              isPostLiked ? "text-cobalt" : "text-ink-soft hover:text-ink"
+            }`}
+          >
+            {isPostLiked ? "❤️" : "🤍"} 좋아요 {postLikes.length}
+          </button>
+
+          {currentUser?.id === post.user_id && (
+            <>
+              <button
+                onClick={() => setEditMode(true)}
+                className="text-xs text-ink-soft hover:text-ink cursor-pointer"
+              >
+                수정
+              </button>
+
+              <button
+                onClick={deletePost}
+                className="text-xs text-red-500 hover:text-red-600 cursor-pointer"
+              >
+                삭제
+              </button>
+            </>
+          )}
+
+          {currentUser && currentUser.id !== post.user_id && (
+            <button
+              onClick={reportPost}
+              className="ml-auto text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+            >
+              🚨 신고
+            </button>
+          )}
+        </div>
       </div>
 
-      {currentUser ? (
-        <div style={{ display: 'flex', gap: 8 }}>
+      <div className="bg-surface rounded-xl border border-border p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
+        <h3 className="text-sm font-bold text-ink mb-4">댓글 {comments.length}개</h3>
+
+        {comments.length === 0 && (
+          <p className="text-sm text-ink-soft mb-4">아직 답변이 없어요. 첫 답변을 남겨보세요</p>
+        )}
+
+        <div className="flex flex-col gap-3 mb-4">
+          {comments.map((comment) => {
+            const isCommentLiked = commentLikes.some(
+              (l) => l.comment_id === comment.id && l.user_id === currentUser?.id
+            );
+            const commentLikeCount = commentLikes.filter((l) => l.comment_id === comment.id).length;
+
+            return (
+              <div key={comment.id} className="border border-border rounded-lg p-3">
+                <div className="text-sm text-ink">{comment.content}</div>
+
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-xs font-mono text-ink-soft">{comment.author}</span>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => toggleCommentLike(comment.id)}
+                      className={`text-xs font-medium cursor-pointer ${
+                        isCommentLiked ? "text-cobalt" : "text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      {isCommentLiked ? "❤️" : "🤍"} {commentLikeCount}
+                    </button>
+
+                    {currentUser?.id === comment.user_id && (
+                      <button
+                        onClick={() => deleteComment(comment.id)}
+                        className="text-xs text-ink-soft hover:text-red-500 cursor-pointer"
+                      >
+                        삭제
+                      </button>
+                    )}
+
+                    {currentUser && currentUser.id !== comment.user_id && (
+                      <button
+                        onClick={() => reportComment(comment.id)}
+                        className="text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+                      >
+                        🚨 신고
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {currentUser ? (
+          <div className="flex gap-2">
+            <input
+              placeholder="댓글을 입력하세요"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            />
+            <button
+              onClick={addComment}
+              className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+            >
+              등록
+            </button>
+          </div>
+        ) : (
           <input
-            placeholder="댓글을 입력하세요"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            style={{ flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 6 }}
+            placeholder="댓글을 입력하려면 로그인이 필요합니다"
+            disabled
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-paper text-sm text-ink-soft placeholder:text-ink-soft cursor-not-allowed"
           />
-          <button onClick={addComment}>등록</button>
-        </div>
-      ) : (
-        <div>
-          <input placeholder="댓글을 입력하려면 로그인이 필요합니다" disabled style={{ flex: 1, padding: 8, border: '1px solid #ddd', borderRadius: 6, width: '100%' }} />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

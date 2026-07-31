@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
 
@@ -31,6 +31,7 @@ export default function Home() {
   const [unansweredQuestionOnly, setUnansweredQuestionOnly] = useState(false);
   const [topCommentsByPost, setTopCommentsByPost] = useState<Record<number, PreviewComment[]>>({});
   const [commentCountByPost, setCommentCountByPost] = useState<Record<number, number>>({});
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -191,227 +192,174 @@ export default function Home() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 20 }}>
-      <h1 style={{ marginBottom: 20 }}>게시글 목록</h1>
+    <div className="flex gap-8 items-start">
+      <div className="flex-1 min-w-0">
+        <h1 className="text-2xl font-bold text-ink mb-5">커뮤니티</h1>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
-        <input
-          placeholder="글 제목 입력"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={{
-            flex: 1,
-            padding: 10,
-            border: "1px solid #ddd",
-            borderRadius: 8,
-          }}
-        />
+        <div className="flex gap-2 mb-3">
+          <input
+            ref={titleInputRef}
+            placeholder="글 제목 입력"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+          />
 
-        <button
-          onClick={addPost}
-          style={{
-            padding: "10px 16px",
-            borderRadius: 8,
-            backgroundColor: "#000",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          추가
-        </button>
-      </div>
-
-      <label style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 20, fontSize: 14, color: "#5B6472" }}>
-        <input
-          type="checkbox"
-          checked={isQuestion}
-          onChange={(e) => setIsQuestion(e.target.checked)}
-        />
-        🙋 질문있어요
-      </label>
-
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        <button
-          onClick={getPosts}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: "1px solid #ccc",
-            background: "#f9f9f9",
-            cursor: "pointer",
-          }}
-        >
-          🔄 새로고침
-        </button>
-
-        <button
-          onClick={() => setQuestionOnly((v) => !v)}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: questionOnly ? "1px solid #E2A33B" : "1px solid #ccc",
-            background: questionOnly ? "#FBF0DB" : "#f9f9f9",
-            color: questionOnly ? "#8A5B0E" : "#000",
-            cursor: "pointer",
-          }}
-        >
-          🙋 질문만 보기
-        </button>
-
-        <button
-          onClick={() => setUnansweredQuestionOnly((v) => !v)}
-          style={{
-            padding: "6px 12px",
-            borderRadius: 6,
-            border: unansweredQuestionOnly ? "1px solid #E2A33B" : "1px solid #ccc",
-            background: unansweredQuestionOnly ? "#FBF0DB" : "#f9f9f9",
-            color: unansweredQuestionOnly ? "#8A5B0E" : "#000",
-            cursor: "pointer",
-          }}
-        >
-          🙋 답변 없는 질문만
-        </button>
-      </div>
-
-      {posts.length === 0 && <p>❌ 데이터 없음</p>}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {posts
-          .filter((post) => !questionOnly || post.is_question)
-          .filter(
-            (post) =>
-              !unansweredQuestionOnly ||
-              (post.is_question && (commentCountByPost[post.id] || 0) === 0)
-          )
-          .map((post) => (
-          <div
-            key={post.id}
-            style={{
-              border: "1px solid #eee",
-              borderLeft: post.is_question ? "3px solid #E2A33B" : "1px solid #eee",
-              borderRadius: 12,
-              padding: 16,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-            }}
+          <button
+            onClick={addPost}
+            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
           >
-            {post.is_question && (
-              <span
-                style={{
-                  display: "inline-block",
-                  marginBottom: 8,
-                  padding: "2px 8px",
-                  borderRadius: 4,
-                  background: "#FBF0DB",
-                  color: "#8A5B0E",
-                  fontSize: 12,
-                  fontWeight: "bold",
-                }}
-              >
-                🙋 질문있어요
-              </span>
-            )}
+            + 글쓰기
+          </button>
+        </div>
 
-            {editingId === post.id ? (
-              <>
-                <input
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: 8,
-                    border: "1px solid #ddd",
-                    borderRadius: 6,
-                  }}
-                />
+        <label className="flex items-center gap-1.5 mb-5 text-sm text-ink-soft">
+          <input
+            type="checkbox"
+            checked={isQuestion}
+            onChange={(e) => setIsQuestion(e.target.checked)}
+          />
+          🙋 질문있어요
+        </label>
 
-                <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-                  <button
-                    onClick={() => updatePost(post.id)}
-                    style={{
-                      padding: "6px 10px",
-                      borderRadius: 6,
-                      border: "none",
-                      backgroundColor: "#000",
-                      color: "#fff",
-                      cursor: "pointer",
-                    }}
-                  >
-                    저장
-                  </button>
+        <div className="flex items-center gap-2 mb-5">
+          <button
+            onClick={getPosts}
+            className="px-3 py-1.5 rounded-md border border-border bg-surface text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+          >
+            🔄 새로고침
+          </button>
 
-                  <button
-                    onClick={() => setEditingId(null)}
-                    style={{
-                      padding: "6px 10px",
-                      borderRadius: 6,
-                      border: "1px solid #ccc",
-                      background: "#fff",
-                      cursor: "pointer",
-                    }}
-                  >
-                    취소
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ fontWeight: "bold", fontSize: 16 }}>
-                  {post.title}
-                </div>
+          <button
+            onClick={() => setQuestionOnly((v) => !v)}
+            className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+              questionOnly
+                ? "border-amber bg-amber-bg text-amber-text"
+                : "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+            }`}
+          >
+            🙋 질문만 보기
+          </button>
 
-                <div style={{ color: "#666", marginTop: 6 }}>
-                  <Link href={`/profile/${post.user_id}`}>{post.author}</Link>
-                </div>
+          <button
+            onClick={() => setUnansweredQuestionOnly((v) => !v)}
+            className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+              unansweredQuestionOnly
+                ? "border-amber bg-amber-bg text-amber-text"
+                : "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+            }`}
+          >
+            🙋 답변 없는 질문만
+          </button>
+        </div>
 
-                {currentUser?.id === post.user_id && (
-                  <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
+        {posts.length === 0 && <p className="text-sm text-ink-soft">❌ 데이터 없음</p>}
+
+        <div className="flex flex-col gap-3">
+          {posts
+            .filter((post) => !questionOnly || post.is_question)
+            .filter(
+              (post) =>
+                !unansweredQuestionOnly ||
+                (post.is_question && (commentCountByPost[post.id] || 0) === 0)
+            )
+            .map((post) => (
+            <div
+              key={post.id}
+              className={`bg-surface rounded-xl border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
+                post.is_question ? "border-border border-l-[3px] border-l-amber" : "border-border"
+              }`}
+            >
+              {post.is_question && (
+                <span className="tag-question inline-block mb-2 px-2 py-1 rounded bg-amber-bg text-amber-text text-xs font-bold">
+                  🙋 질문있어요
+                </span>
+              )}
+
+              {editingId === post.id ? (
+                <>
+                  <input
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full px-2.5 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+                  />
+
+                  <div className="mt-2.5 flex gap-2">
                     <button
-                      onClick={() => startEdit(post)}
-                      style={{
-                        padding: "6px 10px",
-                        borderRadius: 6,
-                        border: "1px solid #ccc",
-                        background: "#fff",
-                        cursor: "pointer",
-                      }}
+                      onClick={() => updatePost(post.id)}
+                      className="px-2.5 py-1.5 rounded-md bg-cobalt text-white text-xs font-medium cursor-pointer hover:bg-cobalt-dark"
                     >
-                      수정
+                      저장
                     </button>
 
                     <button
-                      onClick={() => deletePost(post.id)}
-                      style={{
-                        padding: "6px 10px",
-                        borderRadius: 6,
-                        border: "none",
-                        backgroundColor: "#ff4d4f",
-                        color: "#fff",
-                        cursor: "pointer",
-                      }}
+                      onClick={() => setEditingId(null)}
+                      className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs cursor-pointer hover:bg-black/[0.03]"
                     >
-                      삭제
+                      취소
                     </button>
                   </div>
-                )}
-
-                {(topCommentsByPost[post.id] || []).length > 0 && (
-                  <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #eee", display: "flex", flexDirection: "column", gap: 6 }}>
-                    {topCommentsByPost[post.id].map((c) => (
-                      <div key={c.id} style={{ fontSize: 13, color: "#5B6472" }}>
-                        💬 <strong>{c.author}</strong> {c.content}
-                        {c.likeCount > 0 && (
-                          <span style={{ color: "#999", marginLeft: 6 }}>❤️ {c.likeCount}</span>
-                        )}
-                      </div>
-                    ))}
+                </>
+              ) : (
+                <>
+                  <div className="font-bold text-base text-ink">
+                    {post.title}
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
+
+                  <Link
+                    href={`/profile/${post.user_id}`}
+                    className="inline-block mt-1.5 text-sm font-mono text-ink-soft hover:text-cobalt"
+                  >
+                    {post.author}
+                  </Link>
+
+                  {currentUser?.id === post.user_id && (
+                    <div className="mt-2.5 flex gap-2">
+                      <button
+                        onClick={() => startEdit(post)}
+                        className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs cursor-pointer hover:bg-black/[0.03]"
+                      >
+                        수정
+                      </button>
+
+                      <button
+                        onClick={() => deletePost(post.id)}
+                        className="px-2.5 py-1.5 rounded-md bg-red-500 text-white text-xs cursor-pointer hover:bg-red-600"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
+
+                  {(topCommentsByPost[post.id] || []).length > 0 && (
+                    <div className="mt-2.5 pt-2.5 border-t border-border flex flex-col gap-1.5">
+                      {topCommentsByPost[post.id].map((c) => (
+                        <div key={c.id} className="text-[13px] text-ink-soft">
+                          <span className="text-amber">✦</span> <strong className="text-ink">{c.author}</strong> {c.content}
+                          {c.likeCount > 0 && (
+                            <span className="text-ink-soft/70 ml-1.5">❤️ {c.likeCount}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
+
+      <aside className="hidden lg:flex w-[260px] shrink-0 flex-col gap-3 bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)] sticky top-8">
+        <p className="font-bold text-ink">궁금한 게 있으신가요?</p>
+        <p className="text-sm text-ink-soft">질문을 올리면 답변자들이 확인해요.</p>
+        <button
+          onClick={() => titleInputRef.current?.focus()}
+          className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+        >
+          질문하기
+        </button>
+      </aside>
     </div>
   );
 }

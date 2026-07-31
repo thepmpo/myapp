@@ -111,27 +111,56 @@ export default function FollowList() {
   };
 
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", padding: 40 }}>
-      <div style={{ display: "flex", gap: 16, marginBottom: 20 }}>
-        <button onClick={() => setTab("followers")} disabled={tab === "followers"}>
+    <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
+      <div className="flex gap-6 border-b border-border mb-5">
+        <button
+          onClick={() => setTab("followers")}
+          className={`pb-3 text-sm cursor-pointer ${
+            tab === "followers"
+              ? "text-ink font-bold border-b-2 border-cobalt"
+              : "text-ink-soft"
+          }`}
+        >
           팔로워
         </button>
-        <button onClick={() => setTab("following")} disabled={tab === "following"}>
+        <button
+          onClick={() => setTab("following")}
+          className={`pb-3 text-sm cursor-pointer ${
+            tab === "following"
+              ? "text-ink font-bold border-b-2 border-cobalt"
+              : "text-ink-soft"
+          }`}
+        >
           팔로잉
         </button>
       </div>
 
-      {loading && <p>로딩중...</p>}
+      {loading && <p className="text-sm text-ink-soft">로딩중...</p>}
 
-      {!loading && items.length === 0 && <p>아직 팔로워/팔로잉이 없어요</p>}
+      {!loading && items.length === 0 && (
+        <p className="text-sm text-ink-soft">아직 팔로워/팔로잉이 없어요</p>
+      )}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div className="flex flex-col gap-3">
         {items.map((item) => (
-          <div key={item.userId} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Link href={`/profile/${item.userId}`}>{item.nickname}</Link>
+          <div key={item.userId} className="flex items-center justify-between">
+            <Link
+              href={`/profile/${item.userId}`}
+              className="flex items-center gap-3 text-sm font-medium text-ink hover:text-cobalt"
+            >
+              <span className="w-9 h-9 rounded-full bg-black/10 shrink-0" />
+              {item.nickname}
+            </Link>
 
             {currentUser?.id !== item.userId && (
-              <button onClick={() => toggleFollow(item.userId)}>
+              <button
+                onClick={() => toggleFollow(item.userId)}
+                className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+                  followingIds.has(item.userId)
+                    ? "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+                    : "border-cobalt text-cobalt hover:bg-cobalt/5"
+                }`}
+              >
                 {followingIds.has(item.userId) ? "팔로잉" : "팔로우"}
               </button>
             )}

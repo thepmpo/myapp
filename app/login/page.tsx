@@ -33,30 +33,44 @@ export default function Login() {
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>로그인</h1>
+    <div className="bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8 w-full max-w-[400px]">
+      <h1 className="text-xl font-bold text-ink text-center mb-6">The PMPO</h1>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 320 }}>
-        <input
-          placeholder="이메일 입력"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <div className="flex flex-col gap-4">
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1.5">이메일</label>
+          <input
+            placeholder="이메일 입력"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="비밀번호 입력"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1.5">비밀번호</label>
+          <input
+            type="password"
+            placeholder="비밀번호 입력"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+          />
+        </div>
 
-        {error && <p style={{ color: "red", margin: 0 }}>{error}</p>}
+        {error && <p className="text-sm text-red-500 m-0">{error}</p>}
 
-        <button onClick={handleLogin} disabled={loading}>
+        <button
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark disabled:opacity-60 cursor-pointer"
+        >
           {loading ? "로그인 중..." : "로그인"}
         </button>
 
-        <a href="/signup">회원가입</a>
+        <a href="/signup" className="text-sm text-ink-soft hover:text-cobalt text-center">
+          회원가입
+        </a>
       </div>
     </div>
   );
