@@ -228,9 +228,9 @@ export default function Articles() {
           <button
             key={c}
             onClick={() => setCategory(c)}
-            className={`-mb-px pb-3 text-sm cursor-pointer border-b-2 ${
+            className={`-mb-px pb-3 text-sm font-medium cursor-pointer border-b-2 ${
               category === c
-                ? "text-cobalt border-cobalt font-medium"
+                ? "text-cobalt border-cobalt"
                 : "text-ink-soft border-transparent hover:text-ink"
             }`}
           >

@@ -15,10 +15,13 @@ type Post = {
 type PreviewComment = {
   id: number;
   post_id: number;
+  user_id: string;
   author: string;
   content: string;
   likeCount: number;
 };
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function Home() {
   const [title, setTitle] = useState("");
@@ -31,7 +34,24 @@ export default function Home() {
   const [unansweredQuestionOnly, setUnansweredQuestionOnly] = useState(false);
   const [topCommentsByPost, setTopCommentsByPost] = useState<Record<number, PreviewComment[]>>({});
   const [commentCountByPost, setCommentCountByPost] = useState<Record<number, number>>({});
+  const [nicknames, setNicknames] = useState<Record<string, string>>({});
   const titleInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchNicknames = async (userIds: string[]) => {
+    const uniqueIds = Array.from(new Set(userIds.filter((id) => id && UUID_REGEX.test(id))));
+
+    if (uniqueIds.length === 0) return;
+
+    const { data, error } = await supabase.from("profiles").select("id, nickname").in("id", uniqueIds);
+
+    if (!error) {
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: { id: string; nickname: string }) => {
+        map[p.id] = p.nickname;
+      });
+      setNicknames((prev) => ({ ...prev, ...map }));
+    }
+  };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -56,6 +76,7 @@ export default function Home() {
     } else {
       const fetchedPosts = (data as Post[]) || [];
       setPosts(fetchedPosts);
+      await fetchNicknames(fetchedPosts.map((p) => p.user_id));
       await fetchTopComments(fetchedPosts.map((p) => p.id));
     }
   };
@@ -69,7 +90,7 @@ export default function Home() {
 
     const { data: commentsData, error: commentsError } = await supabase
       .from("comments")
-      .select("id, post_id, author, content")
+      .select("id, post_id, user_id, author, content")
       .in("post_id", postIds);
 
     if (commentsError || !commentsData || commentsData.length === 0) {
@@ -101,10 +122,13 @@ export default function Home() {
     const withCounts: PreviewComment[] = commentsData.map((c) => ({
       id: c.id,
       post_id: c.post_id,
+      user_id: c.user_id,
       author: c.author,
       content: c.content,
       likeCount: likeCountByComment[c.id] || 0,
     }));
+
+    await fetchNicknames(commentsData.map((c) => c.user_id));
 
     const grouped: Record<number, PreviewComment[]> = {};
     withCounts.forEach((c) => {
@@ -302,15 +326,18 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <div className="font-bold text-base text-ink">
+                  <Link
+                    href={`/post/${post.id}`}
+                    className="block font-bold text-base text-ink hover:text-cobalt"
+                  >
                     {post.title}
-                  </div>
+                  </Link>
 
                   <Link
                     href={`/profile/${post.user_id}`}
                     className="inline-block mt-1.5 text-sm font-mono text-ink-soft hover:text-cobalt"
                   >
-                    {post.author}
+                    {nicknames[post.user_id] ?? post.author}
                   </Link>
 
                   {currentUser?.id === post.user_id && (
@@ -335,7 +362,8 @@ export default function Home() {
                     <div className="mt-2.5 pt-2.5 border-t border-border flex flex-col gap-1.5">
                       {topCommentsByPost[post.id].map((c) => (
                         <div key={c.id} className="text-[13px] text-ink-soft">
-                          <span className="text-amber">✦</span> <strong className="text-ink">{c.author}</strong> {c.content}
+                          <span className="text-amber">✦</span>{" "}
+                          <strong className="text-ink">{nicknames[c.user_id] ?? c.author}</strong> {c.content}
                           {c.likeCount > 0 && (
                             <span className="text-ink-soft/70 ml-1.5">❤️ {c.likeCount}</span>
                           )}

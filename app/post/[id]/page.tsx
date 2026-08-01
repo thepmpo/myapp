@@ -20,6 +20,8 @@ type Like = {
   comment_id: number | null;
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function PostDetail() {
   const params = useParams();
   const id = Number(params.id);
@@ -36,6 +38,23 @@ export default function PostDetail() {
   const [commentLikes, setCommentLikes] = useState<Like[]>([]);
 
   const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
+  const [nicknames, setNicknames] = useState<Record<string, string>>({});
+
+  const fetchNicknames = async (userIds: string[]) => {
+    const uniqueIds = Array.from(new Set(userIds.filter((uid) => uid && UUID_REGEX.test(uid))));
+
+    if (uniqueIds.length === 0) return;
+
+    const { data, error } = await supabase.from('profiles').select('id, nickname').in('id', uniqueIds);
+
+    if (!error) {
+      const map: Record<string, string> = {};
+      (data || []).forEach((p: { id: string; nickname: string }) => {
+        map[p.id] = p.nickname;
+      });
+      setNicknames((prev) => ({ ...prev, ...map }));
+    }
+  };
 
   useEffect(() => {
     const loadUser = async () => {
@@ -82,6 +101,7 @@ export default function PostDetail() {
     if (data) {
       setPost(data);
       setTitle(data.title);
+      await fetchNicknames([data.user_id]);
     }
   };
 
@@ -115,6 +135,7 @@ export default function PostDetail() {
     } else {
       const fetchedComments = (data as Comment[]) || [];
       setComments(fetchedComments);
+      await fetchNicknames(fetchedComments.map((c) => c.user_id));
       await fetchCommentLikes(fetchedComments.map((c) => c.id));
     }
   };
@@ -301,7 +322,7 @@ export default function PostDetail() {
               href={`/profile/${post.user_id}`}
               className="text-sm font-mono text-ink-soft hover:text-cobalt"
             >
-              {post.author}
+              {nicknames[post.user_id] ?? post.author}
             </Link>
           </div>
 
@@ -403,7 +424,9 @@ export default function PostDetail() {
                 <div className="text-sm text-ink">{comment.content}</div>
 
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs font-mono text-ink-soft">{comment.author}</span>
+                  <span className="text-xs font-mono text-ink-soft">
+                    {nicknames[comment.user_id] ?? comment.author}
+                  </span>
 
                   <div className="flex items-center gap-3">
                     <button
