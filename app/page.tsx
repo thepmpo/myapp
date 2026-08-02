@@ -1,15 +1,17 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
 
 type Post = {
   id: number;
   title: string;
+  content: string | null;
   author: string;
   user_id: string;
   is_question: boolean;
+  image_url: string | null;
 };
 
 type PreviewComment = {
@@ -24,8 +26,6 @@ type PreviewComment = {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function Home() {
-  const [title, setTitle] = useState("");
-  const [isQuestion, setIsQuestion] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -35,7 +35,6 @@ export default function Home() {
   const [topCommentsByPost, setTopCommentsByPost] = useState<Record<number, PreviewComment[]>>({});
   const [commentCountByPost, setCommentCountByPost] = useState<Record<number, number>>({});
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
-  const titleInputRef = useRef<HTMLInputElement>(null);
 
   const fetchNicknames = async (userIds: string[]) => {
     const uniqueIds = Array.from(new Set(userIds.filter((id) => id && UUID_REGEX.test(id))));
@@ -150,36 +149,6 @@ export default function Home() {
     getPosts();
   }, []);
 
-  const addPost = async () => {
-    if (!currentUser) {
-      alert("로그인이 필요합니다");
-      window.location.href = "/login";
-      return;
-    }
-
-    if (!title) {
-      alert("제목을 입력하세요");
-      return;
-    }
-
-    const { error } = await supabase.from("posts").insert([
-      {
-        title: title,
-        author: currentUser.email,
-        user_id: currentUser.id,
-        is_question: isQuestion,
-      },
-    ]);
-
-    if (error) {
-      alert(error.message);
-    } else {
-      setTitle("");
-      setIsQuestion(false);
-      await getPosts();
-    }
-  };
-
   const deletePost = async (id: number) => {
     const { error } = await supabase.from("posts").delete().eq("id", id);
 
@@ -216,36 +185,19 @@ export default function Home() {
   };
 
   return (
-    <div className="flex gap-8 items-start">
-      <div className="flex-1 min-w-0">
-        <h1 className="text-2xl font-bold text-ink mb-1.5">Circle</h1>
-        <p className="text-sm text-ink-soft mb-5">질문하고 답하며 함께 성장하는 자리예요</p>
+    <div className="flex gap-8 items-start max-w-[1652px] mx-auto">
+      <div className="flex-1 min-w-0 max-w-[1360px]">
+        <div className="flex items-center justify-between mb-1.5">
+          <h1 className="text-2xl font-bold text-ink">Circle</h1>
 
-        <div className="flex gap-2 mb-3">
-          <input
-            ref={titleInputRef}
-            placeholder="글 제목 입력"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
-
-          <button
-            onClick={addPost}
-            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
+          <Link
+            href="/circle/new"
+            className="px-3 py-1.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-hover"
           >
             + 글쓰기
-          </button>
+          </Link>
         </div>
-
-        <label className="flex items-center gap-1.5 mb-5 text-sm text-ink-soft">
-          <input
-            type="checkbox"
-            checked={isQuestion}
-            onChange={(e) => setIsQuestion(e.target.checked)}
-          />
-          🙋 질문있어요
-        </label>
+        <p className="text-sm text-ink-soft mb-5">질문하고 답하며 함께 성장하는 자리예요</p>
 
         <div className="flex items-center gap-2 mb-5">
           <button
@@ -280,7 +232,7 @@ export default function Home() {
 
         {posts.length === 0 && <p className="text-sm text-ink-soft">❌ 데이터 없음</p>}
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col">
           {posts
             .filter((post) => !questionOnly || post.is_question)
             .filter(
@@ -291,8 +243,8 @@ export default function Home() {
             .map((post) => (
             <div
               key={post.id}
-              className={`bg-surface rounded-xl border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
-                post.is_question ? "border-border border-l-2 border-l-question" : "border-border"
+              className={`py-6 border-b border-border last:border-b-0 border-l-2 pl-4 -ml-4 transition-colors hover:border-l-accent ${
+                post.is_question ? "border-l-question" : "border-l-transparent"
               }`}
             >
               {post.is_question && (
@@ -326,53 +278,66 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <>
-                  <Link
-                    href={`/post/${post.id}`}
-                    className="block font-bold text-base text-ink hover:text-accent"
-                  >
-                    {post.title}
-                  </Link>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <Link
+                      href={`/post/${post.id}`}
+                      className="block font-bold text-base text-ink hover:text-accent"
+                    >
+                      {post.title}
+                    </Link>
 
-                  <Link
-                    href={`/profile/${post.user_id}`}
-                    className="inline-block mt-1.5 text-sm font-mono text-ink-soft hover:text-accent"
-                  >
-                    {nicknames[post.user_id] ?? post.author}
-                  </Link>
+                    {post.content && (
+                      <p className="mt-1.5 text-sm text-ink-soft line-clamp-2">{post.content}</p>
+                    )}
 
-                  {currentUser?.id === post.user_id && (
-                    <div className="mt-2.5 flex gap-2">
-                      <button
-                        onClick={() => startEdit(post)}
-                        className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs cursor-pointer hover:bg-black/[0.03]"
-                      >
-                        수정
-                      </button>
+                    <Link
+                      href={`/profile/${post.user_id}`}
+                      className="inline-block mt-1.5 text-sm font-mono text-ink-soft hover:text-accent"
+                    >
+                      {nicknames[post.user_id] ?? post.author}
+                    </Link>
 
-                      <button
-                        onClick={() => deletePost(post.id)}
-                        className="px-2.5 py-1.5 rounded-md bg-red-500 text-white text-xs cursor-pointer hover:bg-red-600"
-                      >
-                        삭제
-                      </button>
+                    {currentUser?.id === post.user_id && (
+                      <div className="mt-2.5 flex gap-2">
+                        <button
+                          onClick={() => startEdit(post)}
+                          className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs cursor-pointer hover:bg-black/[0.03]"
+                        >
+                          수정
+                        </button>
+
+                        <button
+                          onClick={() => deletePost(post.id)}
+                          className="px-2.5 py-1.5 rounded-md bg-red-500 text-white text-xs cursor-pointer hover:bg-red-600"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+
+                    {(topCommentsByPost[post.id] || []).length > 0 && (
+                      <div className="mt-2.5 pt-2.5 border-t border-border flex flex-col gap-1.5">
+                        {topCommentsByPost[post.id].map((c) => (
+                          <div key={c.id} className="text-[13px] text-ink-soft">
+                            <span className="text-ink-soft">✦</span>{" "}
+                            <strong className="text-ink">{nicknames[c.user_id] ?? c.author}</strong> {c.content}
+                            {c.likeCount > 0 && (
+                              <span className="text-ink-soft/70 ml-1.5">❤️ {c.likeCount}</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {post.image_url && (
+                    <div className="w-20 h-20 rounded-lg bg-border shrink-0 overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={post.image_url} alt="" className="w-full h-full object-cover" />
                     </div>
                   )}
-
-                  {(topCommentsByPost[post.id] || []).length > 0 && (
-                    <div className="mt-2.5 pt-2.5 border-t border-border flex flex-col gap-1.5">
-                      {topCommentsByPost[post.id].map((c) => (
-                        <div key={c.id} className="text-[13px] text-ink-soft">
-                          <span className="text-ink-soft">✦</span>{" "}
-                          <strong className="text-ink">{nicknames[c.user_id] ?? c.author}</strong> {c.content}
-                          {c.likeCount > 0 && (
-                            <span className="text-ink-soft/70 ml-1.5">❤️ {c.likeCount}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
+                </div>
               )}
             </div>
           ))}
@@ -382,12 +347,12 @@ export default function Home() {
       <aside className="hidden lg:flex w-[260px] shrink-0 flex-col gap-3 bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)] sticky top-8">
         <p className="font-bold text-ink">궁금한 게 있으신가요?</p>
         <p className="text-sm text-ink-soft">질문을 올리면 답변자들이 확인해요.</p>
-        <button
-          onClick={() => titleInputRef.current?.focus()}
-          className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
+        <Link
+          href="/circle/new"
+          className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover text-center"
         >
           질문하기
-        </button>
+        </Link>
       </aside>
     </div>
   );

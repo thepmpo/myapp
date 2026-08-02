@@ -34,7 +34,7 @@ export default function Sidebar() {
   const isInsights = pathname.startsWith("/insights");
 
   return (
-    <aside className="hidden lg:flex w-[200px] shrink-0 px-5 py-8 flex-col justify-between">
+    <aside className="hidden lg:flex w-[200px] shrink-0 px-5 py-8 flex-col justify-between border-r border-border">
       <div>
         <Link href="/" className="block font-bold text-xl text-ink mb-8">
           The PMPO

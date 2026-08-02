@@ -29,9 +29,6 @@ type BlockedProfile = {
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function AdminPage() {
-  const [currentUser, setCurrentUser] = useState<{ id: string; isAdmin: boolean } | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const [reports, setReports] = useState<ReportView[]>([]);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
 
@@ -42,31 +39,9 @@ export default function AdminPage() {
   const [newKeyword, setNewKeyword] = useState("");
 
   useEffect(() => {
-    const init = async () => {
-      const { data } = await supabase.auth.getUser();
-
-      if (!data.user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", data.user.id)
-        .maybeSingle();
-
-      const isAdmin = !!profile?.is_admin;
-      setCurrentUser({ id: data.user.id, isAdmin });
-
-      if (isAdmin) {
-        await Promise.all([fetchReports(), fetchBlockedUsers(), fetchKeywords()]);
-      }
-
-      setLoading(false);
-    };
-
-    init();
+    fetchReports();
+    fetchBlockedUsers();
+    fetchKeywords();
   }, []);
 
   const fetchReports = async () => {
@@ -270,29 +245,8 @@ export default function AdminPage() {
     }
   };
 
-  if (loading) return <div className="text-sm text-ink-soft">로딩중...</div>;
-
-  if (!currentUser?.isAdmin) {
-    return (
-      <div>
-        <p className="text-sm text-ink-soft mb-3">관리자만 접근할 수 있습니다</p>
-        <Link href="/" className="text-sm text-accent hover:underline">
-          ← 홈으로
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-[720px]">
-      <div className="mb-5">
-        <Link href="/" className="text-sm text-ink-soft hover:text-accent">
-          ← Circle로
-        </Link>
-      </div>
-
-      <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
-
+    <div>
       <section className="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)] mb-6">
         <h2 className="text-base font-bold text-ink mb-4">신고 목록 ({reports.length})</h2>
 

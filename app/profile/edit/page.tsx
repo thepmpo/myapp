@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
+import { PASSWORD_RULE_MESSAGE, isValidPassword } from "@/app/lib/passwordRules";
+
+const NICKNAME_COOLDOWN_DAYS = 30;
 
 export default function ProfileEdit() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -11,6 +14,7 @@ export default function ProfileEdit() {
   const [nickname, setNickname] = useState("");
   const [nicknameError, setNicknameError] = useState("");
   const [nicknameSaving, setNicknameSaving] = useState(false);
+  const [nicknameLockedUntil, setNicknameLockedUntil] = useState<Date | null>(null);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -34,11 +38,21 @@ export default function ProfileEdit() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nickname")
+        .select("nickname, nickname_changed_at")
         .eq("id", data.user.id)
         .maybeSingle();
 
       setNickname(profile?.nickname ?? "");
+
+      if (profile?.nickname_changed_at) {
+        const changedAt = new Date(profile.nickname_changed_at);
+        const unlocksAt = new Date(changedAt.getTime() + NICKNAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000);
+
+        if (unlocksAt > new Date()) {
+          setNicknameLockedUntil(unlocksAt);
+        }
+      }
+
       setLoading(false);
     };
 
@@ -74,15 +88,20 @@ export default function ProfileEdit() {
     setNicknameSaving(false);
 
     if (error) {
-      setNicknameError(error.message);
+      setNicknameError(
+        error.message.includes("한 달에 한 번")
+          ? "닉네임은 한 달에 한 번만 변경할 수 있어요"
+          : error.message
+      );
     } else {
+      setNicknameLockedUntil(new Date(Date.now() + NICKNAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000));
       alert("닉네임이 변경되었습니다");
     }
   };
 
   const savePassword = async () => {
-    if (newPassword.length < 8) {
-      setPasswordError("비밀번호는 8자 이상이어야 합니다");
+    if (!isValidPassword(newPassword)) {
+      setPasswordError(PASSWORD_RULE_MESSAGE);
       return;
     }
 
@@ -143,18 +162,23 @@ export default function ProfileEdit() {
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
+            disabled={!!nicknameLockedUntil}
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:bg-paper disabled:text-ink-soft"
           />
           <button
             onClick={saveNickname}
-            disabled={nicknameSaving}
+            disabled={nicknameSaving || !!nicknameLockedUntil}
             className="px-4 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03] disabled:opacity-60"
           >
             {nicknameSaving ? "저장 중..." : "저장"}
           </button>
         </div>
 
-        {nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>}
+        {nicknameLockedUntil ? (
+          <p className="mt-1.5 text-sm text-ink-soft">닉네임은 한 달에 한 번만 변경할 수 있어요</p>
+        ) : (
+          nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>
+        )}
       </section>
 
       <section className="mb-8">
@@ -163,7 +187,7 @@ export default function ProfileEdit() {
         <div className="flex flex-col gap-2">
           <input
             type="password"
-            placeholder="새 비밀번호 (8자 이상)"
+            placeholder="8자 이상, 영문+숫자 조합"
             value={newPassword}
             onChange={(e) => {
               setNewPassword(e.target.value);

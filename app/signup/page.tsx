@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { supabase } from "@/app/lib/supabase";
+import { PASSWORD_RULE_MESSAGE, isValidPassword } from "@/app/lib/passwordRules";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [nickname, setNickname] = useState("");
 
   const [agreeAge, setAgreeAge] = useState(false);
@@ -13,13 +15,22 @@ export default function Signup() {
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [agreeMarketing, setAgreeMarketing] = useState(false);
 
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [nicknameError, setNicknameError] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const allRequiredAgreed = agreeAge && agreeTerms && agreePrivacy;
   const allChecked = allRequiredAgreed && agreeMarketing;
-  const canSubmit = allRequiredAgreed && email && password && nickname && !loading;
+  const canSubmit =
+    allRequiredAgreed &&
+    email &&
+    nickname &&
+    isValidPassword(password) &&
+    password === confirmPassword &&
+    !loading;
 
   const toggleAll = (checked: boolean) => {
     setAgreeAge(checked);
@@ -29,13 +40,23 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
+    setEmailError("");
+    setPasswordError("");
+    setNicknameError("");
+    setError("");
+
     if (!email || !password || !nickname) {
       setError("이메일, 비밀번호, 닉네임을 모두 입력해주세요");
       return;
     }
 
-    if (password.length < 8) {
-      setError("비밀번호는 8자 이상이어야 합니다");
+    if (!isValidPassword(password)) {
+      setPasswordError(PASSWORD_RULE_MESSAGE);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setPasswordError("비밀번호가 일치하지 않습니다");
       return;
     }
 
@@ -44,7 +65,6 @@ export default function Signup() {
       return;
     }
 
-    setError("");
     setLoading(true);
 
     const { data: existingNickname } = await supabase
@@ -55,7 +75,7 @@ export default function Signup() {
 
     if (existingNickname) {
       setLoading(false);
-      setError("이미 사용 중인 닉네임입니다");
+      setNicknameError("이미 사용 중인 닉네임입니다");
       return;
     }
 
@@ -73,19 +93,19 @@ export default function Signup() {
       },
     });
 
+    setLoading(false);
+
     if (signUpError) {
-      setLoading(false);
-      setError(
-        signUpError.message.includes("already registered")
-          ? "이미 가입된 이메일입니다"
-          : signUpError.message.includes("Database error")
-          ? "이미 사용 중인 닉네임입니다"
-          : signUpError.message
-      );
+      if (signUpError.message.includes("already registered")) {
+        setEmailError("이미 가입된 이메일입니다");
+      } else if (signUpError.message.includes("Database error")) {
+        setNicknameError("이미 사용 중인 닉네임입니다");
+      } else {
+        setError(signUpError.message);
+      }
       return;
     }
 
-    setLoading(false);
     setSuccess(true);
   };
 
@@ -117,20 +137,42 @@ export default function Signup() {
           <input
             placeholder="이메일 입력"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError("");
+            }}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
+          {emailError && <p className="mt-1.5 text-sm text-red-500">{emailError}</p>}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">비밀번호</label>
           <input
             type="password"
-            placeholder="비밀번호 입력 (8자 이상)"
+            placeholder="8자 이상, 영문+숫자 조합"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setPasswordError("");
+            }}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-ink mb-1.5">비밀번호 확인</label>
+          <input
+            type="password"
+            placeholder="비밀번호 다시 입력"
+            value={confirmPassword}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setPasswordError("");
+            }}
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
+          />
+          {passwordError && <p className="mt-1.5 text-sm text-red-500">{passwordError}</p>}
         </div>
 
         <div>
@@ -138,9 +180,13 @@ export default function Signup() {
           <input
             placeholder="닉네임 입력"
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              setNickname(e.target.value);
+              setNicknameError("");
+            }}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
+          {nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>}
         </div>
 
         <div className="rounded-lg border border-border bg-paper p-3.5 flex flex-col gap-2.5">

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function TermsOfService() {
   return (
-    <div className="max-w-[680px]">
+    <div className="max-w-[680px] mx-auto">
       <div className="mb-5">
         <Link href="/signup" className="text-sm text-ink-soft hover:text-accent">
           ← 회원가입으로

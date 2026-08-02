@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabase";
+import { PASSWORD_RULE_MESSAGE, isValidPassword } from "@/app/lib/passwordRules";
 
 export default function ResetPasswordConfirm() {
   const [checking, setChecking] = useState(true);
@@ -24,8 +25,8 @@ export default function ResetPasswordConfirm() {
   }, []);
 
   const handleSubmit = async () => {
-    if (password.length < 8) {
-      setError("비밀번호는 8자 이상이어야 합니다");
+    if (!isValidPassword(password)) {
+      setError(PASSWORD_RULE_MESSAGE);
       return;
     }
 
@@ -100,7 +101,7 @@ export default function ResetPasswordConfirm() {
           <label className="block text-sm font-medium text-ink mb-1.5">새 비밀번호</label>
           <input
             type="password"
-            placeholder="비밀번호 입력 (8자 이상)"
+            placeholder="8자 이상, 영문+숫자 조합"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"

@@ -307,7 +307,7 @@ export default function PostDetail() {
   const isPostLiked = postLikes.some((l) => l.user_id === currentUser?.id);
 
   return (
-    <div className="max-w-[640px] flex flex-col gap-6">
+    <div className="max-w-[1280px] mx-auto flex flex-col gap-6">
       <h1 className="text-2xl font-bold text-ink">게시글 상세</h1>
 
       <div
@@ -363,7 +363,18 @@ export default function PostDetail() {
             </button>
           </div>
         ) : (
-          <h2 className="text-xl font-bold text-ink mb-4">{post.title}</h2>
+          <>
+            <h2 className="text-xl font-bold text-ink mb-4">{post.title}</h2>
+
+            {post.image_url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={post.image_url} alt="" className="w-full rounded-lg mb-4 object-cover" />
+            )}
+
+            {post.content && (
+              <p className="text-[15px] leading-relaxed text-ink whitespace-pre-wrap mb-4">{post.content}</p>
+            )}
+          </>
         )}
 
         <div className="flex items-center gap-4 pt-3 border-t border-border">

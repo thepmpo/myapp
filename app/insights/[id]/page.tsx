@@ -304,7 +304,7 @@ export default function ArticleDetail() {
   if (!article) return <div className="text-sm text-ink-soft">로딩중...</div>;
 
   return (
-    <div className="max-w-[640px]">
+    <div className="max-w-[1280px] mx-auto">
       <button
         onClick={() => router.back()}
         className="inline-block mb-4 text-sm text-ink-soft hover:text-accent cursor-pointer"

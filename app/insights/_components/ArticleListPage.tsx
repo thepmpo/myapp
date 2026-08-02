@@ -107,13 +107,13 @@ export default function ArticleListPage({ category }: { category: ArticleCategor
   };
 
   return (
-    <div>
+    <div className="max-w-[1360px] mx-auto">
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-2xl font-bold text-ink">Insights</h1>
 
         {isAdmin && (
           <Link
-            href="/insights/new"
+            href="/admin/insights/new"
             className="px-3 py-1.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-hover"
           >
             + 새 글 작성
@@ -137,12 +137,12 @@ export default function ArticleListPage({ category }: { category: ArticleCategor
 
       {articles.length === 0 && <p className="text-sm text-ink-soft">아직 등록된 글이 없어요</p>}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col">
         {articles.map((article) => (
           <Link
             key={article.id}
             href={`/insights/${article.id}`}
-            className="block bg-surface rounded-xl border border-border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] hover:border-accent/30"
+            className="block py-6 border-b border-border last:border-b-0 border-l-2 border-l-transparent pl-4 -ml-4 transition-colors hover:border-l-accent"
           >
             <span className="inline-block mb-2 text-xs font-bold text-ink-soft">
               {CATEGORY_LABELS[article.category]}
