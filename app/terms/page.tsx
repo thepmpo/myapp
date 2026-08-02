@@ -27,7 +27,7 @@ export default function TermsOfService() {
       <section className="mb-5">
         <h2 className="text-base font-bold text-ink mt-6 mb-2">제2조 (용어의 정의)</h2>
         <p className="text-sm text-ink-soft leading-relaxed">
-          1. "서비스"란 회사가 제공하는 정보게시판, 커뮤니티 게시판 등 일체의 서비스를 말합니다.<br />
+          1. "서비스"란 회사가 제공하는 Insights, Circle 게시판 등 일체의 서비스를 말합니다.<br />
           2. "회원"이란 이 약관에 동의하고 이메일과 비밀번호로 회원가입을 완료하여 서비스를
           이용하는 자를 말합니다.<br />
           3. "게시물"이란 회원이 서비스 이용과 관련하여 게시한 문자, 이미지 등의 정보를 말합니다.

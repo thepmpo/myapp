@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
       <section className="mb-5">
         <h2 className="text-base font-bold text-ink mt-6 mb-2">8. 쿠키의 사용</h2>
         <p className="text-sm text-ink-soft leading-relaxed">
-          회사는 비로그인 이용자의 정보게시판 조회수를 중복 집계하지 않기 위해 브라우저 단위의
+          회사는 비로그인 이용자의 Insights 조회수를 중복 집계하지 않기 위해 브라우저 단위의
           쿠키를 사용합니다. 이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으나, 이
           경우 조회수 중복 방지 등 일부 기능이 정상 동작하지 않을 수 있습니다.
         </p>

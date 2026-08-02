@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
+import { CATEGORY_LABELS } from '@/app/lib/insightsCategories';
 
 type Comment = {
   id: number;
@@ -18,12 +19,6 @@ type Like = {
   id: number;
   user_id: string;
   comment_id: number | null;
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  product: '프로덕트',
-  trend: 'PM·PO 트렌드',
-  ai: 'AI',
 };
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -43,6 +38,7 @@ const getAnonId = () => {
 
 export default function ArticleDetail() {
   const params = useParams();
+  const router = useRouter();
   const id = Number(params.id);
 
   const [article, setArticle] = useState<any>(null);
@@ -309,12 +305,15 @@ export default function ArticleDetail() {
 
   return (
     <div className="max-w-[640px]">
-      <Link href="/articles" className="inline-block mb-4 text-sm text-ink-soft hover:text-accent">
-        ← 정보게시판으로
-      </Link>
+      <button
+        onClick={() => router.back()}
+        className="inline-block mb-4 text-sm text-ink-soft hover:text-accent cursor-pointer"
+      >
+        ← Insights로
+      </button>
 
       <span className="inline-block mb-3 text-xs font-bold text-ink-soft">
-        {CATEGORY_LABELS[article.category]}
+        {CATEGORY_LABELS[article.category as keyof typeof CATEGORY_LABELS]}
       </span>
 
       <h1 className="text-2xl font-bold text-ink mb-2">{article.title}</h1>

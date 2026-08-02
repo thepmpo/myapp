@@ -16,7 +16,7 @@ type Report = {
 
 type ReportView = Report & {
   targetLabel: string;
-  targetType: "게시글" | "댓글" | "정보게시판 글";
+  targetType: "게시글" | "댓글" | "Insights 글";
   targetAuthorId: string | null;
   targetLink: string | null;
 };
@@ -128,10 +128,10 @@ export default function AdminPage() {
       const a = articleMap.get(r.article_id);
       return {
         ...r,
-        targetType: "정보게시판 글",
+        targetType: "Insights 글",
         targetLabel: a ? a.title : "(삭제된 글)",
         targetAuthorId: a ? a.author_id : null,
-        targetLink: `/articles/${r.article_id}`,
+        targetLink: `/insights/${r.article_id}`,
       };
     });
 
@@ -287,7 +287,7 @@ export default function AdminPage() {
     <div className="max-w-[720px]">
       <div className="mb-5">
         <Link href="/" className="text-sm text-ink-soft hover:text-accent">
-          ← 커뮤니티로
+          ← Circle로
         </Link>
       </div>
 

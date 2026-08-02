@@ -218,7 +218,8 @@ export default function Home() {
   return (
     <div className="flex gap-8 items-start">
       <div className="flex-1 min-w-0">
-        <h1 className="text-2xl font-bold text-ink mb-5">커뮤니티</h1>
+        <h1 className="text-2xl font-bold text-ink mb-1.5">Circle</h1>
+        <p className="text-sm text-ink-soft mb-5">질문하고 답하며 함께 성장하는 자리예요</p>
 
         <div className="flex gap-2 mb-3">
           <input
