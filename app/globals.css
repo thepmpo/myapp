@@ -1,17 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --color-paper: #f6f5f1;
+  /* v1.1 절충안 팔레트 — 무채색 위주, 색은 accent/question/error에만 */
+  --color-paper: #faf8f6;
   --color-surface: #ffffff;
-  --color-ink: #171b23;
-  --color-ink-soft: #5b6472;
-  --color-border: #e3e0d8;
-  --color-cobalt: #2e4a8f;
-  --color-cobalt-dark: #243970;
-  --color-amber: #e2a33b;
-  --color-amber-bg: #fbf0db;
-  --color-amber-text: #8a5b0e;
-  --color-sage: #5c8a72;
+  --color-ink: #262322;
+  --color-ink-soft: #6b6460;
+  --color-border: #e5e1dd;
+  --color-accent: #c8464d;
+  --color-accent-hover: #a83840;
+  --color-question: #b8791c;
+  --color-error: #b8382e;
 }
 
 @theme inline {
@@ -20,12 +19,10 @@
   --color-ink: var(--color-ink);
   --color-ink-soft: var(--color-ink-soft);
   --color-border: var(--color-border);
-  --color-cobalt: var(--color-cobalt);
-  --color-cobalt-dark: var(--color-cobalt-dark);
-  --color-amber: var(--color-amber);
-  --color-amber-bg: var(--color-amber-bg);
-  --color-amber-text: var(--color-amber-text);
-  --color-sage: var(--color-sage);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-question: var(--color-question);
+  --color-error: var(--color-error);
   --font-sans: var(--font-noto-sans-kr), "Noto Sans KR", "Malgun Gothic", sans-serif;
   --font-mono: "DejaVu Sans Mono", "IBM Plex Mono", ui-monospace, monospace;
   --shadow-card: 0 1px 3px rgba(23, 27, 35, 0.045);
@@ -35,9 +32,4 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
-}
-
-/* "질문있어요" postit tag — clipped corner */
-.tag-question {
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
 }

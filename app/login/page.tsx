@@ -43,7 +43,7 @@ export default function Login() {
             placeholder="이메일 입력"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
         </div>
 
@@ -54,7 +54,7 @@ export default function Login() {
             placeholder="비밀번호 입력"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
         </div>
 
@@ -63,16 +63,16 @@ export default function Login() {
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark disabled:opacity-60 cursor-pointer"
+          className="w-full py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover disabled:bg-border disabled:text-ink-soft cursor-pointer"
         >
           {loading ? "로그인 중..." : "로그인"}
         </button>
 
         <div className="flex items-center justify-between text-sm">
-          <a href="/reset" className="text-ink-soft hover:text-cobalt">
+          <a href="/reset" className="text-ink-soft hover:text-accent">
             비밀번호를 잊으셨나요?
           </a>
-          <a href="/signup" className="text-ink-soft hover:text-cobalt">
+          <a href="/signup" className="text-ink-soft hover:text-accent">
             회원가입
           </a>
         </div>

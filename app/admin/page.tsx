@@ -276,7 +276,7 @@ export default function AdminPage() {
     return (
       <div>
         <p className="text-sm text-ink-soft mb-3">관리자만 접근할 수 있습니다</p>
-        <Link href="/" className="text-sm text-cobalt hover:underline">
+        <Link href="/" className="text-sm text-accent hover:underline">
           ← 홈으로
         </Link>
       </div>
@@ -286,7 +286,7 @@ export default function AdminPage() {
   return (
     <div className="max-w-[720px]">
       <div className="mb-5">
-        <Link href="/" className="text-sm text-ink-soft hover:text-cobalt">
+        <Link href="/" className="text-sm text-ink-soft hover:text-accent">
           ← 커뮤니티로
         </Link>
       </div>
@@ -310,7 +310,7 @@ export default function AdminPage() {
 
               <div className="text-sm text-ink mb-2">
                 {r.targetLink ? (
-                  <Link href={r.targetLink} className="hover:text-cobalt hover:underline">
+                  <Link href={r.targetLink} className="hover:text-accent hover:underline">
                     {r.targetLabel}
                   </Link>
                 ) : (
@@ -359,7 +359,7 @@ export default function AdminPage() {
             placeholder="닉네임으로 차단"
             value={blockSearch}
             onChange={(e) => setBlockSearch(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
           <button
             onClick={blockByNickname}
@@ -399,11 +399,11 @@ export default function AdminPage() {
             placeholder="새 금지 키워드"
             value={newKeyword}
             onChange={(e) => setNewKeyword(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
           <button
             onClick={addKeyword}
-            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
           >
             추가
           </button>

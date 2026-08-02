@@ -4,14 +4,14 @@ export default function PrivacyPolicy() {
   return (
     <div className="max-w-[680px]">
       <div className="mb-5">
-        <Link href="/signup" className="text-sm text-ink-soft hover:text-cobalt">
+        <Link href="/signup" className="text-sm text-ink-soft hover:text-accent">
           ← 회원가입으로
         </Link>
       </div>
 
       <h1 className="text-2xl font-bold text-ink mb-6">개인정보처리방침</h1>
 
-      <div className="bg-amber-bg text-amber-text border border-amber rounded-lg px-4 py-3 text-sm mb-6">
+      <div className="bg-paper text-ink-soft border border-border rounded-lg px-4 py-3 text-sm mb-6">
         본 방침은 초안이며, 정식 게시 전 변호사 등 법률 전문가의 검토가 필요합니다.
       </div>
 

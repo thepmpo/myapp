@@ -124,7 +124,7 @@ export default function Profile() {
         <h1 className="mt-4 text-lg font-bold text-ink">{nickname}</h1>
 
         {hasBadge ? (
-          <span className="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded bg-sage text-white text-xs font-bold">
+          <span className="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border text-ink-soft text-xs font-bold">
             <BadgeIcon />
             팔로우 {BADGE_THRESHOLD}명 이상 뱃지
           </span>
@@ -136,14 +136,14 @@ export default function Profile() {
       <div className="mt-6 pt-6 border-t border-border flex items-center justify-center gap-10">
         <Link
           href={`/profile/${userId}/follows?tab=followers`}
-          className="text-center text-ink hover:text-cobalt"
+          className="text-center text-ink hover:text-accent"
         >
           <div className="text-base font-bold">{followerCount}</div>
           <div className="text-xs text-ink-soft">팔로워</div>
         </Link>
         <Link
           href={`/profile/${userId}/follows?tab=following`}
-          className="text-center text-ink hover:text-cobalt"
+          className="text-center text-ink hover:text-accent"
         >
           <div className="text-base font-bold">{followingCount}</div>
           <div className="text-xs text-ink-soft">팔로잉</div>
@@ -172,7 +172,7 @@ export default function Profile() {
             className={`w-full py-2.5 rounded-lg text-sm font-medium cursor-pointer ${
               isFollowing
                 ? "border border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
-                : "bg-cobalt text-white shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark"
+                : "bg-accent text-white shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover"
             }`}
           >
             {isFollowing ? "팔로잉" : "팔로우"}

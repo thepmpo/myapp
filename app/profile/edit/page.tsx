@@ -129,7 +129,7 @@ export default function ProfileEdit() {
     <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
       <Link
         href={`/profile/${userId}`}
-        className="inline-block mb-5 text-sm text-ink-soft hover:text-cobalt"
+        className="inline-block mb-5 text-sm text-ink-soft hover:text-accent"
       >
         ← 프로필로
       </Link>
@@ -143,7 +143,7 @@ export default function ProfileEdit() {
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
           <button
             onClick={saveNickname}
@@ -169,7 +169,7 @@ export default function ProfileEdit() {
               setNewPassword(e.target.value);
               setPasswordSaved(false);
             }}
-            className="px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
           <input
             type="password"
@@ -179,19 +179,19 @@ export default function ProfileEdit() {
               setConfirmPassword(e.target.value);
               setPasswordSaved(false);
             }}
-            className="px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
           <button
             onClick={savePassword}
             disabled={passwordSaving}
-            className="self-start px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark disabled:opacity-60 cursor-pointer"
+            className="self-start px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover disabled:bg-border disabled:text-ink-soft cursor-pointer"
           >
             {passwordSaving ? "변경 중..." : "비밀번호 변경"}
           </button>
         </div>
 
         {passwordError && <p className="mt-1.5 text-sm text-red-500">{passwordError}</p>}
-        {passwordSaved && <p className="mt-1.5 text-sm text-sage">비밀번호가 변경되었습니다</p>}
+        {passwordSaved && <p className="mt-1.5 text-sm text-ink-soft">비밀번호가 변경되었습니다</p>}
       </section>
 
       <div className="mt-14 pt-4 border-t border-border flex justify-end">

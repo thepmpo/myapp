@@ -182,7 +182,7 @@ export default function Articles() {
           <select
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value as Article["category"])}
-            className="mb-2 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="mb-2 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
             <option value="product">프로덕트</option>
             <option value="trend">PM·PO 트렌드</option>
@@ -193,14 +193,14 @@ export default function Articles() {
             placeholder="글 제목 입력"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
 
           <textarea
             placeholder="글 내용 입력"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[96px] focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[96px] focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
 
           <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
@@ -216,7 +216,7 @@ export default function Articles() {
 
           <button
             onClick={addArticle}
-            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
           >
             발행
           </button>
@@ -230,7 +230,7 @@ export default function Articles() {
             onClick={() => setCategory(c)}
             className={`-mb-px pb-3 text-sm font-medium cursor-pointer border-b-2 ${
               category === c
-                ? "text-cobalt border-cobalt"
+                ? "text-accent border-accent"
                 : "text-ink-soft border-transparent hover:text-ink"
             }`}
           >
@@ -246,9 +246,9 @@ export default function Articles() {
           <Link
             key={article.id}
             href={`/articles/${article.id}`}
-            className="block bg-surface rounded-xl border border-border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] hover:border-cobalt/30"
+            className="block bg-surface rounded-xl border border-border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] hover:border-accent/30"
           >
-            <span className="inline-block mb-2 px-2 py-0.5 rounded bg-cobalt/10 text-cobalt text-xs font-bold">
+            <span className="inline-block mb-2 text-xs font-bold text-ink-soft">
               {CATEGORY_LABELS[article.category]}
             </span>
 

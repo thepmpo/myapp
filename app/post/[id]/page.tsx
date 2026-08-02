@@ -312,7 +312,7 @@ export default function PostDetail() {
 
       <div
         className={`bg-surface rounded-xl border p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
-          post.is_question ? "border-border border-l-[3px] border-l-amber" : "border-border"
+          post.is_question ? "border-border border-l-2 border-l-question" : "border-border"
         }`}
       >
         <div className="flex items-center justify-between mb-3">
@@ -320,7 +320,7 @@ export default function PostDetail() {
             <div className="w-8 h-8 rounded-full bg-border shrink-0" />
             <Link
               href={`/profile/${post.user_id}`}
-              className="text-sm font-mono text-ink-soft hover:text-cobalt"
+              className="text-sm font-mono text-ink-soft hover:text-accent"
             >
               {nicknames[post.user_id] ?? post.author}
             </Link>
@@ -332,7 +332,7 @@ export default function PostDetail() {
               className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
                 isFollowingAuthor
                   ? "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
-                  : "border-cobalt bg-cobalt text-white hover:bg-cobalt-dark"
+                  : "border-accent bg-accent text-white hover:bg-accent-hover"
               }`}
             >
               {isFollowingAuthor ? "팔로잉" : "+ 팔로우"}
@@ -343,7 +343,7 @@ export default function PostDetail() {
         <p className="font-mono text-xs text-ink-soft/60 mb-2">글 ID: {post.id}</p>
 
         {post.is_question && (
-          <span className="tag-question inline-block mb-2 px-2 py-1 rounded bg-amber-bg text-amber-text text-xs font-bold">
+          <span className="inline-block mb-2 text-xs font-bold text-question">
             🙋 질문있어요
           </span>
         )}
@@ -353,11 +353,11 @@ export default function PostDetail() {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+              className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
             <button
               onClick={updatePost}
-              className="px-4 py-2 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
             >
               저장
             </button>
@@ -370,7 +370,7 @@ export default function PostDetail() {
           <button
             onClick={togglePostLike}
             className={`text-sm font-medium cursor-pointer ${
-              isPostLiked ? "text-cobalt" : "text-ink-soft hover:text-ink"
+              isPostLiked ? "text-accent" : "text-ink-soft hover:text-ink"
             }`}
           >
             {isPostLiked ? "❤️" : "🤍"} 좋아요 {postLikes.length}
@@ -432,7 +432,7 @@ export default function PostDetail() {
                     <button
                       onClick={() => toggleCommentLike(comment.id)}
                       className={`text-xs font-medium cursor-pointer ${
-                        isCommentLiked ? "text-cobalt" : "text-ink-soft hover:text-ink"
+                        isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
                       }`}
                     >
                       {isCommentLiked ? "❤️" : "🤍"} {commentLikeCount}
@@ -468,11 +468,11 @@ export default function PostDetail() {
               placeholder="댓글을 입력하세요"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+              className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
             <button
               onClick={addComment}
-              className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+              className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
             >
               등록
             </button>

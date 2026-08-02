@@ -226,12 +226,12 @@ export default function Home() {
             placeholder="글 제목 입력"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
 
           <button
             onClick={addPost}
-            className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
           >
             + 글쓰기
           </button>
@@ -256,10 +256,10 @@ export default function Home() {
 
           <button
             onClick={() => setQuestionOnly((v) => !v)}
-            className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md border text-xs cursor-pointer ${
               questionOnly
-                ? "border-amber bg-amber-bg text-amber-text"
-                : "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+                ? "border-accent bg-surface text-accent font-bold"
+                : "border-border bg-surface text-ink-soft font-medium hover:bg-black/[0.03]"
             }`}
           >
             🙋 질문만 보기
@@ -267,10 +267,10 @@ export default function Home() {
 
           <button
             onClick={() => setUnansweredQuestionOnly((v) => !v)}
-            className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+            className={`px-3 py-1.5 rounded-md border text-xs cursor-pointer ${
               unansweredQuestionOnly
-                ? "border-amber bg-amber-bg text-amber-text"
-                : "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+                ? "border-accent bg-surface text-accent font-bold"
+                : "border-border bg-surface text-ink-soft font-medium hover:bg-black/[0.03]"
             }`}
           >
             🙋 답변 없는 질문만
@@ -291,11 +291,11 @@ export default function Home() {
             <div
               key={post.id}
               className={`bg-surface rounded-xl border p-4 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
-                post.is_question ? "border-border border-l-[3px] border-l-amber" : "border-border"
+                post.is_question ? "border-border border-l-2 border-l-question" : "border-border"
               }`}
             >
               {post.is_question && (
-                <span className="tag-question inline-block mb-2 px-2 py-1 rounded bg-amber-bg text-amber-text text-xs font-bold">
+                <span className="inline-block mb-2 text-xs font-bold text-question">
                   🙋 질문있어요
                 </span>
               )}
@@ -305,13 +305,13 @@ export default function Home() {
                   <input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+                    className="w-full px-2.5 py-2 rounded-md border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                   />
 
                   <div className="mt-2.5 flex gap-2">
                     <button
                       onClick={() => updatePost(post.id)}
-                      className="px-2.5 py-1.5 rounded-md bg-cobalt text-white text-xs font-medium cursor-pointer hover:bg-cobalt-dark"
+                      className="px-2.5 py-1.5 rounded-md bg-accent text-white text-xs font-medium cursor-pointer hover:bg-accent-hover"
                     >
                       저장
                     </button>
@@ -328,14 +328,14 @@ export default function Home() {
                 <>
                   <Link
                     href={`/post/${post.id}`}
-                    className="block font-bold text-base text-ink hover:text-cobalt"
+                    className="block font-bold text-base text-ink hover:text-accent"
                   >
                     {post.title}
                   </Link>
 
                   <Link
                     href={`/profile/${post.user_id}`}
-                    className="inline-block mt-1.5 text-sm font-mono text-ink-soft hover:text-cobalt"
+                    className="inline-block mt-1.5 text-sm font-mono text-ink-soft hover:text-accent"
                   >
                     {nicknames[post.user_id] ?? post.author}
                   </Link>
@@ -362,7 +362,7 @@ export default function Home() {
                     <div className="mt-2.5 pt-2.5 border-t border-border flex flex-col gap-1.5">
                       {topCommentsByPost[post.id].map((c) => (
                         <div key={c.id} className="text-[13px] text-ink-soft">
-                          <span className="text-amber">✦</span>{" "}
+                          <span className="text-ink-soft">✦</span>{" "}
                           <strong className="text-ink">{nicknames[c.user_id] ?? c.author}</strong> {c.content}
                           {c.likeCount > 0 && (
                             <span className="text-ink-soft/70 ml-1.5">❤️ {c.likeCount}</span>
@@ -383,7 +383,7 @@ export default function Home() {
         <p className="text-sm text-ink-soft">질문을 올리면 답변자들이 확인해요.</p>
         <button
           onClick={() => titleInputRef.current?.focus()}
-          className="px-4 py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark cursor-pointer"
+          className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
         >
           질문하기
         </button>

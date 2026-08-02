@@ -41,7 +41,7 @@ export default function ResetPassword() {
         </p>
         <a
           href="/login"
-          className="block text-sm text-cobalt hover:text-cobalt-dark text-center font-medium"
+          className="block text-sm text-accent hover:text-accent-hover text-center font-medium"
         >
           로그인하러 가기
         </a>
@@ -65,7 +65,7 @@ export default function ResetPassword() {
             placeholder="이메일 입력"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-cobalt/30"
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
         </div>
 
@@ -74,12 +74,12 @@ export default function ResetPassword() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full py-2.5 rounded-lg bg-cobalt text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-cobalt-dark disabled:opacity-60 cursor-pointer"
+          className="w-full py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover disabled:bg-border disabled:text-ink-soft cursor-pointer"
         >
           {loading ? "전송 중..." : "재설정 링크 전송"}
         </button>
 
-        <a href="/login" className="text-sm text-ink-soft hover:text-cobalt text-center">
+        <a href="/login" className="text-sm text-ink-soft hover:text-accent text-center">
           로그인으로 돌아가기
         </a>
       </div>

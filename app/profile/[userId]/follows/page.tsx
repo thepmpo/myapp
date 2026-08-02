@@ -117,7 +117,7 @@ export default function FollowList() {
           onClick={() => setTab("followers")}
           className={`pb-3 text-sm cursor-pointer ${
             tab === "followers"
-              ? "text-ink font-bold border-b-2 border-cobalt"
+              ? "text-ink font-bold border-b-2 border-accent"
               : "text-ink-soft"
           }`}
         >
@@ -127,7 +127,7 @@ export default function FollowList() {
           onClick={() => setTab("following")}
           className={`pb-3 text-sm cursor-pointer ${
             tab === "following"
-              ? "text-ink font-bold border-b-2 border-cobalt"
+              ? "text-ink font-bold border-b-2 border-accent"
               : "text-ink-soft"
           }`}
         >
@@ -146,7 +146,7 @@ export default function FollowList() {
           <div key={item.userId} className="flex items-center justify-between">
             <Link
               href={`/profile/${item.userId}`}
-              className="flex items-center gap-3 text-sm font-medium text-ink hover:text-cobalt"
+              className="flex items-center gap-3 text-sm font-medium text-ink hover:text-accent"
             >
               <span className="w-9 h-9 rounded-full bg-border shrink-0" />
               {item.nickname}
@@ -158,7 +158,7 @@ export default function FollowList() {
                 className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
                   followingIds.has(item.userId)
                     ? "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
-                    : "border-cobalt text-cobalt hover:bg-cobalt/5"
+                    : "border-accent text-accent hover:bg-accent/5"
                 }`}
               >
                 {followingIds.has(item.userId) ? "팔로잉" : "팔로우"}
