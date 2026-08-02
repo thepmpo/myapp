@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
+import MobileTabBar from "@/app/components/MobileTabBar";
 
 const STANDALONE_ROUTES = ["/login", "/signup", "/reset", "/reset/confirm"];
 
@@ -20,7 +21,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen max-w-[1280px] mx-auto w-full">
       <Sidebar />
-      <main className="flex-1 min-w-0 py-8 px-6">{children}</main>
+      <main className="flex-1 min-w-0 pt-8 px-6 pb-24 lg:pb-8">{children}</main>
+      <MobileTabBar />
     </div>
   );
 }
