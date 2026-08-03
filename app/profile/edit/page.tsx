@@ -6,6 +6,8 @@ import { supabase } from "@/app/lib/supabase";
 import { PASSWORD_RULE_MESSAGE, isValidPassword } from "@/app/lib/passwordRules";
 
 const NICKNAME_COOLDOWN_DAYS = 30;
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function ProfileEdit() {
   const [userId, setUserId] = useState<string | null>(null);
@@ -66,6 +68,16 @@ export default function ProfileEdit() {
 
   const saveAvatar = async (file: File) => {
     if (!userId) return;
+
+    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+      setAvatarError("jpg, png, webp 형식의 이미지만 업로드할 수 있어요");
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_SIZE_BYTES) {
+      setAvatarError("이미지 용량은 5MB 이하만 업로드할 수 있어요");
+      return;
+    }
 
     setAvatarError("");
     setAvatarUploading(true);
