@@ -16,6 +16,25 @@ export function InsightsIcon({ className }: { className?: string }) {
   );
 }
 
+export function HomeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m3 11 9-8 9 8" />
+      <path d="M5 10v10h14V10" />
+      <path d="M9 20v-6h6v6" />
+    </svg>
+  );
+}
+
+export function NoticeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 6h16v11H4Z" />
+      <path d="M7 9.5h10M7 13.5h6" />
+    </svg>
+  );
+}
+
 export function ProfileIcon({ className }: { className?: string }) {
   return (
     <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
