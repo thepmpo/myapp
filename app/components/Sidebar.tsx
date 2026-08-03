@@ -11,6 +11,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const [nickname, setNickname] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -20,11 +21,12 @@ export default function Sidebar() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nickname")
+        .select("nickname, avatar_url")
         .eq("id", data.user.id)
         .maybeSingle();
 
       setNickname(profile?.nickname ?? "");
+      setAvatarUrl(profile?.avatar_url ?? null);
     };
 
     load();
@@ -106,7 +108,12 @@ export default function Sidebar() {
         href={currentUser ? `/profile/${currentUser.id}` : "/login"}
         className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-black/[0.03]"
       >
-        <span className="w-8 h-8 rounded-full bg-border shrink-0" />
+        <span className="w-8 h-8 rounded-full bg-border shrink-0 overflow-hidden">
+          {avatarUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+          )}
+        </span>
         <span className="text-sm font-medium text-ink truncate">
           {currentUser ? nickname || "마이페이지" : "로그인"}
         </span>

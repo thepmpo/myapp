@@ -11,6 +11,10 @@ export default function ProfileEdit() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+
   const [nickname, setNickname] = useState("");
   const [nicknameError, setNicknameError] = useState("");
   const [nicknameSaving, setNicknameSaving] = useState(false);
@@ -38,11 +42,12 @@ export default function ProfileEdit() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nickname, nickname_changed_at")
+        .select("nickname, nickname_changed_at, avatar_url")
         .eq("id", data.user.id)
         .maybeSingle();
 
       setNickname(profile?.nickname ?? "");
+      setAvatarUrl(profile?.avatar_url ?? null);
 
       if (profile?.nickname_changed_at) {
         const changedAt = new Date(profile.nickname_changed_at);
@@ -58,6 +63,39 @@ export default function ProfileEdit() {
 
     load();
   }, []);
+
+  const saveAvatar = async (file: File) => {
+    if (!userId) return;
+
+    setAvatarError("");
+    setAvatarUploading(true);
+
+    const path = `${userId}/${Date.now()}-${file.name}`;
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file);
+
+    if (uploadError) {
+      setAvatarUploading(false);
+      setAvatarError(uploadError.message);
+      return;
+    }
+
+    const publicUrl = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ avatar_url: publicUrl })
+      .eq("id", userId)
+      .select();
+
+    setAvatarUploading(false);
+
+    if (error || !data || data.length === 0) {
+      setAvatarError(error?.message ?? "프로필 정보를 찾을 수 없어 저장하지 못했습니다");
+      return;
+    }
+
+    setAvatarUrl(publicUrl);
+  };
 
   const saveNickname = async () => {
     if (!userId) return;
@@ -83,7 +121,11 @@ export default function ProfileEdit() {
       return;
     }
 
-    const { error } = await supabase.from("profiles").update({ nickname }).eq("id", userId);
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ nickname })
+      .eq("id", userId)
+      .select();
 
     setNicknameSaving(false);
 
@@ -93,6 +135,8 @@ export default function ProfileEdit() {
           ? "닉네임은 한 달에 한 번만 변경할 수 있어요"
           : error.message
       );
+    } else if (!data || data.length === 0) {
+      setNicknameError("프로필 정보를 찾을 수 없어 저장하지 못했습니다");
     } else {
       setNicknameLockedUntil(new Date(Date.now() + NICKNAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000));
       alert("닉네임이 변경되었습니다");
@@ -154,6 +198,32 @@ export default function ProfileEdit() {
       </Link>
 
       <h1 className="text-xl font-bold text-ink mb-6">내 정보 수정</h1>
+
+      <section className="mb-8 flex flex-col items-center">
+        <label className="relative cursor-pointer group">
+          <div className="w-20 h-20 rounded-full bg-border overflow-hidden">
+            {avatarUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            )}
+          </div>
+          <span className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/30 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-all">
+            변경
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) saveAvatar(file);
+            }}
+          />
+        </label>
+
+        {avatarUploading && <p className="mt-2 text-xs text-ink-soft">업로드 중...</p>}
+        {avatarError && <p className="mt-2 text-xs text-red-500">{avatarError}</p>}
+      </section>
 
       <section className="mb-8">
         <h2 className="text-sm font-medium text-ink mb-2">닉네임 변경</h2>

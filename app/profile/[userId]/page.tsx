@@ -22,6 +22,7 @@ export default function Profile() {
 
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const [nickname, setNickname] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -37,11 +38,12 @@ export default function Profile() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nickname")
+        .select("nickname, avatar_url")
         .eq("id", userId)
         .maybeSingle();
 
       setNickname(profile?.nickname ?? "(알 수 없는 유저)");
+      setAvatarUrl(profile?.avatar_url ?? null);
 
       const { count: followers } = await supabase
         .from("follows")
@@ -117,11 +119,20 @@ export default function Profile() {
   const hasBadge = followerCount >= BADGE_THRESHOLD;
 
   return (
-    <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
-      <div className="flex flex-col items-center">
-        <div className="w-20 h-20 rounded-full bg-border" />
+    <div className="max-w-[480px] mx-auto">
+      <h1 className="text-2xl font-bold text-ink mb-1.5">마이페이지</h1>
+      <p className="text-sm text-ink-soft mb-5">내 프로필과 활동을 확인해요</p>
 
-        <h1 className="mt-4 text-lg font-bold text-ink">{nickname}</h1>
+      <div className="bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
+      <div className="flex flex-col items-center">
+        <div className="w-20 h-20 rounded-full bg-border overflow-hidden">
+          {avatarUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+          )}
+        </div>
+
+        <h2 className="mt-4 text-lg font-bold text-ink">{nickname}</h2>
 
         {hasBadge ? (
           <span className="mt-3 inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border text-ink-soft text-xs font-bold">
@@ -178,6 +189,7 @@ export default function Profile() {
             {isFollowing ? "팔로잉" : "팔로우"}
           </button>
         )}
+      </div>
       </div>
     </div>
   );
