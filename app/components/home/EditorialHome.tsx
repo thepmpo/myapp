@@ -6,6 +6,7 @@ import { supabase } from "@/app/lib/supabase";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
 import { WorkspaceNavigation } from "@/app/components/home/WorkspaceFrame";
 import type { HomeArticle, HomePost } from "@/app/components/home/types";
+import LoginPromptModal from "@/app/components/LoginPromptModal";
 
 type EditorialArticle = HomeArticle & { isFallback?: boolean };
 type EditorialPost = HomePost & { isFallback?: boolean };
@@ -89,6 +90,28 @@ export default function EditorialHome() {
     const [nicknames, setNicknames] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
+    const [myNickname, setMyNickname] = useState("");
+    const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+
+        const loadUser = async () => {
+            const { data } = await supabase.auth.getUser();
+            if (!active || !data.user) return;
+            setCurrentUser({ id: data.user.id, email: data.user.email ?? "" });
+            const { data: profile } = await supabase.from("profiles").select("nickname, avatar_url").eq("id", data.user.id).maybeSingle();
+            if (active) {
+                setMyNickname(profile?.nickname ?? "");
+                setMyAvatarUrl(profile?.avatar_url ?? null);
+            }
+        };
+
+        void loadUser();
+        return () => { active = false; };
+    }, []);
 
     useEffect(() => {
         let active = true;
@@ -156,6 +179,13 @@ export default function EditorialHome() {
     const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + article.id;
     const postHref = (post: EditorialPost) => post.isFallback ? "/" : "/post/" + post.id;
 
+    const handlePostClick = (event: React.MouseEvent, post: EditorialPost) => {
+        if (!post.isFallback && !currentUser) {
+            event.preventDefault();
+            setShowLoginPrompt(true);
+        }
+    };
+
     return (
         <div className="min-h-screen overflow-x-clip bg-white text-[#161616]">
             <header className="relative border-t-[3px] border-black bg-white">
@@ -164,7 +194,21 @@ export default function EditorialHome() {
                         <span className="flex w-5 flex-col gap-[5px]" aria-hidden="true"><span className="h-px bg-current" /><span className="h-px bg-current" /><span className="h-px bg-current" /></span>
                     </button>
                     <Link href="/home" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[30px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[43px]">THE PMPO</Link>
-                    <Link href="/login" className="pt-2 text-[13px] font-medium text-[#161616]/80 hover:text-black hover:underline underline-offset-4">Sign in</Link>
+                    {currentUser ? (
+                        <Link href={"/profile/" + currentUser.id} className="flex items-center gap-2 pt-1 text-[13px] font-medium text-[#161616]/80 hover:text-black">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae5] text-xs font-bold text-black">
+                                {myAvatarUrl ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={myAvatarUrl} alt="" className="h-full w-full object-cover" />
+                                ) : (
+                                    (myNickname || currentUser.email || "").slice(0, 1).toUpperCase()
+                                )}
+                            </span>
+                            <span className="hidden max-w-24 truncate sm:inline">{myNickname || "마이페이지"}</span>
+                        </Link>
+                    ) : (
+                        <Link href="/login" className="pt-2 text-[13px] font-medium text-[#161616]/80 hover:text-black hover:underline underline-offset-4">Sign in</Link>
+                    )}
                 </div>
             </header>
 
@@ -206,7 +250,7 @@ export default function EditorialHome() {
                                 <ol>
                                     {recent.map((post) => (
                                         <li key={post.id} className="border-t border-[#deddd9] py-5 first:border-t-0 first:pt-1">
-                                            <Link href={postHref(post)} className="group block">
+                                            <Link href={postHref(post)} onClick={(event) => handlePostClick(event, post)} className="group block">
                                                 <strong className="block text-[17px] font-bold leading-[1.3] tracking-[-0.01em] group-hover:underline">{post.title}</strong>
                                                 <span className="mt-2 block text-[11px] leading-5 text-[#77746e]">{nicknames[post.user_id] ?? post.author} · 댓글 {postComments[post.id] ?? 0}</span>
                                             </Link>
@@ -229,6 +273,8 @@ export default function EditorialHome() {
                     <WorkspaceNavigation onNavigate={() => setIsMenuOpen(false)} />
                 </aside>
             </div>
+
+            {showLoginPrompt && <LoginPromptModal onClose={() => setShowLoginPrompt(false)} />}
         </div>
     );
 }

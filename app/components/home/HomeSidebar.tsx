@@ -1,16 +1,30 @@
 // Circle의 실제 게시글만 사용하는 오른쪽 사이드바입니다.
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { INSIGHTS_CATEGORIES } from "@/app/lib/insightsCategories";
 import type { HomePost } from "@/app/components/home/types";
+import LoginPromptModal from "@/app/components/LoginPromptModal";
 
 type HomeSidebarProps = {
   posts: HomePost[];
   commentCounts: Record<number, number>;
   reactionCounts: Record<number, number>;
   nicknames: Record<string, string>;
+  isLoggedIn: boolean;
 };
 
-export default function HomeSidebar({ posts, commentCounts, reactionCounts, nicknames }: HomeSidebarProps) {
+export default function HomeSidebar({ posts, commentCounts, reactionCounts, nicknames, isLoggedIn }: HomeSidebarProps) {
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+  const handlePostClick = (event: React.MouseEvent) => {
+    if (!isLoggedIn) {
+      event.preventDefault();
+      setShowLoginPrompt(true);
+    }
+  };
+
   const popularPosts = [...posts]
     .sort((a, b) => {
       const scoreA = (commentCounts[a.id] || 0) * 2 + (reactionCounts[a.id] || 0);
@@ -45,6 +59,7 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
                   <p className="mb-1.5 truncate text-xs text-ink-soft">{nicknames[post.user_id] ?? post.author}</p>
                   <Link
                     href={"/post/" + post.id}
+                    onClick={handlePostClick}
                     className="line-clamp-2 block text-sm font-bold leading-5 text-ink hover:text-accent"
                   >
                     {post.title}
@@ -80,6 +95,8 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
           </div>
         </section>
       </div>
+
+      {showLoginPrompt && <LoginPromptModal onClose={() => setShowLoginPrompt(false)} />}
     </aside>
   );
 }

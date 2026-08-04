@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import WorkspaceFrame from '@/app/components/home/WorkspaceFrame';
+import LoginPromptModal from '@/app/components/LoginPromptModal';
 
 type Comment = {
   id: number;
@@ -25,10 +26,12 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 export default function PostDetail() {
   const params = useParams();
+  const router = useRouter();
   const id = Number(params.id);
 
   const [post, setPost] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [title, setTitle] = useState('');
 
@@ -58,18 +61,20 @@ export default function PostDetail() {
   };
 
   useEffect(() => {
-    const loadUser = async () => {
+    const init = async () => {
       const { data } = await supabase.auth.getUser();
 
       if (data.user) {
         setCurrentUser({ id: data.user.id, email: data.user.email ?? '' });
+        fetchPost();
+        fetchComments();
+        fetchPostLikes();
       }
+
+      setAuthChecked(true);
     };
 
-    loadUser();
-    fetchPost();
-    fetchComments();
-    fetchPostLikes();
+    init();
   }, []);
 
   useEffect(() => {
@@ -302,6 +307,24 @@ export default function PostDetail() {
     setEditMode(false);
     fetchPost();
   };
+
+  if (!authChecked) {
+    return (
+      <WorkspaceFrame>
+        <div className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</div>
+      </WorkspaceFrame>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <WorkspaceFrame>
+        <div className="px-5 py-8 sm:px-8">
+          <LoginPromptModal onClose={() => router.push('/')} />
+        </div>
+      </WorkspaceFrame>
+    );
+  }
 
   if (!post) {
     return (

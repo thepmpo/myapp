@@ -1,6 +1,10 @@
 // 실제 Circle 게시글을 Medium형 가로 카드로 표시합니다.
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import type { HomePost, HomePreviewComment } from "@/app/components/home/types";
+import LoginPromptModal from "@/app/components/LoginPromptModal";
 
 type CirclePostCardProps = {
   post: HomePost;
@@ -35,11 +39,20 @@ export default function CirclePostCard({
   onSaveEdit,
   onDelete,
 }: CirclePostCardProps) {
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
   const createdDate = post.created_at ? new Date(post.created_at) : null;
   const formattedDate =
     createdDate && !Number.isNaN(createdDate.getTime())
       ? new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric" }).format(createdDate)
       : null;
+
+  const handlePostClick = (event: React.MouseEvent) => {
+    if (!currentUserId) {
+      event.preventDefault();
+      setShowLoginPrompt(true);
+    }
+  };
 
   return (
     <article className="border-b border-[#f1efed] py-7 sm:py-8">
@@ -88,7 +101,7 @@ export default function CirclePostCard({
 
           <div className="flex min-h-0 flex-1 items-start gap-4 sm:gap-7">
             <div className="min-w-0 flex-1">
-              <Link href={"/post/" + post.id} className="group block">
+              <Link href={"/post/" + post.id} onClick={handlePostClick} className="group block">
                 <h2 className="line-clamp-2 text-[18px] font-bold leading-[1.35] tracking-[-0.02em] text-ink transition-colors group-hover:text-accent sm:text-[21px]">
                   {post.title}
                 </h2>
@@ -117,6 +130,7 @@ export default function CirclePostCard({
             {post.image_url && (
               <Link
                 href={"/post/" + post.id}
+                onClick={handlePostClick}
                 className="h-[88px] w-[88px] shrink-0 overflow-hidden bg-border sm:h-[100px] sm:w-[150px]"
                 aria-label={post.title + " 이미지와 함께 읽기"}
               >
@@ -160,6 +174,8 @@ export default function CirclePostCard({
           </div>
         </div>
       )}
+
+      {showLoginPrompt && <LoginPromptModal onClose={() => setShowLoginPrompt(false)} />}
     </article>
   );
 }

@@ -272,7 +272,7 @@ export default function CirclePage() {
             )}
           </section>
 
-          <HomeSidebar posts={posts} commentCounts={commentCounts} reactionCounts={reactionCounts} nicknames={nicknames} />
+          <HomeSidebar posts={posts} commentCounts={commentCounts} reactionCounts={reactionCounts} nicknames={nicknames} isLoggedIn={!!currentUser} />
         </div>
       </div>
     </WorkspaceFrame>
