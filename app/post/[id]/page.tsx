@@ -44,6 +44,16 @@ export default function PostDetail() {
   const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
 
+  const [reportTarget, setReportTarget] = useState<{ type: 'post' } | { type: 'comment'; id: number } | null>(null);
+  const [reporting, setReporting] = useState(false);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(''), 2500);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   const fetchNicknames = async (userIds: string[]) => {
     const uniqueIds = Array.from(new Set(userIds.filter((uid) => uid && UUID_REGEX.test(uid))));
 
@@ -243,44 +253,37 @@ export default function PostDetail() {
     }
   };
 
-  const reportPost = async () => {
+  const reportPost = () => {
     if (!currentUser) {
-      alert('로그인이 필요합니다');
       window.location.href = '/login';
       return;
     }
 
-    if (!confirm('이 게시글을 신고하시겠습니까?')) return;
-
-    const { error } = await supabase
-      .from('reports')
-      .insert([{ reporter_id: currentUser.id, post_id: id }]);
-
-    if (error) {
-      alert(error.code === '23505' ? '이미 신고한 게시글입니다' : error.message);
-    } else {
-      alert('신고가 접수되었습니다');
-    }
+    setReportTarget({ type: 'post' });
   };
 
-  const reportComment = async (commentId: number) => {
+  const reportComment = (commentId: number) => {
     if (!currentUser) {
-      alert('로그인이 필요합니다');
       window.location.href = '/login';
       return;
     }
 
-    if (!confirm('이 댓글을 신고하시겠습니까?')) return;
+    setReportTarget({ type: 'comment', id: commentId });
+  };
 
-    const { error } = await supabase
-      .from('reports')
-      .insert([{ reporter_id: currentUser.id, comment_id: commentId }]);
+  const confirmReport = async () => {
+    if (!reportTarget || !currentUser) return;
 
-    if (error) {
-      alert(error.code === '23505' ? '이미 신고한 댓글입니다' : error.message);
-    } else {
-      alert('신고가 접수되었습니다');
-    }
+    setReporting(true);
+
+    const { error } =
+      reportTarget.type === 'post'
+        ? await supabase.from('reports').insert([{ reporter_id: currentUser.id, post_id: id }])
+        : await supabase.from('reports').insert([{ reporter_id: currentUser.id, comment_id: reportTarget.id }]);
+
+    setReporting(false);
+    setReportTarget(null);
+    setToast(error ? (error.code === '23505' ? '이미 신고했어요' : error.message) : '신고가 접수됐어요');
   };
 
   const deleteComment = async (commentId: number) => {
@@ -338,15 +341,28 @@ export default function PostDetail() {
 
   return (
     <WorkspaceFrame>
-    <div className="px-5 py-8 pb-24 sm:px-8 lg:pb-8">
+    <div className="h-[42px] border-b border-black/10 bg-accent text-white">
+      <div className="mx-auto flex h-full max-w-[1200px] items-center justify-center px-5 text-center text-xs sm:text-sm">
+        <span className="rounded bg-white px-2 py-1 text-[11px] font-bold text-accent">Circle</span>
+        <span className="ml-2 truncate">PM·PO 멤버들과 물어보고 답하며 경험을 나눠보세요.</span>
+        <Link href="/circle/new" className="ml-2 shrink-0 font-bold underline underline-offset-2">글쓰기</Link>
+      </div>
+    </div>
+    <div className="px-5 pb-24 sm:px-8 lg:pb-8">
     <div className="max-w-[1360px] mx-auto flex flex-col gap-6">
-      <h1 className="text-2xl font-bold text-ink">게시글 상세</h1>
+      <h1 className="pt-6 text-2xl font-bold text-ink">게시글 상세</h1>
 
       <div
         className={`bg-surface rounded-xl border p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
           post.is_question ? "border-border border-l-2 border-l-question" : "border-border"
         }`}
       >
+        {post.is_question && (
+          <span className="inline-block mb-2 text-xs font-bold text-question">
+            🙋 질문있어요
+          </span>
+        )}
+
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-border shrink-0" />
@@ -372,14 +388,6 @@ export default function PostDetail() {
           )}
         </div>
 
-        <p className="font-mono text-xs text-ink-soft/60 mb-2">글 ID: {post.id}</p>
-
-        {post.is_question && (
-          <span className="inline-block mb-2 text-xs font-bold text-question">
-            🙋 질문있어요
-          </span>
-        )}
-
         {editMode ? (
           <div className="flex gap-2 mb-4">
             <input
@@ -396,7 +404,7 @@ export default function PostDetail() {
           </div>
         ) : (
           <>
-            <h2 className="text-xl font-bold text-ink mb-4">{post.title}</h2>
+            <h2 className="text-[40px] leading-tight font-bold text-ink mb-4">{post.title}</h2>
 
             {post.image_url && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -416,7 +424,7 @@ export default function PostDetail() {
               isPostLiked ? "text-accent" : "text-ink-soft hover:text-ink"
             }`}
           >
-            {isPostLiked ? "❤️" : "🤍"} 좋아요 {postLikes.length}
+            🙌 공감해요 {postLikes.length}
           </button>
 
           {currentUser?.id === post.user_id && (
@@ -455,7 +463,7 @@ export default function PostDetail() {
           <p className="text-sm text-ink-soft mb-4">아직 답변이 없어요. 첫 답변을 남겨보세요</p>
         )}
 
-        <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-col mb-4">
           {comments.map((comment) => {
             const isCommentLiked = commentLikes.some(
               (l) => l.comment_id === comment.id && l.user_id === currentUser?.id
@@ -463,7 +471,7 @@ export default function PostDetail() {
             const commentLikeCount = commentLikes.filter((l) => l.comment_id === comment.id).length;
 
             return (
-              <div key={comment.id} className="border border-border rounded-lg p-3">
+              <div key={comment.id} className="border-b border-border py-3 last:border-b-0">
                 <div className="text-sm text-ink">{comment.content}</div>
 
                 <div className="flex items-center justify-between mt-2">
@@ -478,7 +486,7 @@ export default function PostDetail() {
                         isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
                       }`}
                     >
-                      {isCommentLiked ? "❤️" : "🤍"} {commentLikeCount}
+                      🙌 {commentLikeCount}
                     </button>
 
                     {currentUser?.id === comment.user_id && (
@@ -530,6 +538,39 @@ export default function PostDetail() {
       </div>
     </div>
     </div>
+
+    {reportTarget && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="w-full max-w-[340px] bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-6">
+          <h2 className="text-base font-bold text-ink mb-2">
+            {reportTarget.type === 'post' ? '이 게시글을 신고하시겠어요?' : '이 댓글을 신고하시겠어요?'}
+          </h2>
+          <p className="text-sm text-ink-soft mb-6">신고 접수 후에는 취소할 수 없어요.</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setReportTarget(null)}
+              disabled={reporting}
+              className="flex-1 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03] disabled:opacity-60"
+            >
+              취소
+            </button>
+            <button
+              onClick={confirmReport}
+              disabled={reporting}
+              className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium cursor-pointer hover:bg-red-600 disabled:opacity-60"
+            >
+              {reporting ? '신고 중...' : '신고하기'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {toast && (
+      <div className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-ink px-4 py-2.5 text-sm text-white shadow-[0_4px_16px_rgba(23,27,35,0.2)] lg:bottom-8">
+        {toast}
+      </div>
+    )}
     </WorkspaceFrame>
   );
 }

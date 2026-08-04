@@ -9,6 +9,7 @@ export type HomePost = {
   is_question: boolean;
   image_url: string | null;
   created_at?: string | null;
+  is_featured?: boolean;
 };
 
 export type HomeArticle = {

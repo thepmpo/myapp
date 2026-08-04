@@ -64,8 +64,10 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
                   >
                     {post.title}
                   </Link>
-                  <p className="mt-1.5 text-xs text-ink-soft">
-                    댓글 {commentCounts[post.id] || 0} · 반응 {reactionCounts[post.id] || 0}
+                  <p className="mt-1.5 flex items-center gap-1 text-xs text-ink-soft">
+                    <span className="text-question">✦</span> {reactionCounts[post.id] || 0}
+                    <span aria-hidden="true">·</span>
+                    💬 {commentCounts[post.id] || 0}
                   </p>
                 </li>
               ))}

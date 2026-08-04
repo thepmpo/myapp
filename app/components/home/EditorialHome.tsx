@@ -57,7 +57,6 @@ const FALLBACK_POSTS: EditorialPost[] = [
 ];
 
 const dateValue = (value?: string | null) => value ? new Date(value).getTime() : 0;
-const formatDate = (value?: string | null) => value ? new Intl.DateTimeFormat("ko-KR", { month: "long", day: "numeric" }).format(new Date(value)) : "";
 const excerpt = (value: string | null, length = 112) => {
     const cleaned = (value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     return cleaned.length > length ? cleaned.slice(0, length).trimEnd() + "…" : cleaned;
@@ -171,10 +170,12 @@ export default function EditorialHome() {
     const { latest, hero, recent } = useMemo(() => {
         const newest = [...articles].sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id);
         const best = [...articles].sort((a, b) => (articleLikes[b.id] ?? 0) - (articleLikes[a.id] ?? 0) || dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id)[0] ?? FALLBACK_ARTICLES[0];
-        const score = (post: EditorialPost) => (postComments[post.id] ?? 0) + (postLikes[post.id] ?? 0);
-        const discussed = [...posts].sort((a, b) => score(b) - score(a) || dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id).slice(0, 5);
-        return { latest: newest.slice(0, 2), hero: best, recent: discussed };
-    }, [articles, articleLikes, posts, postComments, postLikes]);
+        const featured = posts
+            .filter((post) => post.isFallback || post.is_featured)
+            .sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id)
+            .slice(0, 5);
+        return { latest: newest.slice(0, 2), hero: best, recent: featured };
+    }, [articles, articleLikes, posts]);
 
     const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + article.id;
     const postHref = (post: EditorialPost) => post.isFallback ? "/" : "/post/" + post.id;
@@ -193,7 +194,7 @@ export default function EditorialHome() {
                     <button type="button" onClick={() => setIsMenuOpen(true)} aria-label="주요 메뉴 열기" className="flex h-10 w-10 items-center justify-center text-black">
                         <span className="flex w-5 flex-col gap-[5px]" aria-hidden="true"><span className="h-px bg-current" /><span className="h-px bg-current" /><span className="h-px bg-current" /></span>
                     </button>
-                    <Link href="/home" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[30px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[43px]">THE PMPO</Link>
+                    <Link href="/home" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[60px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[86px]">THE PMPO</Link>
                     {currentUser ? (
                         <Link href={"/profile/" + currentUser.id} className="flex items-center gap-2 pt-1 text-[13px] font-medium text-[#161616]/80 hover:text-black">
                             <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae5] text-xs font-bold text-black">
@@ -211,6 +212,12 @@ export default function EditorialHome() {
                     )}
                 </div>
             </header>
+
+            <div className="h-[42px] border-b border-black/10 bg-accent text-white">
+                <div className="mx-auto flex h-full max-w-[1320px] items-center justify-center px-5 text-center text-xs sm:text-sm">
+                    PM·PO를 위한 인사이트와 커뮤니티, The PMPO에 오신 것을 환영해요.
+                </div>
+            </div>
 
             <main className="mx-auto w-full max-w-[1320px] px-5 pb-20 sm:px-8">
                 <div className="border-y border-[#deddd9]">
@@ -230,7 +237,6 @@ export default function EditorialHome() {
                                             <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.13em] text-[#6c6a66]">{CATEGORY_LABELS[article.category]}</p>
                                             <h3 className="mt-2 text-[22px] font-bold leading-[1.25] tracking-[-0.02em]">{article.title}</h3>
                                             <p className="mt-2 line-clamp-3 text-[13px] leading-[1.6] text-[#696762]">{excerpt(article.content, 100)}</p>
-                                            <p className="mt-3 text-[11px] text-[#77746e]">{formatDate(article.created_at)}</p>
                                         </Link>
                                     ))}
                                 </div>
@@ -242,17 +248,23 @@ export default function EditorialHome() {
                                     <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.14em] text-[#6c6a66]">{CATEGORY_LABELS[hero.category]}</p>
                                     <h1 className="mt-3 max-w-[720px] text-[32px] font-bold leading-[1.2] tracking-[-0.025em] sm:text-[40px] lg:text-[36px]">{hero.title}</h1>
                                     <p className="mt-4 max-w-[630px] text-[15px] leading-[1.7] text-[#66645f]">{excerpt(hero.content, 170)}</p>
-                                    <p className="mt-5 text-[12px] text-[#77746e]">{nicknames[hero.author_id] ?? hero.author} · {formatDate(hero.created_at)}</p>
+                                    <p className="mt-5 text-[12px] text-[#77746e]">{nicknames[hero.author_id] ?? hero.author}</p>
                                 </Link>
                             </section>
 
                             <aside className="min-w-0 order-3 border-t border-[#deddd9] py-8 md:border-t-0 md:pl-8 lg:border-l lg:py-10 lg:pl-9" aria-label="지금 인기 있는 Circle 글">
+                                {recent.length === 0 && <p className="text-sm text-[#77746e]">아직 소개할 글이 없어요.</p>}
                                 <ol>
                                     {recent.map((post) => (
                                         <li key={post.id} className="border-t border-[#deddd9] py-5 first:border-t-0 first:pt-1">
                                             <Link href={postHref(post)} onClick={(event) => handlePostClick(event, post)} className="group block">
                                                 <strong className="block text-[17px] font-bold leading-[1.3] tracking-[-0.01em] group-hover:underline">{post.title}</strong>
-                                                <span className="mt-2 block text-[11px] leading-5 text-[#77746e]">{nicknames[post.user_id] ?? post.author} · 댓글 {postComments[post.id] ?? 0}</span>
+                                                <span className="mt-2 flex items-center gap-1.5 text-[11px] leading-5 text-[#77746e]">
+                                                    <span>{nicknames[post.user_id] ?? post.author}</span>
+                                                    <span aria-hidden="true">·</span>
+                                                    <span>🙌 {postLikes[post.id] ?? 0}</span>
+                                                    <span>💬 {postComments[post.id] ?? 0}</span>
+                                                </span>
                                             </Link>
                                         </li>
                                     ))}
@@ -267,7 +279,7 @@ export default function EditorialHome() {
                 <button type="button" aria-label="메뉴 닫기" onClick={() => setIsMenuOpen(false)} className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0"}`} />
                 <aside className={`absolute inset-y-0 left-0 w-[min(82vw,218px)] border-r border-[#f1efed] bg-surface px-5 py-6 shadow-xl transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="mb-8 flex items-center justify-between">
-                        <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
+                        <Link href="/home" onClick={() => setIsMenuOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
                         <button type="button" onClick={() => setIsMenuOpen(false)} aria-label="내비게이션 닫기" className="h-9 w-9 text-xl text-ink-soft">×</button>
                     </div>
                     <WorkspaceNavigation onNavigate={() => setIsMenuOpen(false)} />

@@ -1,22 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Sidebar from "@/app/components/Sidebar";
 import MobileTabBar from "@/app/components/MobileTabBar";
 import Footer from "@/app/components/Footer";
 import WorkspaceFrame from "@/app/components/home/WorkspaceFrame";
 
 const STANDALONE_ROUTES = ["/login", "/signup", "/reset", "/reset/confirm"];
-const EMPTY_WORKSPACE_ROUTES = ["/notice"];
-const WORKSPACE_CONTENT_ROUTES = ["/insights/product", "/insights/trend", "/insights/ai"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isStandalone = STANDALONE_ROUTES.includes(pathname);
   const isHome = pathname === "/home";
   const isCircle = pathname === "/" || pathname.startsWith("/post/");
-  const isEmptyWorkspace = EMPTY_WORKSPACE_ROUTES.includes(pathname);
-  const isWorkspaceContent = WORKSPACE_CONTENT_ROUTES.includes(pathname);
 
   if (isStandalone) {
     return (
@@ -46,37 +41,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (isEmptyWorkspace) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 min-w-0">
-          <WorkspaceFrame>
-            <div className="min-h-[calc(100vh-57px)] bg-white" aria-label="준비 중인 빈 화면" />
-          </WorkspaceFrame>
-        </div>
-        <MobileTabBar />
-        <Footer />
-      </div>
-    );
-  }
-
-  if (isWorkspaceContent) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 min-w-0">
-          <WorkspaceFrame>{children}</WorkspaceFrame>
-        </div>
-        <MobileTabBar />
-        <Footer />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 min-w-0 px-6 pt-8 pb-24 lg:pb-8 min-h-[calc(100vh-2rem)]">{children}</main>
+      <div className="flex-1 min-w-0">
+        <WorkspaceFrame>{children}</WorkspaceFrame>
       </div>
       <MobileTabBar />
       <Footer />

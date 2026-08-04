@@ -83,11 +83,11 @@ export default function NewCirclePostPage() {
     router.push("/");
   };
 
-  if (checkingAuth) return <div className="text-sm text-ink-soft">로딩중...</div>;
+  if (checkingAuth) return <div className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</div>;
 
   if (!currentUser) {
     return (
-      <div>
+      <div className="px-5 py-8 sm:px-8">
         <p className="text-sm text-ink-soft mb-3">로그인이 필요합니다</p>
         <Link href="/login" className="text-sm text-accent hover:underline">
           로그인하러 가기
@@ -97,7 +97,7 @@ export default function NewCirclePostPage() {
   }
 
   return (
-    <div className="w-full max-w-[680px] mx-auto">
+    <div className="w-full max-w-[680px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
       <Link href="/" className="inline-block mb-4 text-sm text-ink-soft hover:text-accent">
         ← Circle로
       </Link>
@@ -105,6 +105,11 @@ export default function NewCirclePostPage() {
       <h1 className="text-2xl font-bold text-ink mb-5">질문하기</h1>
 
       <div className="bg-surface rounded-xl border border-border p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
+        <label className="flex items-center gap-1.5 mb-3 text-sm text-ink-soft">
+          <input type="checkbox" checked={isQuestion} onChange={(e) => setIsQuestion(e.target.checked)} />
+          🙋 질문있어요
+        </label>
+
         <input
           placeholder="글 제목 입력"
           value={title}
@@ -113,16 +118,11 @@ export default function NewCirclePostPage() {
         />
 
         <textarea
-          placeholder="본문 내용 입력 (선택)"
+          placeholder="본문 내용 입력"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[120px] focus:outline-none focus:ring-2 focus:ring-accent/30"
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 h-[360px] resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-accent/30"
         />
-
-        <label className="flex items-center gap-1.5 mb-3 text-sm text-ink-soft">
-          <input type="checkbox" checked={isQuestion} onChange={(e) => setIsQuestion(e.target.checked)} />
-          🙋 질문있어요
-        </label>
 
         <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
           <input
@@ -135,14 +135,16 @@ export default function NewCirclePostPage() {
           {uploading && <span>업로드 중...</span>}
         </div>
 
-        {error && <p className="mb-3 text-sm text-red-500">{error}</p>}
+        <div className="flex justify-end">
+          <button
+            onClick={submit}
+            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
+          >
+            등록
+          </button>
+        </div>
 
-        <button
-          onClick={submit}
-          className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
-        >
-          등록
-        </button>
+        {error && <p className="mt-3 text-sm text-red-500 text-right">{error}</p>}
       </div>
     </div>
   );

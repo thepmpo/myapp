@@ -111,6 +111,7 @@ export default function FollowList() {
   };
 
   return (
+    <div className="px-5 py-8 sm:px-8">
     <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
       <div className="flex gap-6 border-b border-border mb-5">
         <button
@@ -144,13 +145,10 @@ export default function FollowList() {
       <div className="flex flex-col gap-3">
         {items.map((item) => (
           <div key={item.userId} className="flex items-center justify-between">
-            <Link
-              href={`/profile/${item.userId}`}
-              className="flex items-center gap-3 text-sm font-medium text-ink hover:text-accent"
-            >
+            <span className="flex items-center gap-3 text-sm font-medium text-ink">
               <span className="w-9 h-9 rounded-full bg-border shrink-0" />
               {item.nickname}
-            </Link>
+            </span>
 
             {currentUser?.id !== item.userId && (
               <button
@@ -167,6 +165,7 @@ export default function FollowList() {
           </div>
         ))}
       </div>
+    </div>
     </div>
   );
 }

@@ -114,12 +114,13 @@ export default function Profile() {
     window.location.href = "/";
   };
 
-  if (loading) return <p className="text-sm text-ink-soft">로딩중...</p>;
+  if (loading) return <p className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</p>;
 
   const hasBadge = followerCount >= BADGE_THRESHOLD;
 
   return (
-    <div className="max-w-[480px] mx-auto">
+    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center px-5 py-8 sm:px-8">
+    <div className="w-full max-w-[480px] mx-auto">
       <h1 className="text-2xl font-bold text-ink mb-1.5">마이페이지</h1>
       <p className="text-sm text-ink-soft mb-5">내 프로필과 활동을 확인해요</p>
 
@@ -191,6 +192,7 @@ export default function Profile() {
         )}
       </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -25,6 +25,7 @@ export default function ProfileEdit() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordSaved, setPasswordSaved] = useState(false);
 
@@ -163,11 +164,12 @@ export default function ProfileEdit() {
     }
 
     if (newPassword !== confirmPassword) {
-      setPasswordError("비밀번호가 일치하지 않습니다");
+      setConfirmPasswordError("비밀번호가 서로 같지 않습니다");
       return;
     }
 
     setPasswordError("");
+    setConfirmPasswordError("");
     setPasswordSaving(true);
 
     const { error } = await supabase.auth.updateUser({ password: newPassword });
@@ -199,10 +201,11 @@ export default function ProfileEdit() {
     window.location.href = "/";
   };
 
-  if (loading) return <p className="text-sm text-ink-soft">로딩중...</p>;
+  if (loading) return <p className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</p>;
 
   return (
-    <div className="max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
+    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center px-5 py-8 sm:px-8">
+    <div className="w-full max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
       <Link
         href={`/profile/${userId}`}
         className="inline-block mb-5 text-sm text-ink-soft hover:text-accent"
@@ -273,21 +276,30 @@ export default function ProfileEdit() {
             placeholder="8자 이상, 영문+숫자 조합"
             value={newPassword}
             onChange={(e) => {
-              setNewPassword(e.target.value);
+              const value = e.target.value;
+              setNewPassword(value);
               setPasswordSaved(false);
+              setPasswordError(value && !isValidPassword(value) ? PASSWORD_RULE_MESSAGE : "");
+              setConfirmPasswordError(confirmPassword && value !== confirmPassword ? "비밀번호가 서로 같지 않습니다" : "");
             }}
             className="px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
+          {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
+
           <input
             type="password"
             placeholder="새 비밀번호 확인"
             value={confirmPassword}
             onChange={(e) => {
-              setConfirmPassword(e.target.value);
+              const value = e.target.value;
+              setConfirmPassword(value);
               setPasswordSaved(false);
+              setConfirmPasswordError(value && value !== newPassword ? "비밀번호가 서로 같지 않습니다" : "");
             }}
             className="px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
+          {confirmPasswordError && <p className="text-sm text-red-500">{confirmPasswordError}</p>}
+
           <button
             onClick={savePassword}
             disabled={passwordSaving}
@@ -297,7 +309,6 @@ export default function ProfileEdit() {
           </button>
         </div>
 
-        {passwordError && <p className="mt-1.5 text-sm text-red-500">{passwordError}</p>}
         {passwordSaved && <p className="mt-1.5 text-sm text-ink-soft">비밀번호가 변경되었습니다</p>}
       </section>
 
@@ -348,6 +359,7 @@ export default function ProfileEdit() {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 }

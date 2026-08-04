@@ -31,12 +31,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   if (status === "loading") {
-    return <div className="text-sm text-ink-soft">로딩중...</div>;
+    return <div className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</div>;
   }
 
   if (status === "denied") {
     return (
-      <div>
+      <div className="px-5 py-8 sm:px-8">
         <p className="text-sm text-ink-soft mb-3">관리자만 접근할 수 있습니다</p>
         <Link href="/" className="text-sm text-accent hover:underline">
           ← 홈으로
@@ -46,9 +46,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const isInsights = pathname.startsWith("/admin/insights");
+  const isFeatured = pathname.startsWith("/admin/featured");
+  const isReports = !isInsights && !isFeatured;
 
   return (
-    <div className="max-w-[720px] mx-auto">
+    <div className="max-w-[720px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
       <div className="mb-5">
         <Link href="/" className="text-sm text-ink-soft hover:text-accent">
           ← Circle로
@@ -61,7 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Link
           href="/admin"
           className={`-mb-px pb-3 text-sm font-medium border-b-2 ${
-            !isInsights ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
+            isReports ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
           }`}
         >
           신고/유저 관리
@@ -73,6 +75,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }`}
         >
           Insights 관리
+        </Link>
+        <Link
+          href="/admin/featured"
+          className={`-mb-px pb-3 text-sm font-medium border-b-2 ${
+            isFeatured ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
+          }`}
+        >
+          홈 추천글 관리
         </Link>
       </div>
 

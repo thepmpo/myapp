@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
+import { ProfileIcon } from "@/app/components/icons";
 
 export const WORKSPACE_NAV_ITEMS = [
     { label: "Home", href: "/home", icon: "home" },
@@ -22,13 +23,44 @@ type WorkspaceFrameProps = {
 function NavIcon({ icon }: { icon: (typeof WORKSPACE_NAV_ITEMS)[number]["icon"] }) {
     if (icon === "home") return <><path d="m4 11 8-7 8 7" /><path d="M6.5 10v10h11V10M10 20v-6h4v6" /></>;
     if (icon === "circle") return <path d="M20 11.5a7.8 7.8 0 0 1-8 7.5 8.5 8.5 0 0 1-3.5-.8L4 20l1.4-4.2A7.8 7.8 0 1 1 20 11.5Z" />;
-    if (icon === "document") return <><path d="M6 3h9l3 3v15H6Z" /><path d="M9 11h6M9 15h6" /></>;
+    if (icon === "document") return <><rect x="4.5" y="4.5" width="15" height="15" rx="4.5" /><path d="m12 9 .9 1.9 2.1.3-1.5 1.5.35 2.1L12 13.8l-1.85 1 .35-2.1-1.5-1.5 2.1-.3Z" /></>;
     if (icon === "chart") return <><path d="M5 20v-6h3v6M11 20V9h3v11M17 20V4h3v16" /><path d="M3 20h19" /></>;
     return <path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5ZM18.5 15l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7Z" />;
 }
 
+type RecentFollow = { id: string; nickname: string };
+
 export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [recentFollows, setRecentFollows] = useState<RecentFollow[]>([]);
+
+    useEffect(() => {
+        let active = true;
+        const load = async () => {
+            const { data } = await supabase.auth.getUser();
+            if (!active || !data.user) return;
+            setCurrentUserId(data.user.id);
+
+            const { data: follows } = await supabase
+                .from("follows")
+                .select("following_id")
+                .eq("follower_id", data.user.id)
+                .order("created_at", { ascending: false })
+                .limit(5);
+
+            const ids = (follows ?? []).map((f: { following_id: string }) => f.following_id);
+            if (!active || ids.length === 0) return;
+
+            const { data: profiles } = await supabase.from("profiles").select("id, nickname").in("id", ids);
+            if (!active) return;
+
+            const nicknameById = new Map((profiles ?? []).map((p: { id: string; nickname: string }) => [p.id, p.nickname]));
+            setRecentFollows(ids.map((id: string) => ({ id, nickname: nicknameById.get(id) ?? "(알 수 없는 유저)" })));
+        };
+        void load();
+        return () => { active = false; };
+    }, []);
 
     return (
         <nav aria-label="The PMPO 주요 메뉴">
@@ -41,7 +73,7 @@ export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void })
                                 href={item.href}
                                 onClick={onNavigate}
                                 aria-current={active ? "page" : undefined}
-                                className={`relative flex h-10 items-center gap-3 px-1 text-sm transition-colors ${active ? "font-bold text-ink" : "text-ink-soft hover:text-ink"}`}
+                                className={`relative flex h-10 items-center gap-3 rounded-md px-2.5 text-sm transition-colors ${active ? "bg-black/[0.04] font-bold text-ink" : "text-ink-soft hover:text-ink"}`}
                             >
                                 {active && <span className="absolute -left-5 h-6 w-0.5 bg-ink" aria-hidden="true" />}
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -53,6 +85,39 @@ export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void })
                     );
                 })}
             </ul>
+
+            {currentUserId && (
+                <div className="mt-4 border-t border-[#f1efed] pt-4">
+                    <p className="px-2.5 mb-1 text-sm font-bold text-ink-soft">팔로잉</p>
+
+                    {recentFollows.length > 0 ? (
+                        <ul className="space-y-1">
+                            {recentFollows.map((follow) => (
+                                <li key={follow.id}>
+                                    <Link
+                                        href={"/profile/" + follow.id}
+                                        onClick={onNavigate}
+                                        className="flex h-10 items-center gap-3 rounded-md px-2.5 text-sm text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink"
+                                    >
+                                        <ProfileIcon />
+                                        <span className="truncate">{follow.nickname}</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="px-2.5 text-xs text-ink-soft">아직 팔로우한 사람이 없어요</p>
+                    )}
+
+                    <Link
+                        href={"/profile/" + currentUserId + "/follows?tab=following"}
+                        onClick={onNavigate}
+                        className="mt-1 block px-2.5 text-right text-xs text-ink-soft hover:text-ink"
+                    >
+                        더보기
+                    </Link>
+                </div>
+            )}
         </nav>
     );
 }
@@ -102,7 +167,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                                 <span className="block h-px w-4 bg-current" />
                             </span>
                         </button>
-                        <Link href="/" className="whitespace-nowrap font-serif text-[24px] font-bold leading-none tracking-[-0.04em] text-ink">
+                        <Link href="/home" className="whitespace-nowrap font-serif text-[24px] font-bold leading-none tracking-[-0.04em] text-ink">
                             The PMPO
                         </Link>
                     </div>
@@ -147,7 +212,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                     id="workspace-left-navigation"
                     aria-hidden={!isDesktopNavOpen}
                     inert={!isDesktopNavOpen}
-                    className={`sticky top-[57px] hidden h-[calc(100vh-57px)] shrink-0 overflow-hidden bg-surface transition-[width,border-color] duration-300 ease-in-out lg:block ${isDesktopNavOpen ? "w-[218px] border-r border-[#f1efed]" : "w-0 border-r border-transparent"}`}
+                    className={`sticky top-[57px] hidden h-[calc(100vh-57px)] shrink-0 overflow-y-auto bg-surface transition-[width,border-color] duration-300 ease-in-out lg:block ${isDesktopNavOpen ? "w-[218px] border-r border-[#f1efed]" : "w-0 border-r border-transparent"}`}
                 >
                     <div className={`h-full w-[218px] px-5 py-7 transition-transform duration-300 ease-in-out ${isDesktopNavOpen ? "translate-x-0" : "-translate-x-full"}`}>
                         <WorkspaceNavigation />
@@ -161,7 +226,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                 <button type="button" aria-label="내비게이션 닫기" onClick={() => setIsMobileNavOpen(false)} className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isMobileNavOpen ? "opacity-100" : "opacity-0"}`} />
                 <aside className={`absolute inset-y-0 left-0 w-[min(82vw,290px)] border-r border-[#f1efed] bg-surface px-5 py-6 shadow-xl transition-transform duration-300 ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="mb-8 flex items-center justify-between">
-                        <Link href="/" onClick={() => setIsMobileNavOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
+                        <Link href="/home" onClick={() => setIsMobileNavOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
                         <button type="button" onClick={() => setIsMobileNavOpen(false)} aria-label="내비게이션 닫기" className="h-9 w-9 text-xl text-ink-soft">×</button>
                     </div>
                     <WorkspaceNavigation onNavigate={() => setIsMobileNavOpen(false)} />

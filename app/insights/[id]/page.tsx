@@ -304,7 +304,7 @@ export default function ArticleDetail() {
   if (!article) return <div className="text-sm text-ink-soft">로딩중...</div>;
 
   return (
-    <div className="max-w-[1280px] mx-auto">
+    <div className="max-w-[1280px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
       <button
         onClick={() => router.back()}
         className="inline-block mb-4 text-sm text-ink-soft hover:text-accent cursor-pointer"
@@ -316,7 +316,7 @@ export default function ArticleDetail() {
         {CATEGORY_LABELS[article.category as keyof typeof CATEGORY_LABELS]}
       </span>
 
-      <h1 className="text-2xl font-bold text-ink mb-2">{article.title}</h1>
+      <h1 className="text-[48px] leading-tight font-bold text-ink mb-2">{article.title}</h1>
 
       <div className="flex items-center gap-1.5 mb-5 text-sm font-mono text-ink-soft">
         <Link href={`/profile/${article.author_id}`} className="hover:text-accent">
