@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
@@ -17,6 +17,16 @@ export default function MobileTabBar() {
   const pathname = usePathname();
   const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
   const [isInsightsMenuOpen, setIsInsightsMenuOpen] = useState(false);
+  const insightsLabelRef = useRef<HTMLSpanElement>(null);
+  const [popupLeft, setPopupLeft] = useState(0);
+
+  useEffect(() => {
+    if (isInsightsMenuOpen && insightsLabelRef.current) {
+      // 드롭업 항목의 좌측 내부 여백(px-4 = 16px)만큼 빼서, 항목 글자의 왼쪽 선이
+      // "Insights" 글자의 왼쪽 선과 정확히 같은 위치에 오도록 맞춥니다.
+      setPopupLeft(insightsLabelRef.current.getBoundingClientRect().left - 16);
+    }
+  }, [isInsightsMenuOpen]);
 
   useEffect(() => {
     const load = async () => {
@@ -57,7 +67,10 @@ export default function MobileTabBar() {
       >
         <div className="relative flex-1">
           {isInsightsMenuOpen && (
-            <div className="absolute bottom-full left-0 mb-2 flex w-[140px] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-[0_4px_16px_rgba(23,27,35,0.12)]">
+            <div
+              className="absolute bottom-full mb-2 flex w-[140px] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-[0_4px_16px_rgba(23,27,35,0.12)]"
+              style={{ left: popupLeft }}
+            >
               {INSIGHTS_CATEGORIES.map((cat) => {
                 const Icon = CATEGORY_ICONS[cat.key];
                 return (
@@ -79,7 +92,7 @@ export default function MobileTabBar() {
 
           <button type="button" onClick={() => setIsInsightsMenuOpen((open) => !open)} className={tabClass(isInsights) + " w-full"}>
             <InsightsIcon />
-            Insights
+            <span ref={insightsLabelRef}>Insights</span>
           </button>
         </div>
 

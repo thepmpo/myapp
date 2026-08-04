@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
-import { ArticleCategory, CATEGORY_LABELS, INSIGHTS_CATEGORIES } from "@/app/lib/insightsCategories";
+import { ArticleCategory, CATEGORY_LABELS } from "@/app/lib/insightsCategories";
 
 type Article = {
   id: number;
@@ -107,8 +107,8 @@ export default function ArticleListPage({ category }: { category: ArticleCategor
   };
 
   return (
-    <div className="max-w-[1360px] mx-auto px-5 sm:px-8">
-      <div className="flex items-center justify-between mb-5">
+    <div className="max-w-[1360px] mx-auto px-5 sm:px-8 xl:pl-12">
+      <div className="flex items-center justify-between pt-6 mb-5">
         <h1 className="text-2xl font-bold text-ink">{CATEGORY_LABELS[category]}</h1>
 
         {isAdmin && (
@@ -121,19 +121,7 @@ export default function ArticleListPage({ category }: { category: ArticleCategor
         )}
       </div>
 
-      <div className="lg:hidden flex gap-6 overflow-x-auto border-b border-border mb-5">
-        {INSIGHTS_CATEGORIES.map((cat) => (
-          <Link
-            key={cat.key}
-            href={cat.href}
-            className={`-mb-px pb-3 text-sm font-medium whitespace-nowrap border-b-2 ${
-              cat.key === category ? "text-accent border-accent" : "text-ink-soft border-transparent"
-            }`}
-          >
-            {cat.label}
-          </Link>
-        ))}
-      </div>
+      <div className="lg:hidden border-b border-border mb-5" />
 
       {articles.length === 0 && <p className="text-sm text-ink-soft">아직 등록된 글이 없어요</p>}
 
