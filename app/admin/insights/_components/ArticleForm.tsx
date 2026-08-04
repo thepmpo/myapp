@@ -69,7 +69,8 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
     if (imageFile) {
       setUploading(true);
 
-      const path = `${currentUser.id}/${Date.now()}-${imageFile.name}`;
+      const extension = imageFile.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+      const path = `${currentUser.id}/${Date.now()}.${extension}`;
       const { error: uploadError } = await supabase.storage.from("post-images").upload(path, imageFile);
 
       setUploading(false);

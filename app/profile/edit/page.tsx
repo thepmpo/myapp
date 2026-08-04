@@ -82,7 +82,8 @@ export default function ProfileEdit() {
     setAvatarError("");
     setAvatarUploading(true);
 
-    const path = `${userId}/${Date.now()}-${file.name}`;
+    const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+    const path = `${userId}/${Date.now()}.${extension}`;
     const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file);
 
     if (uploadError) {

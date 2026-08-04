@@ -4,8 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
-import { CircleIcon, InsightsIcon, ProfileIcon } from "@/app/components/icons";
+import { CircleIcon, InsightsIcon, ProfileIcon, ProductIcon, TrendsIcon, AiIcon } from "@/app/components/icons";
 import { INSIGHTS_CATEGORIES } from "@/app/lib/insightsCategories";
+
+const CATEGORY_ICONS: Record<string, (props: { className?: string }) => React.ReactElement> = {
+  product: ProductIcon,
+  trend: TrendsIcon,
+  ai: AiIcon,
+};
 
 export default function MobileTabBar() {
   const pathname = usePathname();
@@ -49,29 +55,33 @@ export default function MobileTabBar() {
         className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-stretch bg-surface border-t border-border"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        {isInsightsMenuOpen && (
-          <div className="absolute bottom-full left-0 mb-2 w-full px-4">
-            <div className="mx-auto flex max-w-[280px] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-[0_4px_16px_rgba(23,27,35,0.12)]">
-              {INSIGHTS_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.key}
-                  href={cat.href}
-                  onClick={() => setIsInsightsMenuOpen(false)}
-                  className={`px-4 py-3 text-sm border-b border-border last:border-b-0 ${
-                    pathname === cat.href ? "font-bold text-accent" : "text-ink hover:bg-black/[0.03]"
-                  }`}
-                >
-                  {cat.label}
-                </Link>
-              ))}
+        <div className="relative flex-1">
+          {isInsightsMenuOpen && (
+            <div className="absolute bottom-full left-0 mb-2 flex w-[140px] flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-[0_4px_16px_rgba(23,27,35,0.12)]">
+              {INSIGHTS_CATEGORIES.map((cat) => {
+                const Icon = CATEGORY_ICONS[cat.key];
+                return (
+                  <Link
+                    key={cat.key}
+                    href={cat.href}
+                    onClick={() => setIsInsightsMenuOpen(false)}
+                    className={`flex items-center gap-2 px-4 py-3 text-sm border-b border-border last:border-b-0 ${
+                      pathname === cat.href ? "font-bold text-accent" : "text-ink hover:bg-black/[0.03]"
+                    }`}
+                  >
+                    <Icon />
+                    {cat.label}
+                  </Link>
+                );
+              })}
             </div>
-          </div>
-        )}
+          )}
 
-        <button type="button" onClick={() => setIsInsightsMenuOpen((open) => !open)} className={tabClass(isInsights)}>
-          <InsightsIcon />
-          Insights
-        </button>
+          <button type="button" onClick={() => setIsInsightsMenuOpen((open) => !open)} className={tabClass(isInsights) + " w-full"}>
+            <InsightsIcon />
+            Insights
+          </button>
+        </div>
 
         <Link href="/" className={tabClass(isCircle)}>
           <CircleIcon />
