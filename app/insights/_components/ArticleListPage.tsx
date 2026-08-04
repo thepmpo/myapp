@@ -107,9 +107,9 @@ export default function ArticleListPage({ category }: { category: ArticleCategor
   };
 
   return (
-    <div className="max-w-[1360px] mx-auto">
+    <div className="max-w-[1360px] mx-auto px-5 sm:px-8">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-2xl font-bold text-ink">Insights</h1>
+        <h1 className="text-2xl font-bold text-ink">{CATEGORY_LABELS[category]}</h1>
 
         {isAdmin && (
           <Link

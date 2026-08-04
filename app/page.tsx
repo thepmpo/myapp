@@ -205,6 +205,8 @@ export default function CirclePage() {
 
         <div className="mx-auto max-w-[1320px] xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-x-20">
           <section className="min-w-0 px-5 sm:px-8 xl:border-r xl:border-[#f1efed] xl:pl-12 xl:pr-10" aria-label="Circle 게시글 피드">
+            <h1 className="pt-6 text-2xl font-bold text-ink">Circle</h1>
+
             <div className="flex h-[72px] items-end gap-8 border-b border-[#f1efed]">
               <button type="button" onClick={() => setSortMode("latest")} aria-pressed={sortMode === "latest"} className={`h-full border-b pb-4 pt-5 text-sm ${sortMode === "latest" ? "border-ink font-medium text-ink" : "border-transparent text-ink-soft hover:text-ink"}`}>
                 최신
