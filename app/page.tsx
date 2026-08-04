@@ -215,13 +215,10 @@ export default function CirclePage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 border-b border-[#f1efed] py-3">
-              <button type="button" onClick={() => void getPosts()} className="rounded-full border border-[#e6e4e1] px-3 py-1.5 text-xs text-ink-soft hover:border-ink hover:text-ink">
-                새로고침
-              </button>
-              <button type="button" onClick={() => setQuestionOnly((value) => !value)} aria-pressed={questionOnly} className={questionOnly ? "rounded-full border border-ink bg-ink px-3 py-1.5 text-xs text-white" : "rounded-full border border-[#e6e4e1] px-3 py-1.5 text-xs text-ink-soft hover:border-ink hover:text-ink"}>
+              <button type="button" onClick={() => setQuestionOnly((value) => !value)} aria-pressed={questionOnly} className={questionOnly ? "rounded-md border border-accent bg-accent px-3 py-1.5 text-xs text-white" : "rounded-md border border-[#e6e4e1] px-3 py-1.5 text-xs text-ink-soft hover:border-ink hover:text-ink"}>
                 질문만 보기
               </button>
-              <button type="button" onClick={() => setUnansweredQuestionOnly((value) => !value)} aria-pressed={unansweredQuestionOnly} className={unansweredQuestionOnly ? "rounded-full border border-ink bg-ink px-3 py-1.5 text-xs text-white" : "rounded-full border border-[#e6e4e1] px-3 py-1.5 text-xs text-ink-soft hover:border-ink hover:text-ink"}>
+              <button type="button" onClick={() => setUnansweredQuestionOnly((value) => !value)} aria-pressed={unansweredQuestionOnly} className={unansweredQuestionOnly ? "rounded-md border border-accent bg-accent px-3 py-1.5 text-xs text-white" : "rounded-md border border-[#e6e4e1] px-3 py-1.5 text-xs text-ink-soft hover:border-ink hover:text-ink"}>
                 답변 없는 질문만
               </button>
             </div>

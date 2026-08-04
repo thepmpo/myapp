@@ -73,7 +73,7 @@ export default function HomeHeader({
               className="flex h-8 max-w-32 items-center gap-2 rounded-full text-ink-soft hover:text-ink"
             >
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-border text-xs font-bold text-ink">
-                {(nickname || currentUser?.email || "로그인").slice(0, 1).toUpperCase()}
+                {(nickname || currentUser?.email || "").slice(0, 1).toUpperCase()}
               </span>
               <span className="hidden max-w-20 truncate xl:inline">
                 {currentUser ? nickname || "마이페이지" : "로그인"}

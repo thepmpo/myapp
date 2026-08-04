@@ -4,14 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
+import { INSIGHTS_CATEGORIES } from "@/app/lib/insightsCategories";
 
 export const WORKSPACE_NAV_ITEMS = [
     { label: "Home", href: "/home", icon: "home" },
     { label: "Circle", href: "/", icon: "circle" },
-    { label: "Product", href: "/insights/product", icon: "document" },
-    { label: "Trends", href: "/insights/trend", icon: "chart" },
-    { label: "AI", href: "/insights/ai", icon: "spark" },
-    { label: "Notice", href: "/notice", icon: "notice" },
 ] as const;
 
 type WorkspaceFrameProps = {
@@ -20,17 +17,16 @@ type WorkspaceFrameProps = {
     onSearchChange?: (value: string) => void;
 };
 
-function NavIcon({ icon }: { icon: (typeof WORKSPACE_NAV_ITEMS)[number]["icon"] }) {
+function NavIcon({ icon }: { icon: "home" | "circle" | "document" }) {
     if (icon === "home") return <><path d="m4 11 8-7 8 7" /><path d="M6.5 10v10h11V10M10 20v-6h4v6" /></>;
     if (icon === "circle") return <path d="M20 11.5a7.8 7.8 0 0 1-8 7.5 8.5 8.5 0 0 1-3.5-.8L4 20l1.4-4.2A7.8 7.8 0 1 1 20 11.5Z" />;
-    if (icon === "document") return <><path d="M6 3h9l3 3v15H6Z" /><path d="M9 11h6M9 15h6" /></>;
-    if (icon === "chart") return <><path d="M5 20v-6h3v6M11 20V9h3v11M17 20V4h3v16" /><path d="M3 20h19" /></>;
-    if (icon === "notice") return <><path d="M5 7h14v11H5Z" /><path d="M8 10h8M8 14h5" /></>;
-    return <path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5ZM18.5 15l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7Z" />;
+    return <><path d="M6 3h9l3 3v15H6Z" /><path d="M9 11h6M9 15h6" /></>;
 }
 
-function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
+export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
+    const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+    const isInsightsActive = pathname.startsWith("/insights");
 
     return (
         <nav aria-label="The PMPO 주요 메뉴">
@@ -54,6 +50,42 @@ function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
                         </li>
                     );
                 })}
+
+                <li onMouseEnter={() => setIsInsightsOpen(true)} onMouseLeave={() => setIsInsightsOpen(false)}>
+                    <button
+                        type="button"
+                        onClick={() => setIsInsightsOpen((open) => !open)}
+                        aria-expanded={isInsightsOpen}
+                        aria-controls="workspace-insights-submenu"
+                        className={`relative flex h-10 w-full items-center gap-3 px-1 text-sm transition-colors ${isInsightsActive ? "font-bold text-ink" : "text-ink-soft hover:text-ink"}`}
+                    >
+                        {isInsightsActive && <span className="absolute -left-5 h-6 w-0.5 bg-ink" aria-hidden="true" />}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <NavIcon icon="document" />
+                        </svg>
+                        Insights
+                    </button>
+
+                    {isInsightsOpen && (
+                        <ul id="workspace-insights-submenu" className="ml-8 mt-1 space-y-1">
+                            {INSIGHTS_CATEGORIES.map((cat) => {
+                                const active = pathname === cat.href;
+                                return (
+                                    <li key={cat.key}>
+                                        <Link
+                                            href={cat.href}
+                                            onClick={onNavigate}
+                                            aria-current={active ? "page" : undefined}
+                                            className={`block py-1.5 text-sm ${active ? "font-bold text-ink" : "text-ink-soft hover:text-ink"}`}
+                                        >
+                                            {cat.label}
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                </li>
             </ul>
         </nav>
     );
@@ -121,7 +153,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                             className="ml-auto flex h-8 max-w-32 items-center gap-2 rounded-full text-ink-soft hover:text-ink"
                         >
                             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-border text-xs font-bold text-ink">
-                                {(nickname || currentUser?.email || "로그인").slice(0, 1).toUpperCase()}
+                                {(nickname || currentUser?.email || "").slice(0, 1).toUpperCase()}
                             </span>
                             <span className="hidden max-w-20 truncate xl:inline">{currentUser ? nickname || "마이페이지" : "로그인"}</span>
                         </Link>

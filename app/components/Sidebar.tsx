@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { INSIGHTS_CATEGORIES } from "@/app/lib/insightsCategories";
-import { CircleIcon, InsightsIcon, HomeIcon, NoticeIcon } from "@/app/components/icons";
+import { CircleIcon, InsightsIcon, HomeIcon } from "@/app/components/icons";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -35,7 +35,6 @@ export default function Sidebar() {
   const isHome = pathname === "/home";
   const isCircle = pathname === "/" || pathname.startsWith("/post");
   const isInsights = pathname.startsWith("/insights");
-  const isNotice = pathname === "/notice";
 
   return (
     <aside className="hidden lg:flex w-[200px] shrink-0 px-5 py-8 flex-col justify-between border-r border-border">
@@ -91,16 +90,6 @@ export default function Sidebar() {
               );
             })}
           </div>
-
-          <Link
-            href="/notice"
-            className={`flex items-center gap-2.5 pl-[10px] pr-3 py-2 rounded-lg border-l-2 text-sm ${
-              isNotice ? "border-accent text-accent font-bold" : "border-transparent text-ink-soft font-medium hover:bg-black/[0.03]"
-            }`}
-          >
-            <NoticeIcon />
-            Notice
-          </Link>
         </nav>
       </div>
 

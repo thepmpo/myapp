@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/app/lib/supabase";
-import { PASSWORD_RULE_MESSAGE, isValidPassword } from "@/app/lib/passwordRules";
+import { isValidPassword } from "@/app/lib/passwordRules";
 
 export default function Signup() {
   const [email, setEmail] = useState("");
@@ -17,6 +17,7 @@ export default function Signup() {
 
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [nicknameError, setNicknameError] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,6 +43,7 @@ export default function Signup() {
   const handleSignup = async () => {
     setEmailError("");
     setPasswordError("");
+    setConfirmPasswordError("");
     setNicknameError("");
     setError("");
 
@@ -51,12 +53,12 @@ export default function Signup() {
     }
 
     if (!isValidPassword(password)) {
-      setPasswordError(PASSWORD_RULE_MESSAGE);
+      setPasswordError("다른 비밀번호를 입력해주세요");
       return;
     }
 
     if (password !== confirmPassword) {
-      setPasswordError("비밀번호가 일치하지 않습니다");
+      setConfirmPasswordError("위 비밀번호와 같지 않습니다");
       return;
     }
 
@@ -153,11 +155,14 @@ export default function Signup() {
             placeholder="8자 이상, 영문+숫자 조합"
             value={password}
             onChange={(e) => {
-              setPassword(e.target.value);
-              setPasswordError("");
+              const value = e.target.value;
+              setPassword(value);
+              setPasswordError(value && !isValidPassword(value) ? "다른 비밀번호를 입력해주세요" : "");
+              setConfirmPasswordError(confirmPassword && value !== confirmPassword ? "위 비밀번호와 같지 않습니다" : "");
             }}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
+          {passwordError && <p className="mt-1.5 text-sm text-red-500">{passwordError}</p>}
         </div>
 
         <div>
@@ -167,12 +172,13 @@ export default function Signup() {
             placeholder="비밀번호 다시 입력"
             value={confirmPassword}
             onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              setPasswordError("");
+              const value = e.target.value;
+              setConfirmPassword(value);
+              setConfirmPasswordError(value && value !== password ? "위 비밀번호와 같지 않습니다" : "");
             }}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
-          {passwordError && <p className="mt-1.5 text-sm text-red-500">{passwordError}</p>}
+          {confirmPasswordError && <p className="mt-1.5 text-sm text-red-500">{confirmPasswordError}</p>}
         </div>
 
         <div>

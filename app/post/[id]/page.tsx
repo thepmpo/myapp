@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
+import WorkspaceFrame from '@/app/components/home/WorkspaceFrame';
 
 type Comment = {
   id: number;
@@ -302,12 +303,20 @@ export default function PostDetail() {
     fetchPost();
   };
 
-  if (!post) return <div className="text-sm text-ink-soft">로딩중...</div>;
+  if (!post) {
+    return (
+      <WorkspaceFrame>
+        <div className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</div>
+      </WorkspaceFrame>
+    );
+  }
 
   const isPostLiked = postLikes.some((l) => l.user_id === currentUser?.id);
 
   return (
-    <div className="max-w-[1280px] mx-auto flex flex-col gap-6">
+    <WorkspaceFrame>
+    <div className="px-5 py-8 pb-24 sm:px-8 lg:pb-8">
+    <div className="max-w-[1360px] mx-auto flex flex-col gap-6">
       <h1 className="text-2xl font-bold text-ink">게시글 상세</h1>
 
       <div
@@ -497,5 +506,7 @@ export default function PostDetail() {
         )}
       </div>
     </div>
+    </div>
+    </WorkspaceFrame>
   );
 }

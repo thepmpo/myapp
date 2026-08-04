@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
-import { WORKSPACE_NAV_ITEMS } from "@/app/components/home/WorkspaceFrame";
+import { WorkspaceNavigation } from "@/app/components/home/WorkspaceFrame";
 import type { HomeArticle, HomePost } from "@/app/components/home/types";
 
 type EditorialArticle = HomeArticle & { isFallback?: boolean };
@@ -85,6 +85,7 @@ export default function EditorialHome() {
     const [posts, setPosts] = useState<EditorialPost[]>(FALLBACK_POSTS);
     const [articleLikes, setArticleLikes] = useState<CountMap>({});
     const [postComments, setPostComments] = useState<CountMap>({});
+    const [postLikes, setPostLikes] = useState<CountMap>({});
     const [nicknames, setNicknames] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -106,9 +107,10 @@ export default function EditorialHome() {
             const articleIds = realArticles.map((article) => article.id);
             const postIds = realPosts.map((post) => post.id);
 
-            const [{ data: likeData }, { data: commentData }] = await Promise.all([
+            const [{ data: likeData }, { data: commentData }, { data: postLikeData }] = await Promise.all([
                 articleIds.length ? supabase.from("likes").select("article_id").in("article_id", articleIds) : Promise.resolve({ data: [] }),
                 postIds.length ? supabase.from("comments").select("post_id").in("post_id", postIds) : Promise.resolve({ data: [] }),
+                postIds.length ? supabase.from("likes").select("post_id").in("post_id", postIds) : Promise.resolve({ data: [] }),
             ]);
 
             const likes: CountMap = {};
@@ -118,6 +120,10 @@ export default function EditorialHome() {
             const comments: CountMap = {};
             (commentData ?? []).forEach((row: { post_id: number | null }) => {
                 if (row.post_id != null) comments[row.post_id] = (comments[row.post_id] ?? 0) + 1;
+            });
+            const postReactions: CountMap = {};
+            (postLikeData ?? []).forEach((row: { post_id: number | null }) => {
+                if (row.post_id != null) postReactions[row.post_id] = (postReactions[row.post_id] ?? 0) + 1;
             });
 
             const userIds = Array.from(new Set([...realArticles.map((article) => article.author_id), ...realPosts.map((post) => post.user_id)].filter((id) => /^[0-9a-f-]{36}$/i.test(id))));
@@ -130,6 +136,7 @@ export default function EditorialHome() {
             setPosts(realPosts.length ? realPosts : FALLBACK_POSTS);
             setArticleLikes(likes);
             setPostComments(comments);
+            setPostLikes(postReactions);
             setNicknames(names);
             setIsLoading(false);
         };
@@ -141,9 +148,10 @@ export default function EditorialHome() {
     const { latest, hero, recent } = useMemo(() => {
         const newest = [...articles].sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id);
         const best = [...articles].sort((a, b) => (articleLikes[b.id] ?? 0) - (articleLikes[a.id] ?? 0) || dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id)[0] ?? FALLBACK_ARTICLES[0];
-        const discussed = [...posts].sort((a, b) => (postComments[b.id] ?? 0) - (postComments[a.id] ?? 0) || dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id).slice(0, 5);
+        const score = (post: EditorialPost) => (postComments[post.id] ?? 0) + (postLikes[post.id] ?? 0);
+        const discussed = [...posts].sort((a, b) => score(b) - score(a) || dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id).slice(0, 5);
         return { latest: newest.slice(0, 2), hero: best, recent: discussed };
-    }, [articles, articleLikes, posts, postComments]);
+    }, [articles, articleLikes, posts, postComments, postLikes]);
 
     const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + article.id;
     const postHref = (post: EditorialPost) => post.isFallback ? "/" : "/post/" + post.id;
@@ -170,8 +178,7 @@ export default function EditorialHome() {
                         </div>
                     ) : (
                         <div className="grid md:grid-cols-2 lg:grid-cols-[300px_minmax(0,1fr)_320px]">
-                            <section className="min-w-0 order-2 border-t border-[#deddd9] py-8 md:border-r md:border-t-0 md:pr-8 lg:order-1 lg:py-10 lg:pr-9" aria-labelledby="latest-heading">
-                                <h2 id="latest-heading" className="mb-8 text-[12px] font-bold uppercase tracking-[0.16em]">Latest</h2>
+                            <section className="min-w-0 order-2 border-t border-[#deddd9] py-8 md:border-r md:border-t-0 md:pr-8 lg:order-1 lg:py-10 lg:pr-9" aria-label="최신 아티클">
                                 <div className="space-y-9">
                                     {latest.map((article) => (
                                         <Link href={articleHref(article)} key={article.id} className="group block">
@@ -195,17 +202,13 @@ export default function EditorialHome() {
                                 </Link>
                             </section>
 
-                            <aside className="min-w-0 order-3 border-t border-[#deddd9] py-8 md:border-t-0 md:pl-8 lg:border-l lg:py-10 lg:pl-9" aria-labelledby="recent-heading">
-                                <h2 id="recent-heading" className="mb-5 font-serif text-[25px] font-bold tracking-[-0.035em]">Recent Essays</h2>
+                            <aside className="min-w-0 order-3 border-t border-[#deddd9] py-8 md:border-t-0 md:pl-8 lg:border-l lg:py-10 lg:pl-9" aria-label="지금 인기 있는 Circle 글">
                                 <ol>
-                                    {recent.map((post, index) => (
+                                    {recent.map((post) => (
                                         <li key={post.id} className="border-t border-[#deddd9] py-5 first:border-t-0 first:pt-1">
-                                            <Link href={postHref(post)} className="group grid grid-cols-[28px_1fr] gap-2">
-                                                <span className="font-serif text-[16px] text-[#8b8882]">{String(index + 1).padStart(2, "0")}</span>
-                                                <span className="min-w-0">
-                                                    <strong className="block text-[17px] font-bold leading-[1.3] tracking-[-0.01em] group-hover:underline">{post.title}</strong>
-                                                    <span className="mt-2 block text-[11px] leading-5 text-[#77746e]">{nicknames[post.user_id] ?? post.author} · 댓글 {postComments[post.id] ?? 0}</span>
-                                                </span>
+                                            <Link href={postHref(post)} className="group block">
+                                                <strong className="block text-[17px] font-bold leading-[1.3] tracking-[-0.01em] group-hover:underline">{post.title}</strong>
+                                                <span className="mt-2 block text-[11px] leading-5 text-[#77746e]">{nicknames[post.user_id] ?? post.author} · 댓글 {postComments[post.id] ?? 0}</span>
                                             </Link>
                                         </li>
                                     ))}
@@ -217,19 +220,13 @@ export default function EditorialHome() {
             </main>
 
             <div className={`fixed inset-0 z-[70] ${isMenuOpen ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!isMenuOpen}>
-                <button type="button" aria-label="메뉴 닫기" onClick={() => setIsMenuOpen(false)} className={`absolute inset-0 bg-black/25 transition-opacity ${isMenuOpen ? "opacity-100" : "opacity-0"}`} />
-                <aside className={`absolute inset-y-0 left-0 w-[min(84vw,310px)] bg-white px-7 py-8 shadow-2xl transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                    <div className="mb-10 flex items-center justify-between">
-                        <span className="font-serif text-2xl font-bold tracking-[-0.05em]">THE PMPO</span>
-                        <button type="button" onClick={() => setIsMenuOpen(false)} aria-label="메뉴 닫기" className="h-9 w-9 text-2xl">×</button>
+                <button type="button" aria-label="메뉴 닫기" onClick={() => setIsMenuOpen(false)} className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0"}`} />
+                <aside className={`absolute inset-y-0 left-0 w-[min(82vw,218px)] border-r border-[#f1efed] bg-surface px-5 py-6 shadow-xl transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                    <div className="mb-8 flex items-center justify-between">
+                        <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
+                        <button type="button" onClick={() => setIsMenuOpen(false)} aria-label="내비게이션 닫기" className="h-9 w-9 text-xl text-ink-soft">×</button>
                     </div>
-                    <nav aria-label="Home 주요 메뉴">
-                        <ul className="space-y-1">
-                            {WORKSPACE_NAV_ITEMS.map((item) => (
-                                <li key={item.href}><Link href={item.href} onClick={() => setIsMenuOpen(false)} className={`block border-b border-[#eceae5] py-4 text-sm ${item.href === "/home" ? "font-bold" : ""}`}>{item.label}</Link></li>
-                            ))}
-                        </ul>
-                    </nav>
+                    <WorkspaceNavigation onNavigate={() => setIsMenuOpen(false)} />
                 </aside>
             </div>
         </div>

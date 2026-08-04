@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,6 +36,18 @@ export default function Login() {
 
   return (
     <div className="bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8 w-full max-w-[400px]">
+      <button
+        type="button"
+        onClick={() => router.back()}
+        aria-label="이전 페이지로"
+        className="fixed top-6 left-6 flex h-9 w-9 items-center justify-center rounded-full text-ink-soft hover:text-ink hover:bg-black/[0.03] cursor-pointer"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5" />
+          <path d="m12 19-7-7 7-7" />
+        </svg>
+      </button>
+
       <h1 className="text-xl font-bold text-ink text-center mb-6">The PMPO</h1>
 
       <div className="flex flex-col gap-4">

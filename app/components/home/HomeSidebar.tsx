@@ -22,13 +22,13 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
   return (
     <aside className="hidden w-[360px] shrink-0 xl:block">
       <div className="sticky top-[76px] py-9 pr-8">
-        <section className="pb-8" aria-labelledby="circle-question-title">
-          <h2 id="circle-question-title" className="text-[15px] font-bold text-ink">
+        <section className="grid grid-cols-[max-content] pb-8" aria-labelledby="circle-question-title">
+          <h2 id="circle-question-title" className="whitespace-nowrap text-[15px] font-bold text-ink">
             함께 풀고 싶은 고민이 있나요?
           </h2>
           <Link
             href="/circle/new"
-            className="mt-4 inline-flex rounded-full border border-ink px-4 py-2 text-xs font-medium text-ink hover:bg-ink hover:text-white"
+            className="mt-4 flex items-center justify-center rounded-md border border-ink px-4 py-2 text-xs font-medium text-ink hover:bg-ink hover:text-white"
           >
             질문 작성하기
           </Link>
