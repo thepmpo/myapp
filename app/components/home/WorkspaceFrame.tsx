@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { ProfileIcon } from "@/app/components/icons";
 import { useWorkspaceData } from "@/app/components/home/WorkspaceDataContext";
+import ProfileMenu from "@/app/components/ProfileMenu";
 
 export const WORKSPACE_NAV_ITEMS = [
     { label: "Home", href: "/home", icon: "home" },
@@ -101,6 +102,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
     const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
     const [nickname, setNickname] = useState("");
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         let active = true;
@@ -108,10 +110,11 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
             const { data } = await supabase.auth.getUser();
             if (!active || !data.user) return;
             setCurrentUser({ id: data.user.id, email: data.user.email ?? "" });
-            const { data: profile } = await supabase.from("profiles").select("nickname, avatar_url").eq("id", data.user.id).maybeSingle();
+            const { data: profile } = await supabase.from("profiles").select("nickname, avatar_url, is_admin").eq("id", data.user.id).maybeSingle();
             if (active) {
                 setNickname(profile?.nickname ?? "");
                 setAvatarUrl(profile?.avatar_url ?? null);
+                setIsAdmin(!!profile?.is_admin);
             }
         };
         void loadUser();
@@ -157,20 +160,19 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                         )}
 
                         {currentUser ? (
-                            <Link
-                                href={"/profile/" + currentUser.id}
-                                className="ml-auto flex h-8 max-w-32 items-center gap-2 rounded-full text-ink-soft hover:text-ink"
-                            >
-                                <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-border text-xs font-bold text-ink">
-                                    {avatarUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-                                    ) : (
-                                        (nickname || currentUser.email || "").slice(0, 1).toUpperCase()
-                                    )}
+                            <ProfileMenu userId={currentUser.id} isAdmin={isAdmin} className="ml-auto">
+                                <span className="flex h-8 max-w-32 items-center gap-2 rounded-full text-ink-soft hover:text-ink">
+                                    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-border text-xs font-bold text-ink">
+                                        {avatarUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+                                        ) : (
+                                            (nickname || currentUser.email || "").slice(0, 1).toUpperCase()
+                                        )}
+                                    </span>
+                                    <span className="hidden max-w-20 truncate xl:inline">{nickname || "마이페이지"}</span>
                                 </span>
-                                <span className="hidden max-w-20 truncate xl:inline">{nickname || "마이페이지"}</span>
-                            </Link>
+                            </ProfileMenu>
                         ) : (
                             <Link href="/login" className="ml-auto text-sm font-medium text-ink-soft hover:text-ink">
                                 Sign in

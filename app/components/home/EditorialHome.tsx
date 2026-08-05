@@ -7,6 +7,7 @@ import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
 import { WorkspaceNavigation } from "@/app/components/home/WorkspaceFrame";
 import type { HomeArticle, HomePost } from "@/app/components/home/types";
 import LoginPromptModal from "@/app/components/LoginPromptModal";
+import ProfileMenu from "@/app/components/ProfileMenu";
 
 type EditorialArticle = HomeArticle & { isFallback?: boolean };
 type EditorialPost = HomePost & { isFallback?: boolean };
@@ -92,6 +93,7 @@ export default function EditorialHome() {
     const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
     const [myNickname, setMyNickname] = useState("");
     const [myAvatarUrl, setMyAvatarUrl] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
     useEffect(() => {
@@ -101,10 +103,11 @@ export default function EditorialHome() {
             const { data } = await supabase.auth.getUser();
             if (!active || !data.user) return;
             setCurrentUser({ id: data.user.id, email: data.user.email ?? "" });
-            const { data: profile } = await supabase.from("profiles").select("nickname, avatar_url").eq("id", data.user.id).maybeSingle();
+            const { data: profile } = await supabase.from("profiles").select("nickname, avatar_url, is_admin").eq("id", data.user.id).maybeSingle();
             if (active) {
                 setMyNickname(profile?.nickname ?? "");
                 setMyAvatarUrl(profile?.avatar_url ?? null);
+                setIsAdmin(!!profile?.is_admin);
             }
         };
 
@@ -196,17 +199,19 @@ export default function EditorialHome() {
                     </button>
                     <Link href="/home" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[36px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[86px]">The PMPO</Link>
                     {currentUser ? (
-                        <Link href={"/profile/" + currentUser.id} className="ml-auto hidden items-center gap-2 pt-1 text-[13px] font-medium text-[#161616]/80 hover:text-black md:flex">
-                            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae5] text-xs font-bold text-black">
-                                {myAvatarUrl ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={myAvatarUrl} alt="" className="h-full w-full object-cover" />
-                                ) : (
-                                    (myNickname || currentUser.email || "").slice(0, 1).toUpperCase()
-                                )}
+                        <ProfileMenu userId={currentUser.id} isAdmin={isAdmin} className="ml-auto hidden md:block">
+                            <span className="flex items-center gap-2 pt-1 text-[13px] font-medium text-[#161616]/80 hover:text-black">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae5] text-xs font-bold text-black">
+                                    {myAvatarUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img src={myAvatarUrl} alt="" className="h-full w-full object-cover" />
+                                    ) : (
+                                        (myNickname || currentUser.email || "").slice(0, 1).toUpperCase()
+                                    )}
+                                </span>
+                                <span className="hidden max-w-24 truncate sm:inline">{myNickname || "마이페이지"}</span>
                             </span>
-                            <span className="hidden max-w-24 truncate sm:inline">{myNickname || "마이페이지"}</span>
-                        </Link>
+                        </ProfileMenu>
                     ) : (
                         <Link href="/login" className="ml-auto pt-2 text-[13px] font-medium text-[#161616]/80 hover:text-black hover:underline underline-offset-4">Sign in</Link>
                     )}
