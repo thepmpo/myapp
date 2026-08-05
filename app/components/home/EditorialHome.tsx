@@ -190,11 +190,11 @@ export default function EditorialHome() {
     return (
         <div className="min-h-screen overflow-x-clip bg-white text-[#161616]">
             <header className="relative border-t-[3px] border-black bg-white">
-                <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-3 px-5 sm:px-8">
+                <div className="relative mx-auto flex h-14 max-w-[1320px] items-center px-5 sm:px-8">
                     <button type="button" onClick={() => setIsMenuOpen(true)} aria-label="주요 메뉴 열기" className="flex h-10 w-10 shrink-0 items-center justify-center text-black">
                         <span className="flex w-5 flex-col gap-[5px]" aria-hidden="true"><span className="h-px bg-current" /><span className="h-px bg-current" /><span className="h-px bg-current" /></span>
                     </button>
-                    <Link href="/home" className="whitespace-nowrap font-serif text-2xl font-bold leading-none tracking-[-0.04em] text-black">The PMPO</Link>
+                    <Link href="/home" className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap font-serif text-2xl font-bold leading-none tracking-[-0.04em] text-black">The PMPO</Link>
                     {currentUser ? (
                         <Link href={"/profile/" + currentUser.id} className="ml-auto hidden items-center gap-2 text-[13px] font-medium text-[#161616]/80 hover:text-black md:flex">
                             <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae5] text-xs font-bold text-black">

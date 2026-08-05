@@ -390,12 +390,6 @@ export default function PostDetail() {
           post.is_question ? "border-border border-l-2 border-l-question" : "border-border"
         }`}
       >
-        {post.is_question && (
-          <span className="inline-block mb-2 text-xs font-bold text-question">
-            🙋 질문있어요
-          </span>
-        )}
-
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-border shrink-0 overflow-hidden">
@@ -412,18 +406,26 @@ export default function PostDetail() {
             </Link>
           </div>
 
-          {currentUser && currentUser.id !== post.user_id && (
-            <button
-              onClick={toggleFollowAuthor}
-              className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
-                isFollowingAuthor
-                  ? "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
-                  : "border-accent bg-accent text-white hover:bg-accent-hover"
-              }`}
-            >
+          <div className="flex items-center gap-2">
+            {post.is_question && (
+              <span className="text-xs font-bold text-question">
+                🙋 질문있어요
+              </span>
+            )}
+
+            {currentUser && currentUser.id !== post.user_id && (
+              <button
+                onClick={toggleFollowAuthor}
+                className={`px-3 py-1.5 rounded-md border text-xs font-medium cursor-pointer ${
+                  isFollowingAuthor
+                    ? "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+                    : "border-accent bg-accent text-white hover:bg-accent-hover"
+                }`}
+              >
               {isFollowingAuthor ? "팔로잉" : "+ 팔로우"}
             </button>
           )}
+          </div>
         </div>
 
         <h2 className="text-[20px] sm:text-[40px] leading-tight font-bold text-ink mb-4">{post.title}</h2>
