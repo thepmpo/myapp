@@ -121,7 +121,7 @@ export default function CirclePostCard({
               </Link>
 
               {previewComments.length > 0 && (
-                <div className="mt-3 border-l-2 border-[#f1efed] pl-3">
+                <div className="mt-3 hidden border-l-2 border-[#f1efed] pl-3 sm:block">
                   {previewComments.map((comment) => (
                     <p key={comment.id} className="line-clamp-1 text-xs leading-5 text-ink-soft">
                       <strong className="font-medium text-ink">{nicknames[comment.user_id] ?? comment.author}</strong>{" "}

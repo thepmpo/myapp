@@ -498,7 +498,13 @@ export default function PostDetail() {
                 <div className="text-sm text-ink">{comment.content}</div>
 
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs font-mono text-ink-soft">
+                  <span className="flex items-center gap-1.5 text-xs font-mono text-ink-soft">
+                    <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-border">
+                      {avatars[comment.user_id] && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={avatars[comment.user_id]} alt="" className="h-full w-full object-cover" />
+                      )}
+                    </span>
                     {nicknames[comment.user_id] ?? comment.author}
                   </span>
 
