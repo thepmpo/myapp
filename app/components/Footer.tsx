@@ -10,8 +10,8 @@ export default function Footer() {
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <span className="w-8 h-8" />
-          <span className="w-8 h-8" />
+          <span className="w-8 h-8 rounded-full border border-white/20" />
+          <span className="w-8 h-8 rounded-full border border-white/20" />
         </div>
       </div>
     </footer>
