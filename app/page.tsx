@@ -15,6 +15,7 @@ export default function CirclePage() {
   const [posts, setPosts] = useState<HomePost[]>([]);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
+  const [avatars, setAvatars] = useState<Record<string, string>>({});
   const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
   const [reactionCounts, setReactionCounts] = useState<Record<number, number>>({});
   const [topComments, setTopComments] = useState<Record<number, HomePreviewComment[]>>({});
@@ -31,14 +32,17 @@ export default function CirclePage() {
     const uniqueIds = Array.from(new Set(userIds.filter((id) => id && UUID_REGEX.test(id))));
     if (uniqueIds.length === 0) return;
 
-    const { data, error } = await supabase.from("profiles").select("id, nickname").in("id", uniqueIds);
+    const { data, error } = await supabase.from("profiles").select("id, nickname, avatar_url").in("id", uniqueIds);
     if (error) return;
 
     const nextNicknames: Record<string, string> = {};
-    (data || []).forEach((profile: { id: string; nickname: string }) => {
+    const nextAvatars: Record<string, string> = {};
+    (data || []).forEach((profile: { id: string; nickname: string; avatar_url: string | null }) => {
       nextNicknames[profile.id] = profile.nickname;
+      if (profile.avatar_url) nextAvatars[profile.id] = profile.avatar_url;
     });
     setNicknames((previous) => ({ ...previous, ...nextNicknames }));
+    setAvatars((previous) => ({ ...previous, ...nextAvatars }));
   };
 
   const fetchPostActivity = async (postIds: number[]) => {
@@ -254,6 +258,7 @@ export default function CirclePage() {
                     key={post.id}
                     post={post}
                     authorName={nicknames[post.user_id] ?? post.author}
+                    authorAvatarUrl={avatars[post.user_id]}
                     currentUserId={currentUser?.id}
                     commentCount={commentCounts[post.id] || 0}
                     reactionCount={reactionCounts[post.id] || 0}

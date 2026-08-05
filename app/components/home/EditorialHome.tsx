@@ -215,7 +215,7 @@ export default function EditorialHome() {
 
             <div className="border-b border-black/10 bg-accent text-white">
                 <div className="mx-auto max-w-[1320px] px-5 py-10 text-center sm:px-8 sm:py-14">
-                    <p className="text-xl font-bold tracking-[-0.02em] sm:text-[28px]">가장 최신의 트렌드와 AI 정보 그리고 커뮤니티까지</p>
+                    <p className="whitespace-nowrap text-[15px] font-bold tracking-[-0.02em] sm:text-[28px]">가장 최신의 트렌드와 AI 정보 그리고 커뮤니티까지</p>
                     <p className="mt-2 text-sm text-white/85 sm:text-base">지금 바로 The PMPO에서 만나보세요.</p>
                 </div>
             </div>

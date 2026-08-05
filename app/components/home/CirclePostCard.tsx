@@ -10,6 +10,7 @@ import { LikeIcon } from "@/app/components/icons";
 type CirclePostCardProps = {
   post: HomePost;
   authorName: string;
+  authorAvatarUrl?: string;
   currentUserId?: string;
   commentCount: number;
   reactionCount: number;
@@ -27,6 +28,7 @@ type CirclePostCardProps = {
 export default function CirclePostCard({
   post,
   authorName,
+  authorAvatarUrl,
   currentUserId,
   commentCount,
   reactionCount,
@@ -81,8 +83,13 @@ export default function CirclePostCard({
         <div className="flex min-h-[152px] flex-col sm:min-h-[164px]">
           <div className="mb-3 flex items-center gap-2 text-xs text-ink-soft">
             <Link href={"/profile/" + post.user_id} className="flex min-w-0 items-center gap-2 hover:text-ink">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-border text-[10px] font-bold text-ink">
-                {authorName.slice(0, 1).toUpperCase()}
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded-full bg-border text-[10px] font-bold text-ink">
+                {authorAvatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={authorAvatarUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  authorName.slice(0, 1).toUpperCase()
+                )}
               </span>
               <span className="max-w-40 truncate font-medium text-ink">{authorName}</span>
             </Link>

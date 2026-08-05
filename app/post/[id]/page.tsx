@@ -44,6 +44,7 @@ export default function PostDetail() {
 
   const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
+  const [avatars, setAvatars] = useState<Record<string, string>>({});
 
   const [sidebarPosts, setSidebarPosts] = useState<HomePost[]>([]);
   const [sidebarCommentCounts, setSidebarCommentCounts] = useState<Record<number, number>>({});
@@ -64,14 +65,17 @@ export default function PostDetail() {
 
     if (uniqueIds.length === 0) return;
 
-    const { data, error } = await supabase.from('profiles').select('id, nickname').in('id', uniqueIds);
+    const { data, error } = await supabase.from('profiles').select('id, nickname, avatar_url').in('id', uniqueIds);
 
     if (!error) {
       const map: Record<string, string> = {};
-      (data || []).forEach((p: { id: string; nickname: string }) => {
+      const avatarMap: Record<string, string> = {};
+      (data || []).forEach((p: { id: string; nickname: string; avatar_url: string | null }) => {
         map[p.id] = p.nickname;
+        if (p.avatar_url) avatarMap[p.id] = p.avatar_url;
       });
       setNicknames((prev) => ({ ...prev, ...map }));
+      setAvatars((prev) => ({ ...prev, ...avatarMap }));
     }
   };
 
@@ -394,7 +398,12 @@ export default function PostDetail() {
 
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-border shrink-0" />
+            <div className="w-8 h-8 rounded-full bg-border shrink-0 overflow-hidden">
+              {avatars[post.user_id] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatars[post.user_id]} alt="" className="h-full w-full object-cover" />
+              )}
+            </div>
             <Link
               href={`/profile/${post.user_id}`}
               className="text-sm font-mono text-ink-soft hover:text-accent"
