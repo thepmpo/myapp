@@ -119,59 +119,56 @@ export default function EditCirclePostPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1320px]">
-      <section className="min-w-0 px-5 sm:px-8 xl:pl-24" aria-label="Circle 게시글 수정">
-        <h1 className="pt-6 text-2xl font-bold text-ink">Circle</h1>
-
-        <Link href={`/post/${id}`} className="mt-4 inline-block text-sm text-ink-soft hover:text-accent">
-          ← 게시글로
+    <div className="w-full max-w-[680px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
+      <div className="mb-5 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-ink">Circle</h1>
+        <Link href={`/post/${id}`} className="text-sm text-ink-soft hover:text-accent">
+          ← 게시글
         </Link>
+      </div>
 
-        <div className="mt-4 pb-24 lg:pb-8">
-          <div className="bg-surface rounded-xl border border-border p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
-            <label className="flex items-center gap-1.5 mb-3 text-sm text-ink-soft">
-              <input type="checkbox" checked={isQuestion} onChange={(e) => setIsQuestion(e.target.checked)} />
-              🙋 질문있어요
-            </label>
+      <div className="bg-surface rounded-xl border border-border p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
+        <label className="flex items-center gap-1.5 mb-3 text-sm text-ink-soft">
+          <input type="checkbox" checked={isQuestion} onChange={(e) => setIsQuestion(e.target.checked)} />
+          🙋 질문있어요
+        </label>
 
-            <input
-              placeholder="글 제목 입력"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-accent/30"
-            />
+        <input
+          placeholder="글 제목 입력"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-accent/30"
+        />
 
-            <textarea
-              placeholder="본문 내용 입력"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 h-[360px] resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-accent/30"
-            />
+        <textarea
+          placeholder="본문 내용 입력"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 h-[360px] resize-none overflow-y-auto focus:outline-none focus:ring-2 focus:ring-accent/30"
+        />
 
-            <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                className="text-xs text-ink-soft file:mr-2 file:px-2.5 file:py-1.5 file:rounded-md file:border file:border-border file:bg-surface file:text-xs file:text-ink-soft file:cursor-pointer cursor-pointer"
-              />
-              {imageFile ? <span>{imageFile.name}</span> : post.image_url && <span>기존 이미지 유지 중</span>}
-              {uploading && <span>업로드 중...</span>}
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                onClick={submit}
-                className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
-              >
-                저장
-              </button>
-            </div>
-
-            {error && <p className="mt-3 text-sm text-red-500 text-right">{error}</p>}
-          </div>
+        <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            className="text-xs text-ink-soft file:mr-2 file:px-2.5 file:py-1.5 file:rounded-md file:border file:border-border file:bg-surface file:text-xs file:text-ink-soft file:cursor-pointer cursor-pointer"
+          />
+          {imageFile ? <span>{imageFile.name}</span> : post.image_url && <span>기존 이미지 유지 중</span>}
+          {uploading && <span>업로드 중...</span>}
         </div>
-      </section>
+
+        <div className="flex justify-end">
+          <button
+            onClick={submit}
+            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
+          >
+            저장
+          </button>
+        </div>
+
+        {error && <p className="mt-3 text-sm text-red-500 text-right">{error}</p>}
+      </div>
     </div>
   );
 }

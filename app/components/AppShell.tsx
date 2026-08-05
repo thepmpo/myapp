@@ -24,7 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isHome) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-surface">
         <div className="flex-1 min-w-0">{children}</div>
         <Footer />
       </div>
@@ -33,7 +33,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isCircle) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-surface">
         <div className="flex-1 min-w-0">{children}</div>
         <MobileTabBar />
         <Footer />
@@ -42,7 +42,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-surface">
       <div className="flex-1 min-w-0">
         <WorkspaceFrame>{children}</WorkspaceFrame>
       </div>

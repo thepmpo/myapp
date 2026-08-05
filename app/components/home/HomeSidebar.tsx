@@ -6,6 +6,7 @@ import Link from "next/link";
 import { INSIGHTS_CATEGORIES } from "@/app/lib/insightsCategories";
 import type { HomePost } from "@/app/components/home/types";
 import LoginPromptModal from "@/app/components/LoginPromptModal";
+import { LikeIcon } from "@/app/components/icons";
 
 type HomeSidebarProps = {
   posts: HomePost[];
@@ -65,7 +66,7 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
                     {post.title}
                   </Link>
                   <p className="mt-1.5 flex items-center gap-1 text-xs text-ink-soft">
-                    <span className="text-question">✦</span> {reactionCounts[post.id] || 0}
+                    <LikeIcon /> {reactionCounts[post.id] || 0}
                     <span aria-hidden="true">·</span>
                     💬 {commentCounts[post.id] || 0}
                   </p>

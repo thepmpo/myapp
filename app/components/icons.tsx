@@ -70,6 +70,14 @@ export function LockIcon({ className }: { className?: string }) {
   );
 }
 
+export function LikeIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20s-7.2-4.4-9.6-8.6C.8 8.2 2 4.7 5.6 4.7c2.1 0 3.6 1.2 4.7 2.9C11.4 5.9 12.9 4.7 15 4.7c3.6 0 4.8 3.5 3.2 6.7C15.8 15.6 12 20 12 20Z" />
+    </svg>
+  );
+}
+
 export function ProfileIcon({ className }: { className?: string }) {
   return (
     <svg className={className} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

@@ -190,13 +190,13 @@ export default function EditorialHome() {
     return (
         <div className="min-h-screen overflow-x-clip bg-white text-[#161616]">
             <header className="relative border-t-[3px] border-black bg-white">
-                <div className="relative mx-auto flex h-[112px] max-w-[1320px] items-start px-5 pt-6 sm:px-8 md:h-[184px] md:pt-12">
-                    <button type="button" onClick={() => setIsMenuOpen(true)} aria-label="주요 메뉴 열기" className="absolute left-1/2 top-7 z-10 flex h-10 w-10 -translate-x-1/2 items-center justify-center text-black md:static md:left-auto md:top-auto md:translate-x-0">
+                <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-3 px-5 sm:px-8">
+                    <button type="button" onClick={() => setIsMenuOpen(true)} aria-label="주요 메뉴 열기" className="flex h-10 w-10 shrink-0 items-center justify-center text-black">
                         <span className="flex w-5 flex-col gap-[5px]" aria-hidden="true"><span className="h-px bg-current" /><span className="h-px bg-current" /><span className="h-px bg-current" /></span>
                     </button>
-                    <Link href="/home" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[60px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[86px]">THE PMPO</Link>
+                    <Link href="/home" className="whitespace-nowrap font-serif text-2xl font-bold leading-none tracking-[-0.04em] text-black">The PMPO</Link>
                     {currentUser ? (
-                        <Link href={"/profile/" + currentUser.id} className="ml-auto hidden items-center gap-2 pt-1 text-[13px] font-medium text-[#161616]/80 hover:text-black md:flex">
+                        <Link href={"/profile/" + currentUser.id} className="ml-auto hidden items-center gap-2 text-[13px] font-medium text-[#161616]/80 hover:text-black md:flex">
                             <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#eceae5] text-xs font-bold text-black">
                                 {myAvatarUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
@@ -208,15 +208,15 @@ export default function EditorialHome() {
                             <span className="hidden max-w-24 truncate sm:inline">{myNickname || "마이페이지"}</span>
                         </Link>
                     ) : (
-                        <Link href="/login" className="ml-auto pt-2 text-[13px] font-medium text-[#161616]/80 hover:text-black hover:underline underline-offset-4">Sign in</Link>
+                        <Link href="/login" className="ml-auto text-[13px] font-medium text-[#161616]/80 hover:text-black hover:underline underline-offset-4">Sign in</Link>
                     )}
                 </div>
             </header>
 
             <div className="border-b border-black/10 bg-accent text-white">
                 <div className="mx-auto max-w-[1320px] px-5 py-10 text-center sm:px-8 sm:py-14">
-                    <p className="text-xl font-bold tracking-[-0.02em] sm:text-[28px]">PM·PO를 위한 인사이트와 커뮤니티</p>
-                    <p className="mt-2 text-sm text-white/85 sm:text-base">The PMPO에 오신 것을 환영해요.</p>
+                    <p className="text-xl font-bold tracking-[-0.02em] sm:text-[28px]">가장 최신의 트렌드와 AI 정보 그리고 커뮤니티까지</p>
+                    <p className="mt-2 text-sm text-white/85 sm:text-base">지금 바로 The PMPO에서 만나보세요.</p>
                 </div>
             </div>
 

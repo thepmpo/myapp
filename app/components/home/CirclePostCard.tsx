@@ -5,6 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { HomePost, HomePreviewComment } from "@/app/components/home/types";
 import LoginPromptModal from "@/app/components/LoginPromptModal";
+import { LikeIcon } from "@/app/components/icons";
 
 type CirclePostCardProps = {
   post: HomePost;
@@ -143,9 +144,7 @@ export default function CirclePostCard({
           <div className="mt-4 flex min-h-6 items-center justify-between gap-3 text-xs text-ink-soft">
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1" aria-label={"반응 " + reactionCount + "개"}>
-                <span className="text-question" aria-hidden="true">
-                  ✦
-                </span>
+                <LikeIcon />
                 {reactionCount}
               </span>
               <span className="flex items-center gap-1" aria-label={"댓글 " + commentCount + "개"}>

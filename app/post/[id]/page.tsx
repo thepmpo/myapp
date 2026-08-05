@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase';
 import WorkspaceFrame from '@/app/components/home/WorkspaceFrame';
 import HomeSidebar from '@/app/components/home/HomeSidebar';
 import LoginPromptModal from '@/app/components/LoginPromptModal';
+import { LikeIcon } from '@/app/components/icons';
 import type { HomePost } from '@/app/components/home/types';
 
 type Comment = {
@@ -375,8 +376,8 @@ export default function PostDetail() {
       </div>
     </div>
 
-    <div className="mx-auto max-w-[1320px] xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-x-20">
-      <section className="min-w-0 px-5 sm:px-8 xl:border-r xl:border-[#f1efed] xl:pl-24" aria-label="Circle 게시글 상세">
+    <div className="mx-auto max-w-[1320px] xl:grid xl:grid-cols-[minmax(0,1fr)_1px_360px] xl:gap-x-10">
+      <section className="min-w-0 px-5 sm:px-8 xl:pl-24" aria-label="Circle 게시글 상세">
         <h1 className="pt-6 text-2xl font-bold text-ink">Circle</h1>
 
         <div className="mt-6 flex flex-col gap-6 pb-10">
@@ -416,7 +417,7 @@ export default function PostDetail() {
           )}
         </div>
 
-        <h2 className="text-[40px] leading-tight font-bold text-ink mb-4">{post.title}</h2>
+        <h2 className="text-[20px] sm:text-[40px] leading-tight font-bold text-ink mb-4">{post.title}</h2>
 
         {post.image_url && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -430,11 +431,12 @@ export default function PostDetail() {
         <div className="flex items-center gap-4 pt-3 border-t border-border">
           <button
             onClick={togglePostLike}
-            className={`text-sm font-medium cursor-pointer ${
+            className={`flex items-center gap-1.5 text-sm font-medium cursor-pointer ${
               isPostLiked ? "text-accent" : "text-ink-soft hover:text-ink"
             }`}
           >
-            🙌 공감해요 {postLikes.length}
+            <LikeIcon />
+            공감해요 {postLikes.length}
           </button>
 
           {currentUser?.id === post.user_id && (
@@ -492,11 +494,12 @@ export default function PostDetail() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => toggleCommentLike(comment.id)}
-                      className={`text-xs font-medium cursor-pointer ${
+                      className={`flex items-center gap-1 text-xs font-medium cursor-pointer ${
                         isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
                       }`}
                     >
-                      🙌 {commentLikeCount}
+                      <LikeIcon />
+                      {commentLikeCount}
                     </button>
 
                     {currentUser?.id === comment.user_id && (
@@ -548,6 +551,8 @@ export default function PostDetail() {
       </div>
         </div>
       </section>
+
+      <div className="hidden xl:block bg-[#f1efed]" aria-hidden="true" />
 
       <HomeSidebar
         posts={sidebarPosts}
