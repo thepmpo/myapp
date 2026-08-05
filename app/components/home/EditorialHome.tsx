@@ -213,9 +213,10 @@ export default function EditorialHome() {
                 </div>
             </header>
 
-            <div className="h-[42px] border-b border-black/10 bg-accent text-white">
-                <div className="mx-auto flex h-full max-w-[1320px] items-center justify-center px-5 text-center text-xs sm:text-sm">
-                    PM·PO를 위한 인사이트와 커뮤니티, The PMPO에 오신 것을 환영해요.
+            <div className="border-b border-black/10 bg-accent text-white">
+                <div className="mx-auto max-w-[1320px] px-5 py-10 text-center sm:px-8 sm:py-14">
+                    <p className="text-xl font-bold tracking-[-0.02em] sm:text-[28px]">PM·PO를 위한 인사이트와 커뮤니티</p>
+                    <p className="mt-2 text-sm text-white/85 sm:text-base">The PMPO에 오신 것을 환영해요.</p>
                 </div>
             </div>
 

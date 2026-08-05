@@ -204,7 +204,7 @@ export default function CirclePage() {
         </div>
 
         <div className="mx-auto max-w-[1320px] xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-x-20">
-          <section className="min-w-0 pl-10 pr-5 sm:pl-16 sm:pr-8 xl:border-r xl:border-[#f1efed] xl:pl-24" aria-label="Circle 게시글 피드">
+          <section className="min-w-0 px-5 sm:px-8 xl:border-r xl:border-[#f1efed] xl:pl-24" aria-label="Circle 게시글 피드">
             <h1 className="pt-6 text-2xl font-bold text-ink">Circle</h1>
 
             <div className="flex h-[72px] items-end gap-8 border-b border-[#f1efed]">

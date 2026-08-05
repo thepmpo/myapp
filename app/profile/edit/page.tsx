@@ -204,7 +204,7 @@ export default function ProfileEdit() {
   if (loading) return <p className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</p>;
 
   return (
-    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center px-5 py-8 sm:px-8">
+    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center px-5 pt-8 pb-28 sm:px-8">
     <div className="w-full max-w-[480px] mx-auto bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-8">
       <Link
         href={`/profile/${userId}`}

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { ProfileIcon } from "@/app/components/icons";
+import { useWorkspaceData } from "@/app/components/home/WorkspaceDataContext";
 
 export const WORKSPACE_NAV_ITEMS = [
     { label: "Home", href: "/home", icon: "home" },
@@ -28,39 +29,9 @@ function NavIcon({ icon }: { icon: (typeof WORKSPACE_NAV_ITEMS)[number]["icon"] 
     return <path d="m12 3 1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5ZM18.5 15l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7Z" />;
 }
 
-type RecentFollow = { id: string; nickname: string };
-
 export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-    const [recentFollows, setRecentFollows] = useState<RecentFollow[]>([]);
-
-    useEffect(() => {
-        let active = true;
-        const load = async () => {
-            const { data } = await supabase.auth.getUser();
-            if (!active || !data.user) return;
-            setCurrentUserId(data.user.id);
-
-            const { data: follows } = await supabase
-                .from("follows")
-                .select("following_id")
-                .eq("follower_id", data.user.id)
-                .order("created_at", { ascending: false })
-                .limit(5);
-
-            const ids = (follows ?? []).map((f: { following_id: string }) => f.following_id);
-            if (!active || ids.length === 0) return;
-
-            const { data: profiles } = await supabase.from("profiles").select("id, nickname").in("id", ids);
-            if (!active) return;
-
-            const nicknameById = new Map((profiles ?? []).map((p: { id: string; nickname: string }) => [p.id, p.nickname]));
-            setRecentFollows(ids.map((id: string) => ({ id, nickname: nicknameById.get(id) ?? "(알 수 없는 유저)" })));
-        };
-        void load();
-        return () => { active = false; };
-    }, []);
+    const { currentUserId, recentFollows } = useWorkspaceData();
 
     return (
         <nav aria-label="The PMPO 주요 메뉴">
