@@ -31,7 +31,7 @@ function NavIcon({ icon }: { icon: (typeof WORKSPACE_NAV_ITEMS)[number]["icon"] 
 
 export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const { currentUserId, recentFollows } = useWorkspaceData();
+    const { currentUserId, recentFollows, followCount } = useWorkspaceData();
 
     return (
         <nav aria-label="The PMPO 주요 메뉴">
@@ -80,13 +80,15 @@ export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void })
                         <p className="px-2.5 text-xs text-ink-soft">아직 팔로우한 사람이 없어요</p>
                     )}
 
-                    <Link
-                        href={"/profile/" + currentUserId + "/follows?tab=following"}
-                        onClick={onNavigate}
-                        className="mt-1 block px-2.5 text-right text-xs text-ink-soft hover:text-ink"
-                    >
-                        더보기
-                    </Link>
+                    {followCount > 5 && (
+                        <Link
+                            href={"/profile/" + currentUserId + "/follows?tab=following"}
+                            onClick={onNavigate}
+                            className="mt-1 block px-2.5 text-right text-xs text-ink-soft hover:text-ink"
+                        >
+                            더보기
+                        </Link>
+                    )}
                 </div>
             )}
         </nav>

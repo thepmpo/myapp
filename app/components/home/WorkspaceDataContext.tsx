@@ -8,13 +8,15 @@ export type RecentFollow = { id: string; nickname: string };
 type WorkspaceData = {
     currentUserId: string | null;
     recentFollows: RecentFollow[];
+    followCount: number;
 };
 
-const WorkspaceDataContext = createContext<WorkspaceData>({ currentUserId: null, recentFollows: [] });
+const WorkspaceDataContext = createContext<WorkspaceData>({ currentUserId: null, recentFollows: [], followCount: 0 });
 
 export function WorkspaceDataProvider({ children }: { children: React.ReactNode }) {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [recentFollows, setRecentFollows] = useState<RecentFollow[]>([]);
+    const [followCount, setFollowCount] = useState(0);
 
     useEffect(() => {
         let active = true;
@@ -22,6 +24,12 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
             const { data } = await supabase.auth.getUser();
             if (!active || !data.user) return;
             setCurrentUserId(data.user.id);
+
+            const { count } = await supabase
+                .from("follows")
+                .select("id", { count: "exact", head: true })
+                .eq("follower_id", data.user.id);
+            if (active) setFollowCount(count ?? 0);
 
             const { data: follows } = await supabase
                 .from("follows")
@@ -45,7 +53,7 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const value = useMemo(() => ({ currentUserId, recentFollows }), [currentUserId, recentFollows]);
+    const value = useMemo(() => ({ currentUserId, recentFollows, followCount }), [currentUserId, recentFollows, followCount]);
 
     return <WorkspaceDataContext.Provider value={value}>{children}</WorkspaceDataContext.Provider>;
 }

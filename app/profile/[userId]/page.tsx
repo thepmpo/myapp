@@ -119,7 +119,7 @@ export default function Profile() {
   const hasBadge = followerCount >= BADGE_THRESHOLD;
 
   return (
-    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center px-5 pt-8 pb-28 sm:px-8">
+    <div className="flex min-h-[calc(100vh-57px)] items-center justify-center px-5 pt-8 pb-44 sm:px-8">
     <div className="w-full max-w-[480px] mx-auto">
       <h1 className="text-2xl font-bold text-ink mb-1.5">마이페이지</h1>
       <p className="text-sm text-ink-soft mb-5">내 프로필과 활동을 확인해요</p>

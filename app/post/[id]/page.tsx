@@ -5,7 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import WorkspaceFrame from '@/app/components/home/WorkspaceFrame';
+import HomeSidebar from '@/app/components/home/HomeSidebar';
 import LoginPromptModal from '@/app/components/LoginPromptModal';
+import type { HomePost } from '@/app/components/home/types';
 
 type Comment = {
   id: number;
@@ -32,8 +34,6 @@ export default function PostDetail() {
   const [post, setPost] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [title, setTitle] = useState('');
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -43,6 +43,10 @@ export default function PostDetail() {
 
   const [isFollowingAuthor, setIsFollowingAuthor] = useState(false);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
+
+  const [sidebarPosts, setSidebarPosts] = useState<HomePost[]>([]);
+  const [sidebarCommentCounts, setSidebarCommentCounts] = useState<Record<number, number>>({});
+  const [sidebarReactionCounts, setSidebarReactionCounts] = useState<Record<number, number>>({});
 
   const [reportTarget, setReportTarget] = useState<{ type: 'post' } | { type: 'comment'; id: number } | null>(null);
   const [reporting, setReporting] = useState(false);
@@ -79,6 +83,7 @@ export default function PostDetail() {
         fetchPost();
         fetchComments();
         fetchPostLikes();
+        fetchSidebarData();
       }
 
       setAuthChecked(true);
@@ -86,6 +91,37 @@ export default function PostDetail() {
 
     init();
   }, []);
+
+  const fetchSidebarData = async () => {
+    const { data: postsData } = await supabase.from('posts').select('*').order('id', { ascending: false });
+    const posts = (postsData as HomePost[]) || [];
+    setSidebarPosts(posts);
+    await fetchNicknames(posts.map((p) => p.user_id));
+
+    const postIds = posts.map((p) => p.id);
+    if (postIds.length === 0) {
+      setSidebarCommentCounts({});
+      setSidebarReactionCounts({});
+      return;
+    }
+
+    const [{ data: commentsData }, { data: likesData }] = await Promise.all([
+      supabase.from('comments').select('post_id').in('post_id', postIds),
+      supabase.from('likes').select('post_id').in('post_id', postIds),
+    ]);
+
+    const nextCommentCounts: Record<number, number> = {};
+    (commentsData || []).forEach((c: { post_id: number | null }) => {
+      if (c.post_id != null) nextCommentCounts[c.post_id] = (nextCommentCounts[c.post_id] || 0) + 1;
+    });
+    setSidebarCommentCounts(nextCommentCounts);
+
+    const nextReactionCounts: Record<number, number> = {};
+    (likesData || []).forEach((l: { post_id: number | null }) => {
+      if (l.post_id != null) nextReactionCounts[l.post_id] = (nextReactionCounts[l.post_id] || 0) + 1;
+    });
+    setSidebarReactionCounts(nextReactionCounts);
+  };
 
   useEffect(() => {
     const checkFollowing = async () => {
@@ -116,7 +152,6 @@ export default function PostDetail() {
 
     if (data) {
       setPost(data);
-      setTitle(data.title);
       await fetchNicknames([data.user_id]);
     }
   };
@@ -301,16 +336,6 @@ export default function PostDetail() {
     window.location.href = '/';
   };
 
-  const updatePost = async () => {
-    await supabase
-      .from('posts')
-      .update({ title })
-      .eq('id', id);
-
-    setEditMode(false);
-    fetchPost();
-  };
-
   if (!authChecked) {
     return (
       <WorkspaceFrame>
@@ -341,6 +366,7 @@ export default function PostDetail() {
 
   return (
     <WorkspaceFrame>
+    <div className="min-h-[calc(100vh-57px)] overflow-x-clip bg-surface">
     <div className="h-[42px] border-b border-black/10 bg-accent text-white">
       <div className="mx-auto flex h-full max-w-[1200px] items-center justify-center px-5 text-center text-xs sm:text-sm">
         <span className="rounded bg-white px-2 py-1 text-[11px] font-bold text-accent">Circle</span>
@@ -348,10 +374,12 @@ export default function PostDetail() {
         <Link href="/circle/new" className="ml-2 shrink-0 font-bold underline underline-offset-2">글쓰기</Link>
       </div>
     </div>
-    <div className="px-5 pb-24 sm:px-8 lg:pb-8">
-    <div className="max-w-[1360px] mx-auto flex flex-col gap-6">
-      <h1 className="pt-6 text-2xl font-bold text-ink">게시글 상세</h1>
 
+    <div className="mx-auto max-w-[1320px] xl:grid xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-x-20">
+      <section className="min-w-0 px-5 sm:px-8 xl:border-r xl:border-[#f1efed] xl:pl-24" aria-label="Circle 게시글 상세">
+        <h1 className="pt-6 text-2xl font-bold text-ink">Circle</h1>
+
+        <div className="mt-6 flex flex-col gap-6 pb-10">
       <div
         className={`bg-surface rounded-xl border p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)] ${
           post.is_question ? "border-border border-l-2 border-l-question" : "border-border"
@@ -388,33 +416,15 @@ export default function PostDetail() {
           )}
         </div>
 
-        {editMode ? (
-          <div className="flex gap-2 mb-4">
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
-            />
-            <button
-              onClick={updatePost}
-              className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
-            >
-              저장
-            </button>
-          </div>
-        ) : (
-          <>
-            <h2 className="text-[40px] leading-tight font-bold text-ink mb-4">{post.title}</h2>
+        <h2 className="text-[40px] leading-tight font-bold text-ink mb-4">{post.title}</h2>
 
-            {post.image_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.image_url} alt="" className="w-full rounded-lg mb-4 object-cover" />
-            )}
+        {post.image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={post.image_url} alt="" className="w-full rounded-lg mb-4 object-cover" />
+        )}
 
-            {post.content && (
-              <p className="text-[15px] leading-relaxed text-ink whitespace-pre-wrap mb-4">{post.content}</p>
-            )}
-          </>
+        {post.content && (
+          <p className="text-[15px] leading-relaxed text-ink whitespace-pre-wrap mb-4">{post.content}</p>
         )}
 
         <div className="flex items-center gap-4 pt-3 border-t border-border">
@@ -429,12 +439,12 @@ export default function PostDetail() {
 
           {currentUser?.id === post.user_id && (
             <>
-              <button
-                onClick={() => setEditMode(true)}
+              <Link
+                href={`/circle/edit/${id}`}
                 className="text-xs text-ink-soft hover:text-ink cursor-pointer"
               >
                 수정
-              </button>
+              </Link>
 
               <button
                 onClick={deletePost}
@@ -536,6 +546,16 @@ export default function PostDetail() {
           />
         )}
       </div>
+        </div>
+      </section>
+
+      <HomeSidebar
+        posts={sidebarPosts}
+        commentCounts={sidebarCommentCounts}
+        reactionCounts={sidebarReactionCounts}
+        nicknames={nicknames}
+        isLoggedIn={!!currentUser}
+      />
     </div>
     </div>
 
