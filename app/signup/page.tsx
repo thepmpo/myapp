@@ -16,6 +16,13 @@ export default function Signup() {
   const [agreeMarketing, setAgreeMarketing] = useState(false);
 
   const [emailError, setEmailError] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [code, setCode] = useState("");
+  const [codeError, setCodeError] = useState("");
+  const [verifyingCode, setVerifyingCode] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [accountExists, setAccountExists] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [nicknameError, setNicknameError] = useState("");
@@ -43,11 +50,84 @@ export default function Signup() {
     }
   };
 
+  const resetVerificationState = () => {
+    setCodeSent(false);
+    setCode("");
+    setCodeError("");
+    setEmailVerified(false);
+    setAccountExists(false);
+  };
+
+  const handleSendCode = async () => {
+    setEmailError("");
+    const trimmedEmail = email.trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setEmailError("올바른 이메일 형식이 아니에요");
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      const res = await fetch("/api/signup/send-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setEmailError(data.error || "잠시 후 다시 시도해주세요");
+        return;
+      }
+
+      setCodeSent(true);
+      setCode("");
+      setCodeError("");
+      setEmailVerified(false);
+      setAccountExists(false);
+    } catch {
+      setEmailError("잠시 후 다시 시도해주세요");
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    setCodeError("");
+    const trimmedCode = code.trim();
+
+    if (!trimmedCode) {
+      setCodeError("인증번호를 입력해주세요");
+      return;
+    }
+
+    setVerifyingCode(true);
+    const { data, error } = await supabase.rpc("verify_email_verification_code", {
+      p_email: email.trim(),
+      p_code: trimmedCode,
+    });
+    setVerifyingCode(false);
+
+    if (error || !data?.valid) {
+      setCodeError("인증번호가 일치하지 않아요");
+      return;
+    }
+
+    if (data.status === "existing") {
+      setAccountExists(true);
+      return;
+    }
+
+    setEmailVerified(true);
+  };
+
   const allRequiredAgreed = agreeAge && agreeTerms && agreePrivacy;
   const allChecked = allRequiredAgreed && agreeMarketing;
   const canSubmit =
     allRequiredAgreed &&
     email &&
+    emailVerified &&
     nickname &&
     !nicknameError &&
     !nicknameChecking &&
@@ -71,6 +151,11 @@ export default function Signup() {
 
     if (!email || !password || !nickname) {
       setError("이메일, 비밀번호, 닉네임을 모두 입력해주세요");
+      return;
+    }
+
+    if (!emailVerified) {
+      setError("이메일 인증을 먼저 완료해주세요");
       return;
     }
 
@@ -160,18 +245,71 @@ export default function Signup() {
       <div className="flex flex-col gap-4">
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">이메일</label>
-          <input
-            placeholder="이메일 입력"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError("");
-            }}
-            className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
+          <div className="flex gap-2">
+            <input
+              placeholder="이메일 입력"
+              value={email}
+              disabled={emailVerified || accountExists}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setEmailError("");
+                if (codeSent || emailVerified || accountExists) {
+                  resetVerificationState();
+                }
+              }}
+              className="flex-1 min-w-0 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:bg-paper disabled:text-ink-soft"
+            />
+            <button
+              type="button"
+              onClick={handleSendCode}
+              disabled={!email || sendingCode || emailVerified || accountExists}
+              className="shrink-0 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink hover:border-accent disabled:bg-paper disabled:text-ink-soft cursor-pointer"
+            >
+              {sendingCode ? "발송 중..." : codeSent ? "재전송" : "인증하기"}
+            </button>
+          </div>
           {emailError && <p className="mt-1.5 text-sm text-red-500">{emailError}</p>}
         </div>
 
+        {codeSent && !emailVerified && !accountExists && (
+          <div>
+            <label className="block text-sm font-medium text-ink mb-1.5">인증번호</label>
+            <div className="flex gap-2">
+              <input
+                placeholder="6자리 입력"
+                value={code}
+                onChange={(e) => {
+                  setCode(e.target.value);
+                  setCodeError("");
+                }}
+                maxLength={6}
+                inputMode="numeric"
+                className="flex-1 min-w-0 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
+              />
+              <button
+                type="button"
+                onClick={handleVerifyCode}
+                disabled={!code || verifyingCode}
+                className="shrink-0 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink hover:border-accent disabled:bg-paper disabled:text-ink-soft cursor-pointer"
+              >
+                {verifyingCode ? "확인 중..." : "확인"}
+              </button>
+            </div>
+            {codeError && <p className="mt-1.5 text-sm text-red-500">{codeError}</p>}
+          </div>
+        )}
+
+        {accountExists && (
+          <div className="rounded-lg border border-border bg-paper p-3.5">
+            <p className="text-sm text-ink mb-2">이미 가입된 계정이에요</p>
+            <a href="/login" className="text-sm text-accent hover:text-accent-hover font-medium">
+              로그인하러 가기
+            </a>
+          </div>
+        )}
+
+        {emailVerified && (
+        <>
         <div>
           <label className="block text-sm font-medium text-ink mb-1.5">비밀번호</label>
           <input
@@ -220,7 +358,10 @@ export default function Signup() {
           {nicknameChecking && <p className="mt-1.5 text-sm text-ink-soft">닉네임 확인 중...</p>}
           {!nicknameChecking && nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>}
         </div>
+        </>
+        )}
 
+        {emailVerified && (
         <div className="rounded-lg border border-border bg-paper p-3.5 flex flex-col gap-2.5">
           <label className="flex items-center gap-1.5 text-sm font-medium text-ink pb-2 border-b border-border">
             <input
@@ -283,6 +424,7 @@ export default function Signup() {
             [선택] 마케팅 정보 수신 동의
           </label>
         </div>
+        )}
 
         {error && <p className="text-sm text-red-500 m-0">{error}</p>}
 
