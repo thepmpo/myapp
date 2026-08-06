@@ -114,7 +114,9 @@ export default function ProfileEdit() {
   const saveNickname = async () => {
     if (!userId) return;
 
-    if (!nickname.trim()) {
+    const trimmedNickname = nickname.trim();
+
+    if (!trimmedNickname) {
       setNicknameError("닉네임을 입력해주세요");
       return;
     }
@@ -125,7 +127,7 @@ export default function ProfileEdit() {
     const { data: existing } = await supabase
       .from("profiles")
       .select("id")
-      .eq("nickname", nickname)
+      .eq("nickname", trimmedNickname)
       .neq("id", userId)
       .maybeSingle();
 
@@ -137,7 +139,7 @@ export default function ProfileEdit() {
 
     const { data, error } = await supabase
       .from("profiles")
-      .update({ nickname })
+      .update({ nickname: trimmedNickname })
       .eq("id", userId)
       .select();
 
@@ -152,6 +154,7 @@ export default function ProfileEdit() {
     } else if (!data || data.length === 0) {
       setNicknameError("프로필 정보를 찾을 수 없어 저장하지 못했습니다");
     } else {
+      setNickname(trimmedNickname);
       setNicknameLockedUntil(new Date(Date.now() + NICKNAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000));
       alert("닉네임이 변경되었습니다");
     }

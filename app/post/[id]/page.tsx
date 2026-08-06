@@ -495,9 +495,7 @@ export default function PostDetail() {
 
             return (
               <div key={comment.id} className="border-b border-border py-3 last:border-b-0">
-                <div className="text-sm text-ink">{comment.content}</div>
-
-                <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-xs font-mono text-ink-soft">
                     <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-border">
                       {avatars[comment.user_id] && (
@@ -538,6 +536,8 @@ export default function PostDetail() {
                     )}
                   </div>
                 </div>
+
+                <div className="text-sm text-ink mt-2">{comment.content}</div>
               </div>
             );
           })}

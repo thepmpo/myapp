@@ -66,14 +66,10 @@ export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void })
                         <ul className="space-y-1">
                             {recentFollows.map((follow) => (
                                 <li key={follow.id}>
-                                    <Link
-                                        href={"/profile/" + follow.id}
-                                        onClick={onNavigate}
-                                        className="flex h-10 items-center gap-3 rounded-md px-2.5 text-sm text-ink-soft transition-colors hover:bg-black/[0.04] hover:text-ink"
-                                    >
+                                    <span className="flex h-10 items-center gap-3 rounded-md px-2.5 text-sm text-ink-soft">
                                         <ProfileIcon />
                                         <span className="truncate">{follow.nickname}</span>
-                                    </Link>
+                                    </span>
                                 </li>
                             ))}
                         </ul>

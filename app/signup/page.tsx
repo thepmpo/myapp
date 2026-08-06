@@ -69,10 +69,12 @@ export default function Signup() {
 
     setLoading(true);
 
+    const trimmedNickname = nickname.trim();
+
     const { data: existingNickname } = await supabase
       .from("profiles")
       .select("id")
-      .eq("nickname", nickname)
+      .eq("nickname", trimmedNickname)
       .maybeSingle();
 
     if (existingNickname) {
@@ -86,7 +88,7 @@ export default function Signup() {
       password,
       options: {
         data: {
-          nickname,
+          nickname: trimmedNickname,
           age_over_14: agreeAge,
           terms_of_service: agreeTerms,
           privacy_policy: agreePrivacy,

@@ -248,7 +248,15 @@ export default function CirclePage() {
               </div>
             ) : visiblePosts.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-sm text-ink-soft">{searchQuery ? "검색 결과가 없어요." : "아직 등록된 Circle 글이 없어요."}</p>
+                <p className="text-sm text-ink-soft">
+                  {searchQuery
+                    ? "검색 결과가 없어요."
+                    : unansweredQuestionOnly
+                      ? "답변 없는 질문이 없어요. 모든 질문에 답변이 달렸어요!"
+                      : questionOnly
+                        ? "질문 태그가 달린 글이 없어요."
+                        : "아직 등록된 Circle 글이 없어요."}
+                </p>
                 <Link href="/circle/new" className="mt-4 inline-block text-sm font-medium text-accent hover:text-accent-hover">새 글 작성하기</Link>
               </div>
             ) : (
