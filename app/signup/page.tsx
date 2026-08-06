@@ -19,9 +19,29 @@ export default function Signup() {
   const [passwordError, setPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [nicknameError, setNicknameError] = useState("");
+  const [nicknameChecking, setNicknameChecking] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const checkNicknameDuplicate = async (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+
+    setNicknameChecking(true);
+
+    const { data: existingNickname } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("nickname", trimmed)
+      .maybeSingle();
+
+    setNicknameChecking(false);
+
+    if (existingNickname) {
+      setNicknameError("이미 사용 중인 닉네임입니다");
+    }
+  };
 
   const allRequiredAgreed = agreeAge && agreeTerms && agreePrivacy;
   const allChecked = allRequiredAgreed && agreeMarketing;
@@ -29,6 +49,8 @@ export default function Signup() {
     allRequiredAgreed &&
     email &&
     nickname &&
+    !nicknameError &&
+    !nicknameChecking &&
     isValidPassword(password) &&
     password === confirmPassword &&
     !loading;
@@ -192,9 +214,11 @@ export default function Signup() {
               setNickname(e.target.value);
               setNicknameError("");
             }}
+            onBlur={(e) => checkNicknameDuplicate(e.target.value)}
             className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
           />
-          {nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>}
+          {nicknameChecking && <p className="mt-1.5 text-sm text-ink-soft">닉네임 확인 중...</p>}
+          {!nicknameChecking && nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>}
         </div>
 
         <div className="rounded-lg border border-border bg-paper p-3.5 flex flex-col gap-2.5">

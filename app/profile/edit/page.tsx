@@ -18,7 +18,9 @@ export default function ProfileEdit() {
   const [avatarError, setAvatarError] = useState("");
 
   const [nickname, setNickname] = useState("");
+  const [originalNickname, setOriginalNickname] = useState("");
   const [nicknameError, setNicknameError] = useState("");
+  const [nicknameChecking, setNicknameChecking] = useState(false);
   const [nicknameSaving, setNicknameSaving] = useState(false);
   const [nicknameLockedUntil, setNicknameLockedUntil] = useState<Date | null>(null);
 
@@ -50,6 +52,7 @@ export default function ProfileEdit() {
         .maybeSingle();
 
       setNickname(profile?.nickname ?? "");
+      setOriginalNickname(profile?.nickname ?? "");
       setAvatarUrl(profile?.avatar_url ?? null);
 
       if (profile?.nickname_changed_at) {
@@ -111,6 +114,28 @@ export default function ProfileEdit() {
     setAvatarUrl(publicUrl);
   };
 
+  const checkNicknameDuplicate = async (value: string) => {
+    if (!userId) return;
+
+    const trimmed = value.trim();
+    if (!trimmed || trimmed === originalNickname) return;
+
+    setNicknameChecking(true);
+
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("nickname", trimmed)
+      .neq("id", userId)
+      .maybeSingle();
+
+    setNicknameChecking(false);
+
+    if (existing) {
+      setNicknameError("이미 사용 중인 닉네임입니다");
+    }
+  };
+
   const saveNickname = async () => {
     if (!userId) return;
 
@@ -155,6 +180,7 @@ export default function ProfileEdit() {
       setNicknameError("프로필 정보를 찾을 수 없어 저장하지 못했습니다");
     } else {
       setNickname(trimmedNickname);
+      setOriginalNickname(trimmedNickname);
       setNicknameLockedUntil(new Date(Date.now() + NICKNAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000));
       alert("닉네임이 변경되었습니다");
     }
@@ -250,13 +276,17 @@ export default function ProfileEdit() {
         <div className="flex gap-2">
           <input
             value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
+            onChange={(e) => {
+              setNickname(e.target.value);
+              setNicknameError("");
+            }}
+            onBlur={(e) => checkNicknameDuplicate(e.target.value)}
             disabled={!!nicknameLockedUntil}
             className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:bg-paper disabled:text-ink-soft"
           />
           <button
             onClick={saveNickname}
-            disabled={nicknameSaving || !!nicknameLockedUntil}
+            disabled={nicknameSaving || nicknameChecking || !!nicknameError || !!nicknameLockedUntil}
             className="px-4 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03] disabled:opacity-60"
           >
             {nicknameSaving ? "저장 중..." : "저장"}
@@ -265,6 +295,8 @@ export default function ProfileEdit() {
 
         {nicknameLockedUntil ? (
           <p className="mt-1.5 text-sm text-ink-soft">닉네임은 한 달에 한 번만 변경할 수 있어요</p>
+        ) : nicknameChecking ? (
+          <p className="mt-1.5 text-sm text-ink-soft">닉네임 확인 중...</p>
         ) : (
           nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>
         )}

@@ -9,6 +9,7 @@ import HomeSidebar from '@/app/components/home/HomeSidebar';
 import LoginPromptModal from '@/app/components/LoginPromptModal';
 import { LikeIcon } from '@/app/components/icons';
 import type { HomePost } from '@/app/components/home/types';
+import { formatRelativeTime } from '@/app/lib/relativeTime';
 
 type Comment = {
   id: number;
@@ -53,12 +54,20 @@ export default function PostDetail() {
   const [reportTarget, setReportTarget] = useState<{ type: 'post' } | { type: 'comment'; id: number } | null>(null);
   const [reporting, setReporting] = useState(false);
   const [toast, setToast] = useState('');
+  const [openCommentMenuId, setOpenCommentMenuId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(''), 2500);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    if (openCommentMenuId === null) return;
+    const closeMenu = () => setOpenCommentMenuId(null);
+    document.addEventListener('click', closeMenu);
+    return () => document.removeEventListener('click', closeMenu);
+  }, [openCommentMenuId]);
 
   const fetchNicknames = async (userIds: string[]) => {
     const uniqueIds = Array.from(new Set(userIds.filter((uid) => uid && UUID_REGEX.test(uid))));
@@ -494,48 +503,77 @@ export default function PostDetail() {
             const commentLikeCount = commentLikes.filter((l) => l.comment_id === comment.id).length;
 
             return (
-              <div key={comment.id} className="border-b border-border py-3 last:border-b-0">
-                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-                  <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-border">
-                    {avatars[comment.user_id] && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={avatars[comment.user_id]} alt="" className="h-full w-full object-cover" />
+              <div key={comment.id} className="flex gap-2 border-b border-border py-3 last:border-b-0">
+                <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-border">
+                  {avatars[comment.user_id] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatars[comment.user_id]} alt="" className="h-full w-full object-cover" />
+                  )}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-mono text-ink-soft">
+                      {nicknames[comment.user_id] ?? comment.author}
+                    </span>
+                    <span className="text-xs text-ink-soft/70">
+                      {formatRelativeTime(comment.created_at)}
+                    </span>
+                  </div>
+
+                  <p className="mt-1 text-sm text-ink break-words whitespace-pre-wrap">{comment.content}</p>
+
+                  <div className="flex items-center gap-3 mt-2">
+                    <button
+                      onClick={() => toggleCommentLike(comment.id)}
+                      className={`flex items-center gap-1 text-xs font-medium cursor-pointer ${
+                        isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      <LikeIcon />
+                      공감해요 {commentLikeCount}
+                    </button>
+
+                    {currentUser?.id === comment.user_id && (
+                      <button
+                        onClick={() => deleteComment(comment.id)}
+                        className="text-xs text-ink-soft hover:text-red-500 cursor-pointer"
+                      >
+                        삭제
+                      </button>
                     )}
-                  </span>
-                  <span className="shrink-0 text-xs font-mono text-ink-soft">
-                    {nicknames[comment.user_id] ?? comment.author}
-                  </span>
-                  <span className="text-sm text-ink break-words">{comment.content}</span>
-                </div>
 
-                <div className="flex items-center gap-3 mt-2">
-                  <button
-                    onClick={() => toggleCommentLike(comment.id)}
-                    className={`flex items-center gap-1 text-xs font-medium cursor-pointer ${
-                      isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
-                    }`}
-                  >
-                    <LikeIcon />
-                    {commentLikeCount}
-                  </button>
+                    {currentUser && currentUser.id !== comment.user_id && (
+                      <div className="relative ml-auto">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenCommentMenuId(openCommentMenuId === comment.id ? null : comment.id);
+                          }}
+                          className="px-1.5 text-sm font-bold text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+                        >
+                          ⋯
+                        </button>
 
-                  {currentUser?.id === comment.user_id && (
-                    <button
-                      onClick={() => deleteComment(comment.id)}
-                      className="text-xs text-ink-soft hover:text-red-500 cursor-pointer"
-                    >
-                      삭제
-                    </button>
-                  )}
-
-                  {currentUser && currentUser.id !== comment.user_id && (
-                    <button
-                      onClick={() => reportComment(comment.id)}
-                      className="text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
-                    >
-                      🚨 신고
-                    </button>
-                  )}
+                        {openCommentMenuId === comment.id && (
+                          <div
+                            onClick={(e) => e.stopPropagation()}
+                            className="absolute right-0 top-full z-10 mt-1 w-24 rounded-lg border border-border bg-surface shadow-[0_2px_8px_rgba(23,27,35,0.1)]"
+                          >
+                            <button
+                              onClick={() => {
+                                setOpenCommentMenuId(null);
+                                reportComment(comment.id);
+                              }}
+                              className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:text-red-500 cursor-pointer"
+                            >
+                              🚨 신고
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             );
