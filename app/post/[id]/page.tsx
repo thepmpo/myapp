@@ -495,49 +495,48 @@ export default function PostDetail() {
 
             return (
               <div key={comment.id} className="border-b border-border py-3 last:border-b-0">
-                <div className="flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs font-mono text-ink-soft">
-                    <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-border">
-                      {avatars[comment.user_id] && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={avatars[comment.user_id]} alt="" className="h-full w-full object-cover" />
-                      )}
-                    </span>
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                  <span className="h-5 w-5 shrink-0 overflow-hidden rounded-full bg-border">
+                    {avatars[comment.user_id] && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={avatars[comment.user_id]} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </span>
+                  <span className="shrink-0 text-xs font-mono text-ink-soft">
                     {nicknames[comment.user_id] ?? comment.author}
                   </span>
-
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => toggleCommentLike(comment.id)}
-                      className={`flex items-center gap-1 text-xs font-medium cursor-pointer ${
-                        isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
-                      }`}
-                    >
-                      <LikeIcon />
-                      {commentLikeCount}
-                    </button>
-
-                    {currentUser?.id === comment.user_id && (
-                      <button
-                        onClick={() => deleteComment(comment.id)}
-                        className="text-xs text-ink-soft hover:text-red-500 cursor-pointer"
-                      >
-                        삭제
-                      </button>
-                    )}
-
-                    {currentUser && currentUser.id !== comment.user_id && (
-                      <button
-                        onClick={() => reportComment(comment.id)}
-                        className="text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
-                      >
-                        🚨 신고
-                      </button>
-                    )}
-                  </div>
+                  <span className="text-sm text-ink break-words">{comment.content}</span>
                 </div>
 
-                <div className="text-sm text-ink mt-2">{comment.content}</div>
+                <div className="flex items-center gap-3 mt-2">
+                  <button
+                    onClick={() => toggleCommentLike(comment.id)}
+                    className={`flex items-center gap-1 text-xs font-medium cursor-pointer ${
+                      isCommentLiked ? "text-accent" : "text-ink-soft hover:text-ink"
+                    }`}
+                  >
+                    <LikeIcon />
+                    {commentLikeCount}
+                  </button>
+
+                  {currentUser?.id === comment.user_id && (
+                    <button
+                      onClick={() => deleteComment(comment.id)}
+                      className="text-xs text-ink-soft hover:text-red-500 cursor-pointer"
+                    >
+                      삭제
+                    </button>
+                  )}
+
+                  {currentUser && currentUser.id !== comment.user_id && (
+                    <button
+                      onClick={() => reportComment(comment.id)}
+                      className="text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+                    >
+                      🚨 신고
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
