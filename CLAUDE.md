@@ -325,6 +325,8 @@ PRD/IA 요구사항 대비 기능 구현 완료: 카테고리 탭(프로덕트/P
   - `tsc --noEmit`/`next build` 통과 확인 완료(빌드 로그의 `SyntaxError: Unexpected non-whitespace character after JSON`은 정적 생성 중 나온 기존부터 있던 무관한 경고로, 빌드 자체는 exit code 0으로 정상 완료됨 — 이번 작업과 무관해 별도 조치 안 함)
   - 커밋(`6aa9dae`) 후 `origin/main` 푸시, Vercel 재배포 완료. 배포 직후 `thepmpo.com/api/signup/send-code`가 500을 반환해 확인해보니 Vercel 환경변수에 `SUPABASE_SERVICE_ROLE_KEY`가 아예 없었음(로컬 `.env.local`에만 있었고 Vercel에 등록한 적 없었던 것) — 사용자가 Vercel 대시보드에 추가 후 재배포, curl로 프로덕션 엔드포인트 재확인해 200 정상 응답 및 실제 이메일 발송까지 확인 완료. 테스트 기록은 `0035_cleanup_prod_deploy_check.sql`로 정리
 
+- **해결됨(2026-08-07, 로컬 완료 · 배포 확인 대기)**: Insights `Trends`/`AI` 카테고리 랜딩 페이지 레이아웃 신규 구현(`Product`는 이번 범위 제외, 기존 리스트형 그대로 유지). Trends: 큰 카드 1개+작은 카드 2개(세로) 히어로 → 균일 카드 4개 줄 → 하단에 Circle 목록과 동일한 카드 UI(`CirclePostCard` 재사용)로 최신 Circle 글 미리보기(필터링 없이 최신순, UI 패턴만 재사용). AI: 텍스트/이미지 위치가 엇갈리는 블록 2개 → 균일 카드 4개 줄 → 동일한 Circle 미리보기. 신규 컴포넌트는 `app/insights/_components/`(`CategoryHeroSplit`/`CategoryHeroStagger`/`CategoryCardRow`/`CategoryCirclePreview`/`ArticleArtwork`/`TrendLandingPage`/`AiLandingPage`)에 위치, 기존 `ArticleListPage`가 갖고 있던 아티클/닉네임/좋아요·댓글수 fetch 로직은 `useCategoryArticles` 훅으로 분리해 Product/Trends/AI가 공유(Product 화면 출력은 변경 없음). 해당 카테고리에 발행된 실제 아티클이 있으면 그 데이터를, 없으면 `EditorialHome.tsx`와 동일한 방식의 더미 콘텐츠(`categoryFallbackArticles.ts`)로 레이아웃을 채움 — 실제 글이 1건이라도 발행되면 그 카테고리의 더미는 자동으로 사라지고 실제 데이터로 대체됨. 모바일은 히어로/카드 영역이 1~2열로 자연스럽게 스택되도록 반응형 처리. `tsc --noEmit`/`next build` 통과 확인. 로컬 Chrome 자동화로 스크린샷 검증을 시도했으나 확장 프로그램이 `localhost`/`127.0.0.1` 프레임 캡처에만 계속 실패해(외부 사이트는 정상 캡처됨 — 원인 불명, 코드 문제 아님) 실제 화면 확인은 못 함 — **배포 후 운영자가 `thepmpo.com/insights/trend`, `/insights/ai`를 데스크톱/모바일로 직접 확인 예정**
+
 ### 세션 핸드오프 (2026-08-06 작업 종료 시점 — 다음 세션은 여기부터 읽으면 됨)
 
 **1. 이번 세션에서 완료한 작업**

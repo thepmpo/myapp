@@ -1,5 +1,5 @@
-import ArticleListPage from "../_components/ArticleListPage";
+import TrendLandingPage from "../_components/TrendLandingPage";
 
 export default function InsightsTrendPage() {
-  return <ArticleListPage category="trend" />;
+  return <TrendLandingPage />;
 }

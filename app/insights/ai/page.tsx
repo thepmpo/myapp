@@ -1,5 +1,5 @@
-import ArticleListPage from "../_components/ArticleListPage";
+import AiLandingPage from "../_components/AiLandingPage";
 
 export default function InsightsAiPage() {
-  return <ArticleListPage category="ai" />;
+  return <AiLandingPage />;
 }
