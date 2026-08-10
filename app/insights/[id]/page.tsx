@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import { CATEGORY_LABELS } from '@/app/lib/insightsCategories';
+import ArticleBody from '../_components/ArticleBody';
 
 type Comment = {
   id: number;
@@ -333,7 +334,7 @@ export default function ArticleDetail() {
         <img src={article.image_url} alt="" className="w-full rounded-lg mb-4 object-cover" />
       )}
 
-      <p className="text-[15px] leading-relaxed text-ink whitespace-pre-wrap mb-5">{article.content}</p>
+      <ArticleBody content={article.content} />
 
       <div className="flex items-center gap-2 mb-5">
         <button

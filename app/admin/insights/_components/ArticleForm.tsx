@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { ArticleCategory } from "@/app/lib/insightsCategories";
@@ -18,7 +18,11 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [insertingBodyImage, setInsertingBodyImage] = useState(false);
   const [error, setError] = useState("");
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const bodyImageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -50,6 +54,47 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
 
     init();
   }, [articleId, isEdit]);
+
+  const insertImageIntoContent = async (file: File) => {
+    if (!currentUser) {
+      setError("로그인이 필요합니다");
+      return;
+    }
+
+    setInsertingBodyImage(true);
+
+    const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+    const path = `${currentUser.id}/${Date.now()}-body.${extension}`;
+    const { error: uploadError } = await supabase.storage.from("post-images").upload(path, file);
+
+    setInsertingBodyImage(false);
+
+    if (uploadError) {
+      setError(uploadError.message);
+      return;
+    }
+
+    const url = supabase.storage.from("post-images").getPublicUrl(path).data.publicUrl;
+    const markdown = `![이미지](${url})`;
+
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    const leadingNewline = before.length > 0 && !before.endsWith("\n") ? "\n" : "";
+    const trailingNewline = after.length > 0 && !after.startsWith("\n") ? "\n" : "";
+    const insertText = `${leadingNewline}${markdown}${trailingNewline}`;
+    const nextContent = `${before}${insertText}${after}`;
+
+    setContent(nextContent);
+
+    const cursorPos = before.length + insertText.length;
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(cursorPos, cursorPos);
+    });
+  };
 
   const submit = async () => {
     if (!currentUser) {
@@ -136,11 +181,32 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
       />
 
       <textarea
+        ref={textareaRef}
         placeholder="글 내용 입력"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[96px] focus:outline-none focus:ring-2 focus:ring-accent/30"
       />
+
+      <input
+        ref={bodyImageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) insertImageIntoContent(file);
+          e.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => bodyImageInputRef.current?.click()}
+        disabled={insertingBodyImage}
+        className="mb-3 px-3 py-1.5 rounded-md border border-border bg-surface text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer disabled:opacity-50"
+      >
+        {insertingBodyImage ? "이미지 업로드 중..." : "+ 본문에 이미지 삽입"}
+      </button>
 
       <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
         <input
