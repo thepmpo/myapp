@@ -4,19 +4,52 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/app/lib/supabase";
 
 export type RecentFollow = { id: string; nickname: string };
+export type NavMenuKey = "circle" | "product" | "trend" | "ai";
+export type NavVisibility = Record<NavMenuKey, "public" | "admin_only">;
+
+const DEFAULT_NAV_VISIBILITY: NavVisibility = { circle: "public", product: "public", trend: "public", ai: "public" };
 
 type WorkspaceData = {
     currentUserId: string | null;
     recentFollows: RecentFollow[];
     followCount: number;
+    isAdmin: boolean;
+    navVisibility: NavVisibility;
 };
 
-const WorkspaceDataContext = createContext<WorkspaceData>({ currentUserId: null, recentFollows: [], followCount: 0 });
+const WorkspaceDataContext = createContext<WorkspaceData>({
+    currentUserId: null,
+    recentFollows: [],
+    followCount: 0,
+    isAdmin: false,
+    navVisibility: DEFAULT_NAV_VISIBILITY,
+});
 
 export function WorkspaceDataProvider({ children }: { children: React.ReactNode }) {
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [recentFollows, setRecentFollows] = useState<RecentFollow[]>([]);
     const [followCount, setFollowCount] = useState(0);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [navVisibility, setNavVisibility] = useState<NavVisibility>(DEFAULT_NAV_VISIBILITY);
+
+    useEffect(() => {
+        let active = true;
+        const loadNavVisibility = async () => {
+            const { data } = await supabase.from("nav_menu_settings").select("key, visibility");
+            if (!active || !data) return;
+            setNavVisibility((prev) => {
+                const next = { ...prev };
+                for (const row of data as { key: NavMenuKey; visibility: "public" | "admin_only" }[]) {
+                    next[row.key] = row.visibility;
+                }
+                return next;
+            });
+        };
+        void loadNavVisibility();
+        return () => { active = false; };
+        // 로그인 여부와 무관하게 한 번만 불러오면 되는 공개 설정값이라 별도 effect로 분리.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         let active = true;
@@ -24,6 +57,9 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
             const { data } = await supabase.auth.getUser();
             if (!active || !data.user) return;
             setCurrentUserId(data.user.id);
+
+            const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
+            if (active) setIsAdmin(!!profile?.is_admin);
 
             const { count } = await supabase
                 .from("follows")
@@ -53,7 +89,10 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const value = useMemo(() => ({ currentUserId, recentFollows, followCount }), [currentUserId, recentFollows, followCount]);
+    const value = useMemo(
+        () => ({ currentUserId, recentFollows, followCount, isAdmin, navVisibility }),
+        [currentUserId, recentFollows, followCount, isAdmin, navVisibility]
+    );
 
     return <WorkspaceDataContext.Provider value={value}>{children}</WorkspaceDataContext.Provider>;
 }

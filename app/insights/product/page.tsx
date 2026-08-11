@@ -1,5 +1,5 @@
-import ArticleListPage from "../_components/ArticleListPage";
+import ProductListPage from "../_components/ProductListPage";
 
 export default function InsightsProductPage() {
-  return <ArticleListPage category="product" />;
+  return <ProductListPage />;
 }

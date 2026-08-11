@@ -9,11 +9,11 @@ import { useWorkspaceData } from "@/app/components/home/WorkspaceDataContext";
 import ProfileMenu from "@/app/components/ProfileMenu";
 
 export const WORKSPACE_NAV_ITEMS = [
-    { label: "Home", href: "/home", icon: "home" },
-    { label: "Circle", href: "/", icon: "circle" },
-    { label: "Product", href: "/insights/product", icon: "document" },
-    { label: "Trends", href: "/insights/trend", icon: "chart" },
-    { label: "AI", href: "/insights/ai", icon: "spark" },
+    { label: "Home", href: "/home", icon: "home", navKey: null },
+    { label: "Circle", href: "/", icon: "circle", navKey: "circle" },
+    { label: "Product", href: "/insights/product", icon: "document", navKey: "product" },
+    { label: "Trends", href: "/insights/trend", icon: "chart", navKey: "trend" },
+    { label: "AI", href: "/insights/ai", icon: "spark", navKey: "ai" },
 ] as const;
 
 type WorkspaceFrameProps = {
@@ -32,12 +32,16 @@ function NavIcon({ icon }: { icon: (typeof WORKSPACE_NAV_ITEMS)[number]["icon"] 
 
 export function WorkspaceNavigation({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
-    const { currentUserId, recentFollows, followCount } = useWorkspaceData();
+    const { currentUserId, recentFollows, followCount, isAdmin, navVisibility } = useWorkspaceData();
+
+    const visibleNavItems = WORKSPACE_NAV_ITEMS.filter(
+        (item) => item.navKey === null || navVisibility[item.navKey] === "public" || isAdmin
+    );
 
     return (
         <nav aria-label="The PMPO 주요 메뉴">
             <ul className="space-y-1">
-                {WORKSPACE_NAV_ITEMS.map((item) => {
+                {visibleNavItems.map((item) => {
                     const active = item.href === "/" ? pathname === "/" : pathname === item.href;
                     return (
                         <li key={item.href}>

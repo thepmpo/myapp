@@ -46,21 +46,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   const isInsights = pathname.startsWith("/admin/insights");
+  const isProducts = pathname.startsWith("/admin/products");
   const isFeatured = pathname.startsWith("/admin/featured");
   const isKeywords = pathname.startsWith("/admin/keywords");
   const isCircle = pathname.startsWith("/admin/circle");
   const isStats = pathname.startsWith("/admin/stats");
   const isAnswerRate = pathname.startsWith("/admin/answer-rate");
-  const isReports = !isInsights && !isFeatured && !isKeywords && !isCircle && !isStats && !isAnswerRate;
+  const isMenuSettings = pathname.startsWith("/admin/menu-settings");
+  const isReports =
+    !isInsights && !isProducts && !isFeatured && !isKeywords && !isCircle && !isStats && !isAnswerRate && !isMenuSettings;
 
   const tabs = [
     { href: "/admin/insights", label: "Insights 글 관리", active: isInsights },
+    { href: "/admin/products", label: "Product 관리", active: isProducts },
     { href: "/admin", label: "신고/유저 관리", active: isReports },
     { href: "/admin/featured", label: "홈 추천글 관리", active: isFeatured },
     { href: "/admin/keywords", label: "금지 키워드 관리", active: isKeywords },
     { href: "/admin/circle", label: "Circle 글 관리", active: isCircle },
     { href: "/admin/stats", label: "가입 유저 통계", active: isStats },
     { href: "/admin/answer-rate", label: "답변률/응답시간 대시보드", active: isAnswerRate },
+    { href: "/admin/menu-settings", label: "메뉴 공개 설정", active: isMenuSettings },
   ];
 
   return (
