@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabase";
 import { useAdminChanges } from "../AdminChangesContext";
 
-type Profile = { id: string; nickname: string; is_admin: boolean };
+type Profile = { id: string; nickname: string; email: string; is_admin: boolean };
 
 export default function AdminPermissionsPage() {
   const { pendingAdminFlags, setAdminFlag, version } = useAdminChanges();
@@ -19,16 +19,12 @@ export default function AdminPermissionsPage() {
   const loadAdmins = async () => {
     setLoadingAdmins(true);
 
-    const { data, error: fetchError } = await supabase
-      .from("profiles")
-      .select("id, nickname, is_admin")
-      .eq("is_admin", true)
-      .order("nickname");
+    const { data, error: fetchError } = await supabase.rpc("admin_list_profiles");
 
     if (fetchError) {
       setError(fetchError.message);
     } else {
-      setAdmins((data as Profile[]) || []);
+      setAdmins(((data as Profile[]) || []).filter((p) => p.is_admin));
     }
 
     setLoadingAdmins(false);
@@ -55,12 +51,7 @@ export default function AdminPermissionsPage() {
     setSearching(true);
     setError("");
 
-    const { data, error: searchError } = await supabase
-      .from("profiles")
-      .select("id, nickname, is_admin")
-      .ilike("nickname", `%${term}%`)
-      .order("nickname")
-      .limit(20);
+    const { data, error: searchError } = await supabase.rpc("admin_list_profiles", { search_term: term });
 
     setSearching(false);
 
@@ -83,14 +74,17 @@ export default function AdminPermissionsPage() {
         key={profile.id}
         className="flex items-center justify-between gap-3 py-3 border-b border-border last:border-b-0"
       >
-        <span className={`text-sm ${isPending ? "font-bold text-accent" : "text-ink"}`}>
-          {profile.nickname}
-          {isSelf && <span className="ml-1.5 text-xs text-ink-soft">(나)</span>}
-          {isPending && <span className="ml-1.5 text-xs font-normal text-accent">저장 안 됨</span>}
-        </span>
+        <div className="min-w-0">
+          <p className={`text-sm truncate ${isPending ? "font-bold text-accent" : "text-ink"}`}>
+            {profile.nickname}
+            {isSelf && <span className="ml-1.5 text-xs font-normal text-ink-soft">(나)</span>}
+            {isPending && <span className="ml-1.5 text-xs font-normal text-accent">저장 안 됨</span>}
+          </p>
+          <p className="text-xs text-ink-soft truncate">{profile.email}</p>
+        </div>
 
         <label
-          className={`flex items-center gap-2 text-xs ${
+          className={`flex items-center gap-2 text-xs shrink-0 ${
             isSelf ? "text-ink-soft/50 cursor-not-allowed" : "text-ink-soft cursor-pointer"
           }`}
         >

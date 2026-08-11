@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
@@ -57,7 +57,6 @@ const FALLBACK_POSTS: EditorialPost[] = [
     { id: -205, title: "이번 주 가장 인상 깊었던 제품 경험", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-29T08:00:00.000Z", isFallback: true },
 ];
 
-const dateValue = (value?: string | null) => value ? new Date(value).getTime() : 0;
 const excerpt = (value: string | null, length = 112) => {
     const cleaned = (value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
     return cleaned.length > length ? cleaned.slice(0, length).trimEnd() + "…" : cleaned;
@@ -81,10 +80,19 @@ function Artwork({ article, large = false }: { article: EditorialArticle; large?
     );
 }
 
+type HomeSlotKey = "left_1" | "left_2" | "hero" | "circle_1" | "circle_2" | "circle_3" | "circle_4" | "circle_5";
+type HomeSlotRow = { slot_key: HomeSlotKey; content_type: "article" | "post" | null; content_id: number | null };
+
+const LEFT_SLOT_KEYS: HomeSlotKey[] = ["left_1", "left_2"];
+const CIRCLE_SLOT_KEYS: HomeSlotKey[] = ["circle_1", "circle_2", "circle_3", "circle_4", "circle_5"];
+
 export default function EditorialHome() {
-    const [articles, setArticles] = useState<EditorialArticle[]>(FALLBACK_ARTICLES);
-    const [posts, setPosts] = useState<EditorialPost[]>(FALLBACK_POSTS);
-    const [articleLikes, setArticleLikes] = useState<CountMap>({});
+    // 홈 화면 8개 영역(좌측 아티클 2/중앙 대표 1/우측 Circle 인기글 5)은 이제 관리자가
+    // `/admin/home-content`에서 직접 지정한 콘텐츠만 노출함(예전의 "최신순"/"좋아요순" 자동 계산 방식 폐기).
+    // 슬롯이 비어있으면 아래 fallback 콘텐츠로 대체되어 빈 화면이 뜨지 않게 함.
+    const [latest, setLatest] = useState<EditorialArticle[]>([FALLBACK_ARTICLES[1], FALLBACK_ARTICLES[2]]);
+    const [hero, setHero] = useState<EditorialArticle>(FALLBACK_ARTICLES[0]);
+    const [recent, setRecent] = useState<EditorialPost[]>(FALLBACK_POSTS);
     const [postComments, setPostComments] = useState<CountMap>({});
     const [postLikes, setPostLikes] = useState<CountMap>({});
     const [nicknames, setNicknames] = useState<Record<string, string>>({});
@@ -119,29 +127,61 @@ export default function EditorialHome() {
         let active = true;
 
         const load = async () => {
-            setArticles(FALLBACK_ARTICLES);
-            setPosts(FALLBACK_POSTS);
             setIsLoading(false);
+
+            const { data: slotData } = await supabase
+                .from("home_slots")
+                .select("slot_key, content_type, content_id");
+            const slots = (slotData as HomeSlotRow[] | null) ?? [];
+            const slotByKey = new Map(slots.map((s) => [s.slot_key, s]));
+
+            const articleIds = LEFT_SLOT_KEYS.concat("hero")
+                .map((key) => slotByKey.get(key))
+                .filter((s): s is HomeSlotRow => !!s && s.content_type === "article" && s.content_id != null)
+                .map((s) => s.content_id as number);
+            const postIds = CIRCLE_SLOT_KEYS.map((key) => slotByKey.get(key))
+                .filter((s): s is HomeSlotRow => !!s && s.content_type === "post" && s.content_id != null)
+                .map((s) => s.content_id as number);
+
             const [{ data: articleData }, { data: postData }] = await Promise.all([
-                supabase.from("articles").select("*").in("category", ["product", "trend", "ai"]),
-                supabase.from("posts").select("*"),
+                articleIds.length ? supabase.from("articles").select("*").in("id", articleIds) : Promise.resolve({ data: [] }),
+                postIds.length ? supabase.from("posts").select("*").in("id", postIds) : Promise.resolve({ data: [] }),
             ]);
 
-            const realArticles = (articleData as EditorialArticle[] | null) ?? [];
-            const realPosts = (postData as EditorialPost[] | null) ?? [];
-            const articleIds = realArticles.map((article) => article.id);
-            const postIds = realPosts.map((post) => post.id);
+            const articleById = new Map(((articleData as EditorialArticle[] | null) ?? []).map((a) => [a.id, a]));
+            const postById = new Map(((postData as EditorialPost[] | null) ?? []).map((p) => [p.id, p]));
 
-            const [{ data: likeData }, { data: commentData }, { data: postLikeData }] = await Promise.all([
-                articleIds.length ? supabase.from("likes").select("article_id").in("article_id", articleIds) : Promise.resolve({ data: [] }),
-                postIds.length ? supabase.from("comments").select("post_id").in("post_id", postIds) : Promise.resolve({ data: [] }),
-                postIds.length ? supabase.from("likes").select("post_id").in("post_id", postIds) : Promise.resolve({ data: [] }),
+            const resolveArticle = (key: HomeSlotKey, fallback: EditorialArticle) => {
+                const slot = slotByKey.get(key);
+                if (slot?.content_type === "article" && slot.content_id != null) {
+                    const found = articleById.get(slot.content_id);
+                    if (found) return found;
+                }
+                return fallback;
+            };
+            const resolvePost = (key: HomeSlotKey, fallback: EditorialPost) => {
+                const slot = slotByKey.get(key);
+                if (slot?.content_type === "post" && slot.content_id != null) {
+                    const found = postById.get(slot.content_id);
+                    if (found) return found;
+                }
+                return fallback;
+            };
+
+            const resolvedLatest = [
+                resolveArticle("left_1", FALLBACK_ARTICLES[1]),
+                resolveArticle("left_2", FALLBACK_ARTICLES[2]),
+            ];
+            const resolvedHero = resolveArticle("hero", FALLBACK_ARTICLES[0]);
+            const resolvedRecent = CIRCLE_SLOT_KEYS.map((key, i) => resolvePost(key, FALLBACK_POSTS[i]));
+
+            const realPostIds = resolvedRecent.filter((p) => !p.isFallback).map((p) => p.id);
+
+            const [{ data: commentData }, { data: postLikeData }] = await Promise.all([
+                realPostIds.length ? supabase.from("comments").select("post_id").in("post_id", realPostIds) : Promise.resolve({ data: [] }),
+                realPostIds.length ? supabase.from("likes").select("post_id").in("post_id", realPostIds) : Promise.resolve({ data: [] }),
             ]);
 
-            const likes: CountMap = {};
-            (likeData ?? []).forEach((row: { article_id: number | null }) => {
-                if (row.article_id != null) likes[row.article_id] = (likes[row.article_id] ?? 0) + 1;
-            });
             const comments: CountMap = {};
             (commentData ?? []).forEach((row: { post_id: number | null }) => {
                 if (row.post_id != null) comments[row.post_id] = (comments[row.post_id] ?? 0) + 1;
@@ -151,15 +191,22 @@ export default function EditorialHome() {
                 if (row.post_id != null) postReactions[row.post_id] = (postReactions[row.post_id] ?? 0) + 1;
             });
 
-            const userIds = Array.from(new Set([...realArticles.map((article) => article.author_id), ...realPosts.map((post) => post.user_id)].filter((id) => /^[0-9a-f-]{36}$/i.test(id))));
+            const userIds = Array.from(
+                new Set(
+                    [resolvedHero, ...resolvedLatest]
+                        .map((article) => article.author_id)
+                        .concat(resolvedRecent.map((post) => post.user_id))
+                        .filter((id) => /^[0-9a-f-]{36}$/i.test(id))
+                )
+            );
             const { data: profileData } = userIds.length ? await supabase.from("profiles").select("id, nickname").in("id", userIds) : { data: [] };
             const names: Record<string, string> = {};
             (profileData ?? []).forEach((profile: { id: string; nickname: string }) => { names[profile.id] = profile.nickname; });
 
             if (!active) return;
-            setArticles(realArticles.length ? realArticles : FALLBACK_ARTICLES);
-            setPosts(realPosts.length ? realPosts : FALLBACK_POSTS);
-            setArticleLikes(likes);
+            setLatest(resolvedLatest);
+            setHero(resolvedHero);
+            setRecent(resolvedRecent);
             setPostComments(comments);
             setPostLikes(postReactions);
             setNicknames(names);
@@ -169,16 +216,6 @@ export default function EditorialHome() {
         void load();
         return () => { active = false; };
     }, []);
-
-    const { latest, hero, recent } = useMemo(() => {
-        const newest = [...articles].sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id);
-        const best = [...articles].sort((a, b) => (articleLikes[b.id] ?? 0) - (articleLikes[a.id] ?? 0) || dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id)[0] ?? FALLBACK_ARTICLES[0];
-        const featured = posts
-            .filter((post) => post.isFallback || post.is_featured)
-            .sort((a, b) => dateValue(b.created_at) - dateValue(a.created_at) || b.id - a.id)
-            .slice(0, 5);
-        return { latest: newest.slice(0, 2), hero: best, recent: featured };
-    }, [articles, articleLikes, posts]);
 
     const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + article.id;
     const postHref = (post: EditorialPost) => post.isFallback ? "/" : "/post/" + post.id;

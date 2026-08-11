@@ -5,16 +5,23 @@ import { supabase } from "@/app/lib/supabase";
 
 export type NavMenuKey = "circle" | "product" | "trend" | "ai";
 export type Visibility = "public" | "admin_only";
+export type HomeSlotKey = "left_1" | "left_2" | "hero" | "circle_1" | "circle_2" | "circle_3" | "circle_4" | "circle_5";
+export type HomeSlotValue = { content_type: "article" | "post" | null; content_id: number | null };
+
+const slotValuesEqual = (a: HomeSlotValue, b: HomeSlotValue) =>
+  a.content_type === b.content_type && a.content_id === b.content_id;
 
 type AdminChanges = {
   pendingNavVisibility: Partial<Record<NavMenuKey, Visibility>>;
   pendingAdminFlags: Record<string, boolean>;
+  pendingHomeSlots: Partial<Record<HomeSlotKey, HomeSlotValue>>;
   pendingCount: number;
   saving: boolean;
   error: string;
   version: number;
   setNavVisibility: (key: NavMenuKey, value: Visibility, original: Visibility) => void;
   setAdminFlag: (userId: string, value: boolean, original: boolean) => void;
+  setHomeSlot: (slotKey: HomeSlotKey, value: HomeSlotValue, original: HomeSlotValue) => void;
   saveAll: () => Promise<void>;
 };
 
@@ -23,6 +30,7 @@ const AdminChangesContext = createContext<AdminChanges | null>(null);
 export function AdminChangesProvider({ children }: { children: React.ReactNode }) {
   const [pendingNavVisibility, setPendingNavVisibilityState] = useState<Partial<Record<NavMenuKey, Visibility>>>({});
   const [pendingAdminFlags, setPendingAdminFlagsState] = useState<Record<string, boolean>>({});
+  const [pendingHomeSlots, setPendingHomeSlotsState] = useState<Partial<Record<HomeSlotKey, HomeSlotValue>>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
@@ -41,6 +49,15 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       const next = { ...prev };
       if (value === original) delete next[userId];
       else next[userId] = value;
+      return next;
+    });
+  }, []);
+
+  const setHomeSlot = useCallback((slotKey: HomeSlotKey, value: HomeSlotValue, original: HomeSlotValue) => {
+    setPendingHomeSlotsState((prev) => {
+      const next = { ...prev };
+      if (slotValuesEqual(value, original)) delete next[slotKey];
+      else next[slotKey] = value;
       return next;
     });
   }, []);
@@ -76,6 +93,21 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       })
     );
 
+    const homeSlotEntries = Object.entries(pendingHomeSlots) as [HomeSlotKey, HomeSlotValue][];
+    const homeSlotResults = await Promise.all(
+      homeSlotEntries.map(async ([slotKey, slotValue]) => {
+        const { error: updateError } = await supabase
+          .from("home_slots")
+          .update({
+            content_type: slotValue.content_type,
+            content_id: slotValue.content_id,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("slot_key", slotKey);
+        return { slotKey, ok: !updateError };
+      })
+    );
+
     setPendingNavVisibilityState((prev) => {
       const next = { ...prev };
       navResults.filter((r) => r.ok).forEach((r) => delete next[r.key]);
@@ -88,27 +120,49 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       return next;
     });
 
-    const hasFailure = navResults.some((r) => !r.ok) || adminResults.some((r) => !r.ok);
+    setPendingHomeSlotsState((prev) => {
+      const next = { ...prev };
+      homeSlotResults.filter((r) => r.ok).forEach((r) => delete next[r.slotKey]);
+      return next;
+    });
+
+    const hasFailure =
+      navResults.some((r) => !r.ok) || adminResults.some((r) => !r.ok) || homeSlotResults.some((r) => !r.ok);
     setError(hasFailure ? "일부 변경사항 저장에 실패했어요. 다시 시도해주세요." : "");
     setVersion((v) => v + 1);
     setSaving(false);
-  }, [pendingNavVisibility, pendingAdminFlags]);
+  }, [pendingNavVisibility, pendingAdminFlags, pendingHomeSlots]);
 
-  const pendingCount = Object.keys(pendingNavVisibility).length + Object.keys(pendingAdminFlags).length;
+  const pendingCount =
+    Object.keys(pendingNavVisibility).length + Object.keys(pendingAdminFlags).length + Object.keys(pendingHomeSlots).length;
 
   const value = useMemo(
     () => ({
       pendingNavVisibility,
       pendingAdminFlags,
+      pendingHomeSlots,
       pendingCount,
       saving,
       error,
       version,
       setNavVisibility,
       setAdminFlag,
+      setHomeSlot,
       saveAll,
     }),
-    [pendingNavVisibility, pendingAdminFlags, pendingCount, saving, error, version, setNavVisibility, setAdminFlag, saveAll]
+    [
+      pendingNavVisibility,
+      pendingAdminFlags,
+      pendingHomeSlots,
+      pendingCount,
+      saving,
+      error,
+      version,
+      setNavVisibility,
+      setAdminFlag,
+      setHomeSlot,
+      saveAll,
+    ]
   );
 
   return <AdminChangesContext.Provider value={value}>{children}</AdminChangesContext.Provider>;

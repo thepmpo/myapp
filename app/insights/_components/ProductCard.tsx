@@ -53,13 +53,13 @@ export default function ProductCard({ product }: { product: Product }) {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/5" />
 
-      <div className="absolute inset-x-0 bottom-0 p-4 pr-14">
-        <h3 className="line-clamp-1 text-lg font-bold leading-snug text-white">{product.name}</h3>
+      <div className="absolute inset-x-0 bottom-0 p-4 pr-28">
+        <h3 className="line-clamp-1 text-4xl font-bold leading-snug text-white">{product.name}</h3>
         <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/85">{product.description}</p>
       </div>
 
       {product.product_platforms.length > 0 && (
-        <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+        <div className="absolute bottom-3 right-3 flex items-center gap-2">
           {product.product_platforms.map((platform) => (
             <a
               key={platform.platform + platform.url}
@@ -68,9 +68,9 @@ export default function ProductCard({ product }: { product: Product }) {
               rel="noopener noreferrer"
               onClick={(event) => event.stopPropagation()}
               aria-label={PLATFORM_LABELS[platform.platform] ?? platform.platform}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-ink hover:bg-white"
+              className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-ink hover:bg-white"
             >
-              <PlatformIcon platform={platform.platform} className="h-3.5 w-3.5" />
+              <PlatformIcon platform={platform.platform} className="h-7 w-7" />
             </a>
           ))}
         </div>
