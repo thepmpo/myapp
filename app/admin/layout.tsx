@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
+import { AdminChangesProvider } from "./AdminChangesContext";
+import AdminSaveBar from "./AdminSaveBar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -53,8 +55,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isStats = pathname.startsWith("/admin/stats");
   const isAnswerRate = pathname.startsWith("/admin/answer-rate");
   const isMenuSettings = pathname.startsWith("/admin/menu-settings");
+  const isPermissions = pathname.startsWith("/admin/permissions");
   const isReports =
-    !isInsights && !isProducts && !isFeatured && !isKeywords && !isCircle && !isStats && !isAnswerRate && !isMenuSettings;
+    !isInsights &&
+    !isProducts &&
+    !isFeatured &&
+    !isKeywords &&
+    !isCircle &&
+    !isStats &&
+    !isAnswerRate &&
+    !isMenuSettings &&
+    !isPermissions;
 
   const tabs = [
     { href: "/admin/insights", label: "Insights 글 관리", active: isInsights },
@@ -66,33 +77,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/stats", label: "가입 유저 통계", active: isStats },
     { href: "/admin/answer-rate", label: "답변률/응답시간 대시보드", active: isAnswerRate },
     { href: "/admin/menu-settings", label: "메뉴 공개 설정", active: isMenuSettings },
+    { href: "/admin/permissions", label: "관리자 권한 설정", active: isPermissions },
   ];
 
   return (
-    <div className="max-w-[720px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
-      <div className="mb-5">
-        <Link href="/" className="text-sm text-ink-soft hover:text-accent">
-          ← Circle로
-        </Link>
-      </div>
-
-      <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
-
-      <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-border mb-6">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.href}
-            href={tab.href}
-            className={`-mb-px pb-3 text-sm font-medium border-b-2 whitespace-nowrap ${
-              tab.active ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
-            }`}
-          >
-            {tab.label}
+    <AdminChangesProvider>
+      <div className="max-w-[720px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
+        <div className="mb-5">
+          <Link href="/" className="text-sm text-ink-soft hover:text-accent">
+            ← Circle로
           </Link>
-        ))}
+        </div>
+
+        <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
+
+        <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-border mb-6">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`-mb-px pb-3 text-sm font-medium border-b-2 whitespace-nowrap ${
+                tab.active ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          ))}
+        </div>
+
+        {children}
       </div>
 
-      {children}
-    </div>
+      <AdminSaveBar />
+    </AdminChangesProvider>
   );
 }
