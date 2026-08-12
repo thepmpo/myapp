@@ -448,43 +448,47 @@ export default function PostDetail() {
           <p className="text-[15px] leading-relaxed text-ink whitespace-pre-wrap mb-4">{post.content}</p>
         )}
 
-        <div className="flex items-center gap-4 pt-3 border-t border-border">
-          <button
-            onClick={togglePostLike}
-            className={`flex items-center gap-1.5 text-sm font-medium cursor-pointer ${
-              isPostLiked ? "text-accent" : "text-ink-soft hover:text-ink"
-            }`}
-          >
-            <LikeIcon />
-            공감해요 {postLikes.length}
-          </button>
+        <div className="flex items-center justify-between gap-4 pt-3 border-t border-border">
+          <div className="flex items-center gap-4">
+            {currentUser?.id === post.user_id && (
+              <>
+                <Link
+                  href={`/circle/edit/${id}`}
+                  className="text-xs text-ink-soft hover:text-ink cursor-pointer"
+                >
+                  수정
+                </Link>
 
-          {currentUser?.id === post.user_id && (
-            <>
-              <Link
-                href={`/circle/edit/${id}`}
-                className="text-xs text-ink-soft hover:text-ink cursor-pointer"
-              >
-                수정
-              </Link>
+                <button
+                  onClick={deletePost}
+                  className="text-xs text-red-500 hover:text-red-600 cursor-pointer"
+                >
+                  삭제
+                </button>
+              </>
+            )}
+          </div>
 
-              <button
-                onClick={deletePost}
-                className="text-xs text-red-500 hover:text-red-600 cursor-pointer"
-              >
-                삭제
-              </button>
-            </>
-          )}
-
-          {currentUser && currentUser.id !== post.user_id && (
+          <div className="flex items-center gap-4">
             <button
-              onClick={reportPost}
-              className="ml-auto text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+              onClick={togglePostLike}
+              className={`flex items-center gap-1.5 text-sm font-medium cursor-pointer ${
+                isPostLiked ? "text-accent" : "text-ink-soft hover:text-ink"
+              }`}
             >
-              🚨 신고
+              <LikeIcon />
+              공감해요 {postLikes.length}
             </button>
-          )}
+
+            {currentUser && currentUser.id !== post.user_id && (
+              <button
+                onClick={reportPost}
+                className="text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+              >
+                🚨 신고
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

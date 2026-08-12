@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import { CATEGORY_LABELS } from '@/app/lib/insightsCategories';
+import { LikeIcon } from '@/app/components/icons';
 import ArticleBody from '../_components/ArticleBody';
 
 type Comment = {
@@ -45,6 +46,8 @@ export default function ArticleDetail() {
   const [article, setArticle] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
   const [authorNickname, setAuthorNickname] = useState('');
+  const [authorAvatarUrl, setAuthorAvatarUrl] = useState<string | null>(null);
+  const [authorBio, setAuthorBio] = useState<string | null>(null);
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -108,11 +111,13 @@ export default function ArticleDetail() {
       if (UUID_REGEX.test(data.author_id)) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('nickname')
+          .select('nickname, avatar_url, bio')
           .eq('id', data.author_id)
           .maybeSingle();
 
         setAuthorNickname(profile?.nickname ?? data.author);
+        setAuthorAvatarUrl(profile?.avatar_url ?? null);
+        setAuthorBio(profile?.bio ?? null);
       } else {
         setAuthorNickname(data.author);
       }
@@ -310,10 +315,10 @@ export default function ArticleDetail() {
         onClick={() => router.back()}
         className="inline-block mb-4 text-sm text-ink-soft hover:text-accent cursor-pointer"
       >
-        ← Insights로
+        ← {CATEGORY_LABELS[article.category as keyof typeof CATEGORY_LABELS]}
       </button>
 
-      <span className="inline-block mb-3 text-xs font-bold text-ink-soft">
+      <span className="block mb-3 text-xs font-bold text-ink-soft">
         {CATEGORY_LABELS[article.category as keyof typeof CATEGORY_LABELS]}
       </span>
 
@@ -324,7 +329,7 @@ export default function ArticleDetail() {
           {authorNickname}
         </Link>
         <span>·</span>
-        <span>{new Date(article.created_at).toLocaleDateString('ko-KR')}</span>
+        <span>{new Date(article.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
         <span>·</span>
         <span>조회 {viewCount}회</span>
       </div>
@@ -334,83 +339,110 @@ export default function ArticleDetail() {
         <img src={article.image_url} alt="" className="w-full rounded-lg mb-4 object-cover" />
       )}
 
-      <ArticleBody content={article.content} />
-
-      <div className="flex items-center gap-2 mb-5">
-        <button
-          onClick={toggleArticleLike}
-          className="px-3 py-1.5 rounded-md border border-border bg-surface text-sm text-ink-soft hover:bg-black/[0.03] cursor-pointer"
-        >
-          {articleLikes.some((l) => l.user_id === currentUser?.id) ? '❤️' : '🤍'} 좋아요 {articleLikes.length}
-        </button>
-
-        {currentUser && currentUser.id !== article.author_id && (
-          <button
-            onClick={reportArticle}
-            className="px-3 py-1.5 rounded-md border border-border bg-surface text-sm text-ink-soft hover:bg-black/[0.03] cursor-pointer"
-          >
-            🚨 신고
-          </button>
-        )}
-      </div>
-
-      <hr className="border-border my-6" />
-
-      <h2 className="text-base font-bold text-ink mb-3">댓글 {comments.length}개</h2>
-
-      {comments.length === 0 && (
-        <p className="text-sm text-ink-soft mb-4">아직 답변이 없어요. 첫 답변을 남겨보세요</p>
-      )}
-
-      <div className="flex flex-col gap-2.5 mb-4">
-        {comments.map((comment) => (
-          <div key={comment.id} className="bg-surface rounded-lg border border-border p-3">
-            <div className="text-sm text-ink">{comment.content}</div>
-            <div className="mt-2 flex items-center justify-between text-xs font-mono text-ink-soft">
-              <span>{commentNicknames[comment.user_id] ?? comment.author}</span>
-              <div className="flex items-center gap-3">
-                <button onClick={() => toggleCommentLike(comment.id)} className="cursor-pointer hover:text-accent">
-                  {commentLikes.some((l) => l.comment_id === comment.id && l.user_id === currentUser?.id) ? '❤️' : '🤍'}{' '}
-                  {commentLikes.filter((l) => l.comment_id === comment.id).length}
-                </button>
-                {currentUser?.id === comment.user_id && (
-                  <button onClick={() => deleteComment(comment.id)} className="cursor-pointer hover:text-accent">
-                    삭제
-                  </button>
-                )}
-                {currentUser && currentUser.id !== comment.user_id && (
-                  <button onClick={() => reportComment(comment.id)} className="cursor-pointer hover:text-accent">
-                    🚨 신고
-                  </button>
+      <div className="max-w-[880px]">
+        <div className="flex items-start gap-8">
+          <aside className="w-[160px] shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-border shrink-0 overflow-hidden">
+                {authorAvatarUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={authorAvatarUrl} alt="" className="h-full w-full object-cover" />
                 )}
               </div>
+              <Link href={`/profile/${article.author_id}`} className="text-sm font-bold text-ink hover:text-accent truncate">
+                {authorNickname}
+              </Link>
             </div>
-          </div>
-        ))}
-      </div>
+            {authorBio && <p className="mt-2 text-xs leading-relaxed text-ink-soft">{authorBio}</p>}
+          </aside>
 
-      {currentUser ? (
-        <div className="flex gap-2">
-          <input
-            placeholder="댓글을 입력하세요"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
-          <button
-            onClick={addComment}
-            className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
-          >
-            등록
-          </button>
+          <div className="min-w-0 flex-1">
+            <ArticleBody content={article.content} />
+          </div>
         </div>
-      ) : (
-        <input
-          placeholder="댓글을 입력하려면 로그인이 필요합니다"
-          disabled
-          className="w-full px-3 py-2.5 rounded-lg border border-border bg-paper text-sm text-ink-soft placeholder:text-ink-soft"
-        />
-      )}
+
+        <div className="flex items-center justify-between gap-2 mb-5">
+          <div />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleArticleLike}
+              className={`flex items-center gap-1.5 text-sm font-medium cursor-pointer ${
+                articleLikes.some((l) => l.user_id === currentUser?.id) ? 'text-accent' : 'text-ink-soft hover:text-ink'
+              }`}
+            >
+              <LikeIcon />
+              공감해요 {articleLikes.length}
+            </button>
+
+            {currentUser && currentUser.id !== article.author_id && (
+              <button
+                onClick={reportArticle}
+                className="px-3 py-1.5 rounded-md border border-border bg-surface text-sm text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+              >
+                🚨 신고
+              </button>
+            )}
+          </div>
+        </div>
+
+        <hr className="border-border my-6" />
+
+        <h2 className="text-base font-bold text-ink mb-3">댓글 {comments.length}개</h2>
+
+        {comments.length === 0 && (
+          <p className="text-sm text-ink-soft mb-4">아직 답변이 없어요. 첫 답변을 남겨보세요</p>
+        )}
+
+        <div className="flex flex-col gap-2.5 mb-4">
+          {comments.map((comment) => (
+            <div key={comment.id} className="bg-surface rounded-lg border border-border p-3">
+              <div className="text-sm text-ink">{comment.content}</div>
+              <div className="mt-2 flex items-center justify-between text-xs font-mono text-ink-soft">
+                <span>{commentNicknames[comment.user_id] ?? comment.author}</span>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => toggleCommentLike(comment.id)} className="cursor-pointer hover:text-accent">
+                    {commentLikes.some((l) => l.comment_id === comment.id && l.user_id === currentUser?.id) ? '❤️' : '🤍'}{' '}
+                    {commentLikes.filter((l) => l.comment_id === comment.id).length}
+                  </button>
+                  {currentUser?.id === comment.user_id && (
+                    <button onClick={() => deleteComment(comment.id)} className="cursor-pointer hover:text-accent">
+                      삭제
+                    </button>
+                  )}
+                  {currentUser && currentUser.id !== comment.user_id && (
+                    <button onClick={() => reportComment(comment.id)} className="cursor-pointer hover:text-accent">
+                      🚨 신고
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {currentUser ? (
+          <div className="flex gap-2">
+            <input
+              placeholder="댓글을 입력하세요"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
+            />
+            <button
+              onClick={addComment}
+              className="px-4 py-2.5 rounded-lg bg-accent text-white text-sm font-medium shadow-[0_2px_0_rgba(23,27,35,0.15)] hover:bg-accent-hover cursor-pointer"
+            >
+              등록
+            </button>
+          </div>
+        ) : (
+          <input
+            placeholder="댓글을 입력하려면 로그인이 필요합니다"
+            disabled
+            className="w-full px-3 py-2.5 rounded-lg border border-border bg-paper text-sm text-ink-soft placeholder:text-ink-soft"
+          />
+        )}
+      </div>
     </div>
   );
 }

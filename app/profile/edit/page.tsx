@@ -24,6 +24,11 @@ export default function ProfileEdit() {
   const [nicknameSaving, setNicknameSaving] = useState(false);
   const [nicknameLockedUntil, setNicknameLockedUntil] = useState<Date | null>(null);
 
+  const [bio, setBio] = useState("");
+  const [bioSaving, setBioSaving] = useState(false);
+  const [bioSaved, setBioSaved] = useState(false);
+  const [bioError, setBioError] = useState("");
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -47,13 +52,14 @@ export default function ProfileEdit() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("nickname, nickname_changed_at, avatar_url")
+        .select("nickname, nickname_changed_at, avatar_url, bio")
         .eq("id", data.user.id)
         .maybeSingle();
 
       setNickname(profile?.nickname ?? "");
       setOriginalNickname(profile?.nickname ?? "");
       setAvatarUrl(profile?.avatar_url ?? null);
+      setBio(profile?.bio ?? "");
 
       if (profile?.nickname_changed_at) {
         const changedAt = new Date(profile.nickname_changed_at);
@@ -186,6 +192,30 @@ export default function ProfileEdit() {
     }
   };
 
+  const saveBio = async () => {
+    if (!userId) return;
+
+    setBioError("");
+    setBioSaving(true);
+    setBioSaved(false);
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ bio: bio.trim() || null })
+      .eq("id", userId)
+      .select();
+
+    setBioSaving(false);
+
+    if (error) {
+      setBioError(error.message);
+    } else if (!data || data.length === 0) {
+      setBioError("프로필 정보를 찾을 수 없어 저장하지 못했습니다");
+    } else {
+      setBioSaved(true);
+    }
+  };
+
   const savePassword = async () => {
     if (!isValidPassword(newPassword)) {
       setPasswordError(PASSWORD_RULE_MESSAGE);
@@ -300,6 +330,33 @@ export default function ProfileEdit() {
         ) : (
           nicknameError && <p className="mt-1.5 text-sm text-red-500">{nicknameError}</p>
         )}
+      </section>
+
+      <section className="mb-8">
+        <h2 className="text-sm font-medium text-ink mb-2">소개 변경</h2>
+
+        <div className="flex gap-2">
+          <input
+            value={bio}
+            onChange={(e) => {
+              setBio(e.target.value);
+              setBioSaved(false);
+              setBioError("");
+            }}
+            placeholder="Insights 글 하단에 노출될 한 줄 소개"
+            className="flex-1 px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft focus:outline-none focus:ring-2 focus:ring-accent/30"
+          />
+          <button
+            onClick={saveBio}
+            disabled={bioSaving}
+            className="px-4 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03] disabled:opacity-60"
+          >
+            {bioSaving ? "저장 중..." : "저장"}
+          </button>
+        </div>
+
+        {bioError && <p className="mt-1.5 text-sm text-red-500">{bioError}</p>}
+        {bioSaved && <p className="mt-1.5 text-sm text-ink-soft">소개가 저장되었습니다</p>}
       </section>
 
       <section className="mb-8">

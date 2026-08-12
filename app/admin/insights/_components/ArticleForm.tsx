@@ -55,6 +55,63 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
     init();
   }, [articleId, isEdit]);
 
+  // 굵게/기울임/밑줄/하이라이트: 선택한 텍스트를 기호로 감싸고, 선택이 없으면 기호 사이에 커서를 둠.
+  const wrapSelection = (before: string, after: string = before) => {
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    const selected = content.slice(start, end);
+    const nextContent = `${content.slice(0, start)}${before}${selected}${after}${content.slice(end)}`;
+
+    setContent(nextContent);
+
+    const selectionStart = start + before.length;
+    const selectionEnd = selectionStart + selected.length;
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(selectionStart, selectionEnd);
+    });
+  };
+
+  // 소제목: 커서가 있는 줄 맨 앞에 "## "를 붙임(이미 붙어있으면 중복 삽입하지 않음).
+  const insertHeadingPrefix = () => {
+    const textarea = textareaRef.current;
+    const cursor = textarea?.selectionStart ?? content.length;
+    const lineStart = content.lastIndexOf("\n", cursor - 1) + 1;
+
+    if (content.slice(lineStart, lineStart + 3) === "## ") return;
+
+    const nextContent = `${content.slice(0, lineStart)}## ${content.slice(lineStart)}`;
+    setContent(nextContent);
+
+    const cursorPos = cursor + 3;
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(cursorPos, cursorPos);
+    });
+  };
+
+  // 링크: URL을 입력받아 선택한 텍스트를 [텍스트](URL) 형태로 감쌈(선택 없으면 안내 텍스트 사용).
+  const insertLink = () => {
+    const url = window.prompt("링크 URL을 입력하세요");
+    if (!url) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea?.selectionStart ?? content.length;
+    const end = textarea?.selectionEnd ?? content.length;
+    const selected = content.slice(start, end) || "링크 텍스트";
+    const markdown = `[${selected}](${url})`;
+    const nextContent = `${content.slice(0, start)}${markdown}${content.slice(end)}`;
+
+    setContent(nextContent);
+
+    const cursorPos = start + markdown.length;
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      textarea?.setSelectionRange(cursorPos, cursorPos);
+    });
+  };
+
   const insertImageIntoContent = async (file: File) => {
     if (!currentUser) {
       setError("로그인이 필요합니다");
@@ -179,9 +236,30 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
         className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-accent/30"
       />
 
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        <button type="button" onClick={() => wrapSelection("**")} className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs font-bold text-ink-soft hover:bg-black/[0.03] cursor-pointer">
+          굵게
+        </button>
+        <button type="button" onClick={() => wrapSelection("*")} className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs italic text-ink-soft hover:bg-black/[0.03] cursor-pointer">
+          기울임
+        </button>
+        <button type="button" onClick={() => wrapSelection("++")} className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs underline text-ink-soft hover:bg-black/[0.03] cursor-pointer">
+          밑줄
+        </button>
+        <button type="button" onClick={() => wrapSelection("==")} className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer">
+          하이라이트
+        </button>
+        <button type="button" onClick={insertHeadingPrefix} className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs font-bold text-ink-soft hover:bg-black/[0.03] cursor-pointer">
+          소제목
+        </button>
+        <button type="button" onClick={insertLink} className="px-2.5 py-1.5 rounded-md border border-border bg-surface text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer">
+          링크
+        </button>
+      </div>
+
       <textarea
         ref={textareaRef}
-        placeholder="글 내용 입력"
+        placeholder="글 내용 입력 (굵게 **텍스트**, 기울임 *텍스트*, 밑줄 ++텍스트++, 하이라이트 ==텍스트==, 소제목 ## 텍스트, 링크 [텍스트](URL) 직접 입력도 가능해요)"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[96px] focus:outline-none focus:ring-2 focus:ring-accent/30"
