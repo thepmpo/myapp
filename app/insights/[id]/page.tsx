@@ -334,7 +334,7 @@ export default function ArticleDetail() {
       )}
 
       <div className="max-w-[880px]">
-        <div className="flex items-start gap-8">
+        <div className="flex items-start gap-16">
           <aside className="w-[160px] shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-border shrink-0 overflow-hidden">
@@ -379,8 +379,8 @@ export default function ArticleDetail() {
           </div>
         </div>
 
-        {/* 좌측 작성자 영역(160px)+간격(32px)만큼 왼쪽 여백을 줘서, 본문 컬럼과 정확히 같은 폭으로 정렬 */}
-        <div className="ml-[192px]">
+        {/* 좌측 작성자 영역(160px)+간격(64px)만큼 왼쪽 여백을 줘서, 본문 컬럼과 정확히 같은 폭으로 정렬 */}
+        <div className="ml-[224px]">
           <hr className="border-border my-6" />
 
           <h2 className="text-base font-bold text-ink mb-3">댓글 {comments.length}개</h2>

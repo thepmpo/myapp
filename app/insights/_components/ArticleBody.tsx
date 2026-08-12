@@ -25,10 +25,10 @@ export default function ArticleBody({ content }: { content: string }) {
       <ReactMarkdown
         rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema]]}
         components={{
-          p: ({ children }) => <p className="indent-6 whitespace-pre-wrap mb-4 last:mb-0">{children}</p>,
-          h1: ({ children }) => <h2 className="text-xl font-bold text-ink mt-10 mb-2">{children}</h2>,
-          h2: ({ children }) => <h2 className="text-xl font-bold text-ink mt-10 mb-2">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-lg font-bold text-ink mt-8 mb-2">{children}</h3>,
+          p: ({ children }) => <p className="indent-6 whitespace-pre-wrap mb-8 last:mb-0">{children}</p>,
+          h1: ({ children }) => <h2 className="text-xl font-bold text-ink mt-10 mb-2 first:mt-0">{children}</h2>,
+          h2: ({ children }) => <h2 className="text-xl font-bold text-ink mt-10 mb-2 first:mt-0">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-lg font-bold text-ink mt-8 mb-2 first:mt-0">{children}</h3>,
           strong: ({ children }) => <strong className="font-bold text-ink">{children}</strong>,
           em: ({ children }) => <em className="italic">{children}</em>,
           mark: ({ children }) => <mark className="bg-accent/15 text-ink rounded-sm px-0.5">{children}</mark>,
@@ -41,9 +41,10 @@ export default function ArticleBody({ content }: { content: string }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={typeof src === "string" ? src : undefined} alt={alt ?? ""} className="block w-full h-auto rounded-lg my-4" />
           ),
-          ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1.5">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1.5">{children}</ol>,
+          ul: ({ children }) => <ul className="list-disc pl-6 mb-8 space-y-1.5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-6 mb-8 space-y-1.5">{children}</ol>,
           li: ({ children }) => <li className="pl-1">{children}</li>,
+          hr: () => <hr className="border-border mt-16 mb-10" />,
         }}
       >
         {preprocess(content)}
