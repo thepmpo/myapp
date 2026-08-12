@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { ArticleCategory } from "@/app/lib/insightsCategories";
 import ArticleBody from "@/app/insights/_components/ArticleBody";
+import { useSubcategories } from "@/app/insights/_components/useSubcategories";
 
 export default function ArticleForm({ articleId }: { articleId?: number }) {
   const router = useRouter();
@@ -16,6 +17,8 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState<ArticleCategory>("trend");
+  const [subcategoryId, setSubcategoryId] = useState<number | null>(null);
+  const { subcategories, reload: reloadSubcategories } = useSubcategories(category as "trend" | "ai");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -46,6 +49,7 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
           setTitle(article.title);
           setContent(article.content);
           setCategory(article.category);
+          setSubcategoryId(article.subcategory_id ?? null);
           setExistingImageUrl(article.image_url);
         }
 
@@ -154,6 +158,27 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
     });
   };
 
+  // 세부 카테고리를 그 자리에서 새로 만들고, 만든 항목을 바로 선택 상태로 전환.
+  const createSubcategory = async () => {
+    const name = window.prompt("새 세부 카테고리 이름을 입력하세요");
+    const trimmed = name?.trim();
+    if (!trimmed) return;
+
+    const { data, error: insertError } = await supabase
+      .from("article_subcategories")
+      .insert([{ category, name: trimmed }])
+      .select("id")
+      .single();
+
+    if (insertError || !data) {
+      setError(insertError?.message ?? "세부 카테고리 생성에 실패했습니다");
+      return;
+    }
+
+    await reloadSubcategories();
+    setSubcategoryId(data.id);
+  };
+
   const submit = async () => {
     if (!currentUser) {
       setError("로그인이 필요합니다");
@@ -189,7 +214,7 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
     if (isEdit) {
       const { error: updateError } = await supabase
         .from("articles")
-        .update({ title, content, category, image_url: imageUrl })
+        .update({ title, content, category, subcategory_id: subcategoryId, image_url: imageUrl })
         .eq("id", articleId);
 
       if (updateError) {
@@ -202,6 +227,7 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
           title,
           content,
           category,
+          subcategory_id: subcategoryId,
           author_id: currentUser.id,
           author: currentUser.email,
           image_url: imageUrl,
@@ -221,14 +247,39 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
 
   return (
     <div className="bg-surface rounded-xl border border-border p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value as ArticleCategory)}
-        className="mb-2 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
-      >
-        <option value="trend">Trends</option>
-        <option value="ai">AI</option>
-      </select>
+      <div className="flex gap-2 mb-2">
+        <select
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value as ArticleCategory);
+            setSubcategoryId(null);
+          }}
+          className="px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
+        >
+          <option value="trend">Trends</option>
+          <option value="ai">AI</option>
+        </select>
+
+        <select
+          value={subcategoryId ?? ""}
+          onChange={(e) => {
+            if (e.target.value === "__new__") {
+              createSubcategory();
+              return;
+            }
+            setSubcategoryId(e.target.value ? Number(e.target.value) : null);
+          }}
+          className="px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
+        >
+          <option value="">세부 카테고리 선택 안 함</option>
+          {subcategories.map((sub) => (
+            <option key={sub.id} value={sub.id}>
+              {sub.name}
+            </option>
+          ))}
+          <option value="__new__">+ 새 카테고리 만들기</option>
+        </select>
+      </div>
 
       <input
         placeholder="글 제목 입력"

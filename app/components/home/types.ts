@@ -21,6 +21,7 @@ export type HomeArticle = {
   author_id: string;
   image_url: string | null;
   created_at: string;
+  subcategory_id?: number | null;
 };
 
 export type HomePreviewComment = {
