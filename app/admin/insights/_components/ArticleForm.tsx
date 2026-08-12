@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { ArticleCategory } from "@/app/lib/insightsCategories";
+import ArticleBody from "@/app/insights/_components/ArticleBody";
 
 export default function ArticleForm({ articleId }: { articleId?: number }) {
   const router = useRouter();
@@ -257,13 +258,24 @@ export default function ArticleForm({ articleId }: { articleId?: number }) {
         </button>
       </div>
 
-      <textarea
-        ref={textareaRef}
-        placeholder="글 내용 입력 (굵게 **텍스트**, 기울임 *텍스트*, 밑줄 ++텍스트++, 하이라이트 ==텍스트==, 소제목 ## 텍스트, 링크 [텍스트](URL) 직접 입력도 가능해요)"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 min-h-[96px] focus:outline-none focus:ring-2 focus:ring-accent/30"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2">
+        <textarea
+          ref={textareaRef}
+          placeholder="글 내용 입력 (굵게 **텍스트**, 기울임 *텍스트*, 밑줄 ++텍스트++, 하이라이트 ==텍스트==, 소제목 ## 텍스트, 링크 [텍스트](URL) 직접 입력도 가능해요)"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft min-h-[400px] max-h-[600px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-accent/30"
+        />
+
+        <div className="rounded-lg border border-border bg-paper min-h-[400px] max-h-[600px] overflow-y-auto p-4">
+          <p className="mb-3 text-xs font-bold text-ink-soft">미리보기</p>
+          {content ? (
+            <ArticleBody content={content} />
+          ) : (
+            <p className="text-sm text-ink-soft">왼쪽에 글을 입력하면 여기 실시간으로 미리보기가 표시돼요</p>
+          )}
+        </div>
+      </div>
 
       <input
         ref={bodyImageInputRef}

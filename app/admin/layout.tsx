@@ -57,6 +57,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isMenuSettings = pathname.startsWith("/admin/menu-settings");
   const isPermissions = pathname.startsWith("/admin/permissions");
   const isUsers = pathname.startsWith("/admin/users");
+  // 좌우 분할 마크다운 미리보기가 있는 글쓰기/수정 화면은 다른 관리자 탭보다 더 넓은 폭이 필요함.
+  const isInsightsWriteForm = pathname === "/admin/insights/new" || /^\/admin\/insights\/[^/]+\/edit$/.test(pathname);
   const isReports =
     !isInsights &&
     !isProducts &&
@@ -85,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminChangesProvider>
-      <div className="max-w-[720px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
+      <div className={`mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8 ${isInsightsWriteForm ? "max-w-[1100px]" : "max-w-[720px]"}`}>
         <div className="mb-5">
           <Link href="/" className="text-sm text-ink-soft hover:text-accent">
             ← Circle로
