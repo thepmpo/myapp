@@ -57,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isMenuSettings = pathname.startsWith("/admin/menu-settings");
   const isPermissions = pathname.startsWith("/admin/permissions");
   const isUsers = pathname.startsWith("/admin/users");
+  const isCategories = pathname.startsWith("/admin/categories");
   // 좌우 분할 마크다운 미리보기가 있는 글쓰기/수정 화면은 다른 관리자 탭보다 더 넓은 폭이 필요함.
   const isInsightsWriteForm = pathname === "/admin/insights/new" || /^\/admin\/insights\/[^/]+\/edit$/.test(pathname);
   const isReports =
@@ -69,10 +70,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     !isAnswerRate &&
     !isMenuSettings &&
     !isPermissions &&
-    !isUsers;
+    !isUsers &&
+    !isCategories;
 
   const tabs = [
     { href: "/admin/insights", label: "Insights 글 관리", active: isInsights },
+    { href: "/admin/categories", label: "카테고리 관리", active: isCategories },
     { href: "/admin/products", label: "Product 관리", active: isProducts },
     { href: "/admin", label: "신고/유저 관리", active: isReports },
     { href: "/admin/home-content", label: "홈 화면 관리", active: isHomeContent },

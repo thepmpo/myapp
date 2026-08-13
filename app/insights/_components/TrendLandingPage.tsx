@@ -41,12 +41,12 @@ export default function TrendLandingPage() {
       </div>
 
       {subcategories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
           <button
             type="button"
             onClick={() => setSelectedSubcategory(null)}
-            className={`px-3 py-1.5 rounded-full border text-xs font-medium cursor-pointer transition-colors ${
-              !isFiltering ? "border-accent bg-accent text-white" : "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+            className={`text-xs font-medium cursor-pointer underline-offset-4 ${
+              !isFiltering ? "text-accent underline" : "text-ink-soft hover:text-ink"
             }`}
           >
             전체
@@ -56,10 +56,8 @@ export default function TrendLandingPage() {
               key={sub.id}
               type="button"
               onClick={() => setSelectedSubcategory(sub.id)}
-              className={`px-3 py-1.5 rounded-full border text-xs font-medium cursor-pointer transition-colors ${
-                selectedSubcategory === sub.id
-                  ? "border-accent bg-accent text-white"
-                  : "border-border bg-surface text-ink-soft hover:bg-black/[0.03]"
+              className={`text-xs font-medium cursor-pointer underline-offset-4 ${
+                selectedSubcategory === sub.id ? "text-accent underline" : "text-ink-soft hover:text-ink"
               }`}
             >
               {sub.name}
