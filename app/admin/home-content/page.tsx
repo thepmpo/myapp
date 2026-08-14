@@ -18,6 +18,8 @@ const SLOT_DEFS: SlotDef[] = [
   { key: "circle_3", label: "우측 인기글 3", contentType: "post" },
   { key: "circle_4", label: "우측 인기글 4", contentType: "post" },
   { key: "circle_5", label: "우측 인기글 5", contentType: "post" },
+  { key: "circle_6", label: "우측 인기글 6", contentType: "post" },
+  { key: "circle_7", label: "우측 인기글 7", contentType: "post" },
 ];
 
 const EMPTY_SLOT: HomeSlotValue = { content_type: null, content_id: null };
@@ -85,7 +87,7 @@ export default function AdminHomeContentPage() {
     <section className="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
       <h2 className="text-base font-bold text-ink mb-1">홈 화면 관리</h2>
       <p className="text-sm text-ink-soft mb-4">
-        `/home` 화면의 8개 영역에 노출할 콘텐츠를 직접 지정해요. "선택 안 함"으로 두면 기본 안내 콘텐츠가 대신
+        `/home` 화면의 10개 영역에 노출할 콘텐츠를 직접 지정해요. "선택 안 함"으로 두면 기본 안내 콘텐츠가 대신
         노출돼요. 드롭다운을 바꾼 뒤 우측 하단 저장 버튼을 눌러야 실제로 반영돼요.
       </p>
 

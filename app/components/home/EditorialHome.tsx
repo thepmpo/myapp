@@ -8,6 +8,7 @@ import { WorkspaceNavigation } from "@/app/components/home/WorkspaceFrame";
 import type { HomeArticle, HomePost } from "@/app/components/home/types";
 import LoginPromptModal from "@/app/components/LoginPromptModal";
 import ProfileMenu from "@/app/components/ProfileMenu";
+import { LikeIcon } from "@/app/components/icons";
 
 type EditorialArticle = HomeArticle & { isFallback?: boolean };
 type EditorialPost = HomePost & { isFallback?: boolean };
@@ -55,6 +56,8 @@ const FALLBACK_POSTS: EditorialPost[] = [
     { id: -203, title: "데이터가 부족할 때 의사결정하는 법", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-31T08:00:00.000Z", isFallback: true },
     { id: -204, title: "팀의 공통 언어를 만드는 작은 습관", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-30T08:00:00.000Z", isFallback: true },
     { id: -205, title: "이번 주 가장 인상 깊었던 제품 경험", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-29T08:00:00.000Z", isFallback: true },
+    { id: -206, title: "온보딩 플로우 개선하면서 배운 것들", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-28T08:00:00.000Z", isFallback: true },
+    { id: -207, title: "타 부서와 협업할 때 쓰는 문서 양식 공유해요", content: null, author: "PMPO Circle", user_id: "fallback", is_question: true, image_url: null, created_at: "2026-07-27T08:00:00.000Z", isFallback: true },
 ];
 
 const excerpt = (value: string | null, length = 112) => {
@@ -80,11 +83,21 @@ function Artwork({ article, large = false }: { article: EditorialArticle; large?
     );
 }
 
-type HomeSlotKey = "left_1" | "left_2" | "hero" | "circle_1" | "circle_2" | "circle_3" | "circle_4" | "circle_5";
+type HomeSlotKey =
+    | "left_1"
+    | "left_2"
+    | "hero"
+    | "circle_1"
+    | "circle_2"
+    | "circle_3"
+    | "circle_4"
+    | "circle_5"
+    | "circle_6"
+    | "circle_7";
 type HomeSlotRow = { slot_key: HomeSlotKey; content_type: "article" | "post" | null; content_id: number | null };
 
 const LEFT_SLOT_KEYS: HomeSlotKey[] = ["left_1", "left_2"];
-const CIRCLE_SLOT_KEYS: HomeSlotKey[] = ["circle_1", "circle_2", "circle_3", "circle_4", "circle_5"];
+const CIRCLE_SLOT_KEYS: HomeSlotKey[] = ["circle_1", "circle_2", "circle_3", "circle_4", "circle_5", "circle_6", "circle_7"];
 
 export default function EditorialHome() {
     // 홈 화면 8개 영역(좌측 아티클 2/중앙 대표 1/우측 Circle 인기글 5)은 이제 관리자가
@@ -302,11 +315,18 @@ export default function EditorialHome() {
                                         <li key={post.id} className="border-t border-[#deddd9] py-5 first:border-t-0 first:pt-1">
                                             <Link href={postHref(post)} onClick={(event) => handlePostClick(event, post)} className="group block">
                                                 <strong className="block text-[17px] font-bold leading-[1.3] tracking-[-0.01em] group-hover:underline">{post.title}</strong>
-                                                <span className="mt-2 flex items-center gap-1.5 text-[11px] leading-5 text-[#77746e]">
-                                                    <span>{nicknames[post.user_id] ?? post.author}</span>
-                                                    <span aria-hidden="true">·</span>
-                                                    <span>🙌 {postLikes[post.id] ?? 0}</span>
-                                                    <span>💬 {postComments[post.id] ?? 0}</span>
+                                                <span className="mt-2 block text-[11px] leading-5 text-[#77746e]">{nicknames[post.user_id] ?? post.author}</span>
+                                                <span className="mt-1.5 flex items-center justify-end gap-3 text-[11px] leading-5 text-[#77746e]">
+                                                    <span className="flex items-center gap-1">
+                                                        <LikeIcon />
+                                                        {postLikes[post.id] ?? 0}
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                                                            <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                                                        </svg>
+                                                        {postComments[post.id] ?? 0}
+                                                    </span>
                                                 </span>
                                             </Link>
                                         </li>
