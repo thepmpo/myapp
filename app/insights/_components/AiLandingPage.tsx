@@ -34,63 +34,75 @@ export default function AiLandingPage() {
   const restArticles = (isFiltering ? filteredArticles : articles).filter((a) => !topIds.has(a.id));
 
   return (
-    // Circle 목록(app/page.tsx)의 본문 폭과 동일하게 맞춤: Circle은 max-w-[1320px] 컨테이너를
-    // grid-cols-[minmax(0,1fr)_1px_360px] gap-x-10(40px)으로 나눠서, 본문 칼럼이 실제로는
-    // 1320 - 360(우측 사이드바) - 1(구분선) - 80(gap 2번×40px) = 879px만 씀 — 그 값을 그대로 사용.
-    <div className="max-w-[879px] mx-auto px-5 sm:px-8 xl:pl-24">
-      <div className="flex items-center justify-between pt-[66px] mb-2">
-        <h1 className="text-2xl font-bold text-ink">{CATEGORY_LABELS.ai}</h1>
+    <>
+      {/* 상단(제목/필터/히어로/카드로우)은 원래 폭(1320px) 그대로 유지 */}
+      <div className="max-w-[1320px] mx-auto px-5 sm:px-8 xl:pl-24">
+        <div className="flex items-center justify-between pt-[66px] mb-2">
+          <h1 className="text-2xl font-bold text-ink">{CATEGORY_LABELS.ai}</h1>
 
-        {isAdmin && (
-          <Link
-            href="/admin/insights/new"
-            className="px-3 py-1.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-hover"
-          >
-            + 새 글 작성
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin/insights/new"
+              className="px-3 py-1.5 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent-hover"
+            >
+              + 새 글 작성
+            </Link>
+          )}
+        </div>
+
+        {subcategories.length > 0 && (
+          <div className="flex flex-wrap items-center gap-4 mb-6">
+            <button
+              type="button"
+              onClick={() => setSelectedSubcategory(null)}
+              className={`text-xs font-medium cursor-pointer underline-offset-4 ${
+                !isFiltering ? "text-accent underline" : "text-ink-soft hover:text-ink"
+              }`}
+            >
+              전체
+            </button>
+            {subcategories.map((sub) => (
+              <button
+                key={sub.id}
+                type="button"
+                onClick={() => setSelectedSubcategory(sub.id)}
+                className={`text-xs font-medium cursor-pointer underline-offset-4 ${
+                  selectedSubcategory === sub.id ? "text-accent underline" : "text-ink-soft hover:text-ink"
+                }`}
+              >
+                {sub.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {showEmptyFilterMessage ? (
+          <p className="py-16 text-center text-sm text-ink-soft">이 세부 카테고리엔 아직 글이 없어요.</p>
+        ) : (
+          <>
+            <CategoryHeroStagger articles={displayArticles.slice(0, 2)} />
+            <CategoryCardRow articles={displayArticles.slice(2, 6)} />
+          </>
         )}
       </div>
 
-      {subcategories.length > 0 && (
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-          <button
-            type="button"
-            onClick={() => setSelectedSubcategory(null)}
-            className={`text-xs font-medium cursor-pointer underline-offset-4 ${
-              !isFiltering ? "text-accent underline" : "text-ink-soft hover:text-ink"
-            }`}
-          >
-            전체
-          </button>
-          {subcategories.map((sub) => (
-            <button
-              key={sub.id}
-              type="button"
-              onClick={() => setSelectedSubcategory(sub.id)}
-              className={`text-xs font-medium cursor-pointer underline-offset-4 ${
-                selectedSubcategory === sub.id ? "text-accent underline" : "text-ink-soft hover:text-ink"
-              }`}
-            >
-              {sub.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {showEmptyFilterMessage ? (
-        <p className="py-16 text-center text-sm text-ink-soft">이 세부 카테고리엔 아직 글이 없어요.</p>
-      ) : (
-        <>
-          <CategoryHeroStagger articles={displayArticles.slice(0, 2)} />
-          <CategoryCardRow articles={displayArticles.slice(2, 6)} />
+      {/* 일반 글 목록만 Circle 목록과 동일한 879px 폭 — 계산 근거는 CategoryArticleList 사용부 참고
+          (Circle의 max-w-[1320px] 컨테이너를 grid-cols-[minmax(0,1fr)_1px_360px] gap-x-10(40px)으로
+          나눴을 때 본문 칼럼 실제 폭 = 1320 - 360 - 1 - 80 = 879px). 좌측 패딩(px-5 sm:px-8 xl:pl-24)은
+          위 상단 컨테이너와 동일하게 둬서 좌측 정렬선은 그대로 맞춤. */}
+      {!showEmptyFilterMessage && (
+        // mx-auto를 안 쓰는 이유: 상단 컨테이너가 이 폭보다 넓게 렌더링될 때(즉 879px 캡에 걸릴 때)
+        // mx-auto를 쓰면 남는 공간만큼 가운데 정렬되면서 좌측이 상단 히어로와 안 맞게 밀림 —
+        // 좌측 정렬선을 상단과 맞추려면 왼쪽에 붙여야 함(오른쪽에만 여백이 남는 형태).
+        <div className="max-w-[879px] px-5 sm:px-8 xl:pl-24">
           <CategoryArticleList
             articles={restArticles}
             nicknames={nicknames}
             commentCounts={commentCounts}
             likeCounts={likeCounts}
           />
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
