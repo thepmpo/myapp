@@ -8,10 +8,13 @@ import { useSubcategories } from "./useSubcategories";
 import { TREND_FALLBACK_ARTICLES } from "./categoryFallbackArticles";
 import CategoryHeroSplit from "./CategoryHeroSplit";
 import CategoryCardRow from "./CategoryCardRow";
+import CategoryArticleList from "./CategoryArticleList";
 import CategoryCirclePreview from "./CategoryCirclePreview";
 
+const TOP_SLOT_COUNT = 7; // 히어로 3 + 카드로우 4
+
 export default function TrendLandingPage() {
-  const { articles, isAdmin } = useCategoryArticles("trend");
+  const { articles, nicknames, commentCounts, likeCounts, isAdmin } = useCategoryArticles("trend");
   const { subcategories } = useSubcategories("trend");
   const [selectedSubcategory, setSelectedSubcategory] = useState<number | null>(null);
 
@@ -24,6 +27,12 @@ export default function TrendLandingPage() {
   // (실제로 글이 있는 것처럼 보이면 안 되니까) — 그 카테고리엔 없다는 안내만 보여줌.
   const displayArticles = isFiltering ? filteredArticles : articles.length > 0 ? articles : TREND_FALLBACK_ARTICLES;
   const showEmptyFilterMessage = isFiltering && filteredArticles.length === 0;
+
+  // 상단 히어로+카드로우에 이미 노출 중인 글(더미 fallback 포함 가능)은 목록에서 제외.
+  // displayArticles가 fallback일 땐 topIds가 fallback 글 id라 실제 articles와 안 겹쳐서
+  // 아래 계산 결과가 자연히 빈 배열이 되고(실제 글이 없으니 목록도 없음), 별도 분기가 필요 없음.
+  const topIds = new Set(displayArticles.slice(0, TOP_SLOT_COUNT).map((a) => a.id));
+  const restArticles = (isFiltering ? filteredArticles : articles).filter((a) => !topIds.has(a.id));
 
   return (
     <div className="max-w-[1320px] mx-auto px-5 sm:px-8 xl:pl-24">
@@ -72,6 +81,12 @@ export default function TrendLandingPage() {
         <>
           <CategoryHeroSplit articles={displayArticles.slice(0, 3)} />
           <CategoryCardRow articles={displayArticles.slice(3, 7)} />
+          <CategoryArticleList
+            articles={restArticles}
+            nicknames={nicknames}
+            commentCounts={commentCounts}
+            likeCounts={likeCounts}
+          />
         </>
       )}
 
