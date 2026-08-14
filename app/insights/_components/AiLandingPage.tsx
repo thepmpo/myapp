@@ -9,7 +9,6 @@ import { AI_FALLBACK_ARTICLES } from "./categoryFallbackArticles";
 import CategoryHeroStagger from "./CategoryHeroStagger";
 import CategoryCardRow from "./CategoryCardRow";
 import CategoryArticleList from "./CategoryArticleList";
-import CategoryCirclePreview from "./CategoryCirclePreview";
 
 const TOP_SLOT_COUNT = 6; // 히어로 2 + 카드로우 4
 
@@ -89,8 +88,6 @@ export default function AiLandingPage() {
           />
         </>
       )}
-
-      <CategoryCirclePreview />
     </div>
   );
 }

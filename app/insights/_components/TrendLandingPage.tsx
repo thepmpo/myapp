@@ -9,7 +9,6 @@ import { TREND_FALLBACK_ARTICLES } from "./categoryFallbackArticles";
 import CategoryHeroSplit from "./CategoryHeroSplit";
 import CategoryCardRow from "./CategoryCardRow";
 import CategoryArticleList from "./CategoryArticleList";
-import CategoryCirclePreview from "./CategoryCirclePreview";
 
 const TOP_SLOT_COUNT = 7; // 히어로 3 + 카드로우 4
 
@@ -89,8 +88,6 @@ export default function TrendLandingPage() {
           />
         </>
       )}
-
-      <CategoryCirclePreview />
     </div>
   );
 }
