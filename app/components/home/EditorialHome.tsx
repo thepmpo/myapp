@@ -56,8 +56,6 @@ const FALLBACK_POSTS: EditorialPost[] = [
     { id: -203, title: "데이터가 부족할 때 의사결정하는 법", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-31T08:00:00.000Z", isFallback: true },
     { id: -204, title: "팀의 공통 언어를 만드는 작은 습관", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-30T08:00:00.000Z", isFallback: true },
     { id: -205, title: "이번 주 가장 인상 깊었던 제품 경험", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-29T08:00:00.000Z", isFallback: true },
-    { id: -206, title: "온보딩 플로우 개선하면서 배운 것들", content: null, author: "PMPO Circle", user_id: "fallback", is_question: false, image_url: null, created_at: "2026-07-28T08:00:00.000Z", isFallback: true },
-    { id: -207, title: "타 부서와 협업할 때 쓰는 문서 양식 공유해요", content: null, author: "PMPO Circle", user_id: "fallback", is_question: true, image_url: null, created_at: "2026-07-27T08:00:00.000Z", isFallback: true },
 ];
 
 const excerpt = (value: string | null, length = 112) => {
@@ -83,21 +81,11 @@ function Artwork({ article, large = false }: { article: EditorialArticle; large?
     );
 }
 
-type HomeSlotKey =
-    | "left_1"
-    | "left_2"
-    | "hero"
-    | "circle_1"
-    | "circle_2"
-    | "circle_3"
-    | "circle_4"
-    | "circle_5"
-    | "circle_6"
-    | "circle_7";
+type HomeSlotKey = "left_1" | "left_2" | "hero" | "circle_1" | "circle_2" | "circle_3" | "circle_4" | "circle_5";
 type HomeSlotRow = { slot_key: HomeSlotKey; content_type: "article" | "post" | null; content_id: number | null };
 
 const LEFT_SLOT_KEYS: HomeSlotKey[] = ["left_1", "left_2"];
-const CIRCLE_SLOT_KEYS: HomeSlotKey[] = ["circle_1", "circle_2", "circle_3", "circle_4", "circle_5", "circle_6", "circle_7"];
+const CIRCLE_SLOT_KEYS: HomeSlotKey[] = ["circle_1", "circle_2", "circle_3", "circle_4", "circle_5"];
 
 export default function EditorialHome() {
     // 홈 화면 8개 영역(좌측 아티클 2/중앙 대표 1/우측 Circle 인기글 5)은 이제 관리자가

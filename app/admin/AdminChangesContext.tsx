@@ -5,17 +5,7 @@ import { supabase } from "@/app/lib/supabase";
 
 export type NavMenuKey = "circle" | "product" | "trend" | "ai";
 export type Visibility = "public" | "admin_only";
-export type HomeSlotKey =
-  | "left_1"
-  | "left_2"
-  | "hero"
-  | "circle_1"
-  | "circle_2"
-  | "circle_3"
-  | "circle_4"
-  | "circle_5"
-  | "circle_6"
-  | "circle_7";
+export type HomeSlotKey = "left_1" | "left_2" | "hero" | "circle_1" | "circle_2" | "circle_3" | "circle_4" | "circle_5";
 export type HomeSlotValue = { content_type: "article" | "post" | null; content_id: number | null };
 
 const slotValuesEqual = (a: HomeSlotValue, b: HomeSlotValue) =>
