@@ -34,7 +34,10 @@ export default function TrendLandingPage() {
   const restArticles = (isFiltering ? filteredArticles : articles).filter((a) => !topIds.has(a.id));
 
   return (
-    <div className="max-w-[1320px] mx-auto px-5 sm:px-8 xl:pl-24">
+    // Circle 목록(app/page.tsx)의 본문 폭과 동일하게 맞춤: Circle은 max-w-[1320px] 컨테이너를
+    // grid-cols-[minmax(0,1fr)_1px_360px] gap-x-10(40px)으로 나눠서, 본문 칼럼이 실제로는
+    // 1320 - 360(우측 사이드바) - 1(구분선) - 80(gap 2번×40px) = 879px만 씀 — 그 값을 그대로 사용.
+    <div className="max-w-[879px] mx-auto px-5 sm:px-8 xl:pl-24">
       <div className="flex items-center justify-between pt-[66px] mb-2">
         <h1 className="text-2xl font-bold text-ink">{CATEGORY_LABELS.trend}</h1>
 
