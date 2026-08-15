@@ -75,7 +75,7 @@ export default function ProductCard({ product }: { product: Product }) {
               aria-label={PLATFORM_LABELS[platform.platform] ?? platform.platform}
               className="flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-ink hover:bg-white"
             >
-              <PlatformIcon platform={platform.platform} className="h-3.5 w-3.5" />
+              <PlatformIcon platform={platform.platform} className="h-7 w-7" />
             </a>
           ))}
         </div>
