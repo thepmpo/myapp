@@ -81,8 +81,11 @@ export function LikeIcon({ className }: { className?: string }) {
 // Product 카드 플랫폼 뱃지용 — 작은 사이즈에서 잘 읽히도록 선(stroke)이 아닌 채움(fill) 스타일.
 // 특정 브랜드 로고를 그대로 복제한 게 아니라, 이 프로젝트 톤에 맞게 새로 그린 단순화된 심볼.
 export function AppStoreBadgeIcon({ className }: { className?: string }) {
+  // 로고 도형 자체가 24x24 뷰박스 중앙에서 살짝(우상단으로) 치우쳐 있어서 viewBox를 도형의
+  // 실제 중심(bbox center ≈ 12.99, 11.2)에 맞춰 이동 — 아이콘이 원(배경 서클)에 꽉 차는
+  // 지금 크기에서는 이 정도 오차도 육안으로 티가 나서 보정함.
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <svg className={className} viewBox="0.99 -0.8 24 24" fill="currentColor">
       <path d="M15.4 8.1c-.9-.1-1.7.4-2.2.4-.5 0-1.2-.4-2-.4-1 0-2 .6-2.5 1.5-1.1 1.9-.3 4.7.8 6.2.5.8 1.1 1.6 1.9 1.6.7 0 1-.5 1.9-.5s1.1.5 1.9.5c.8 0 1.3-.7 1.8-1.5.6-.9.8-1.7.8-1.7-.1 0-1.6-.6-1.6-2.4 0-1.4 1.2-2.1 1.2-2.1-.6-.9-1.5-1.4-2-1.6Z" />
       <path d="M13.1 6.9c.4-.5.7-1.2.6-1.9-.6.1-1.3.4-1.7.9-.4.5-.7 1.1-.6 1.8.7.1 1.4-.3 1.7-.8Z" />
     </svg>
@@ -90,8 +93,9 @@ export function AppStoreBadgeIcon({ className }: { className?: string }) {
 }
 
 export function GooglePlayBadgeIcon({ className }: { className?: string }) {
+  // AppStoreBadgeIcon과 같은 이유로 viewBox를 도형 실제 중심(bbox center ≈ 12.46, 12)에 맞춤.
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <svg className={className} viewBox="0.46 0 24 24" fill="currentColor">
       <path d="M6.5 4.2c-.3.3-.5.7-.5 1.2v13.2c0 .5.2.9.5 1.2l7.6-7.8Z" />
       <path d="m14.9 12.6-2.5-2.5-6-3.5 8.5 6ZM6.4 19.8l6-3.5 2.5-2.5-8.5 6Z" />
       <path d="m15.7 11.3 2.7-1.6c.7-.4.7-1.4 0-1.8l-2.7-1.6-2.9 3Z" />
