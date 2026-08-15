@@ -44,7 +44,9 @@ export default function ProductListPage() {
 
       const { data: productRows } = await supabase
         .from("products")
-        .select("id, name, description, image_url, primary_link, category, product_platforms(platform, url)")
+        .select(
+          "id, name, description, image_url, primary_link, product_categories(name), product_platforms(platform, url)"
+        )
         .order("id", { ascending: false });
 
       if (!active) return;

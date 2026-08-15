@@ -7,7 +7,7 @@ import { supabase } from "@/app/lib/supabase";
 type Product = {
   id: number;
   name: string;
-  category: string | null;
+  product_categories: { name: string } | null;
   created_at: string;
 };
 
@@ -17,10 +17,10 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, category, created_at")
+      .select("id, name, product_categories(name), created_at")
       .order("id", { ascending: false });
 
-    if (!error) setProducts((data as Product[]) || []);
+    if (!error) setProducts((data as unknown as Product[]) || []);
   };
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function AdminProductsPage() {
             }`}
           >
             <div className="min-w-0">
-              <div className="text-xs font-mono text-ink-soft">{p.category || "카테고리 없음"}</div>
+              <div className="text-xs font-mono text-ink-soft">{p.product_categories?.name || "카테고리 없음"}</div>
               <div className="text-sm text-ink truncate">{p.name}</div>
             </div>
 

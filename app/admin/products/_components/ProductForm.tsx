@@ -13,6 +13,8 @@ const PLATFORM_OPTIONS: { value: Platform; label: string }[] = [
 ];
 
 type PlatformRow = { platform: Platform; url: string };
+type CategoryOption = { id: number; name: string };
+type SubcategoryOption = { id: number; name: string; category_id: number };
 
 export default function ProductForm({ productId }: { productId?: number }) {
   const router = useRouter();
@@ -24,7 +26,10 @@ export default function ProductForm({ productId }: { productId?: number }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [primaryLink, setPrimaryLink] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [subcategories, setSubcategories] = useState<SubcategoryOption[]>([]);
+  const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [subcategoryId, setSubcategoryId] = useState<number | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [platforms, setPlatforms] = useState<PlatformRow[]>([{ platform: "app_store", url: "" }]);
@@ -35,6 +40,9 @@ export default function ProductForm({ productId }: { productId?: number }) {
     const init = async () => {
       const { data } = await supabase.auth.getUser();
       if (data.user) setCurrentUser({ id: data.user.id });
+
+      const { data: categoryRows } = await supabase.from("product_categories").select("id, name").order("name");
+      setCategories((categoryRows as CategoryOption[]) || []);
 
       if (isEdit) {
         const { data: product, error: fetchError } = await supabase
@@ -49,7 +57,8 @@ export default function ProductForm({ productId }: { productId?: number }) {
           setName(product.name);
           setDescription(product.description);
           setPrimaryLink(product.primary_link);
-          setCategory(product.category ?? "");
+          setCategoryId(product.category_id ?? null);
+          setSubcategoryId(product.subcategory_id ?? null);
           setExistingImageUrl(product.image_url);
           if (product.product_platforms?.length > 0) {
             setPlatforms(product.product_platforms.map((p: PlatformRow) => ({ platform: p.platform, url: p.url })));
@@ -62,6 +71,28 @@ export default function ProductForm({ productId }: { productId?: number }) {
 
     init();
   }, [productId, isEdit]);
+
+  // 선택된 메인 카테고리가 바뀔 때마다 그 하위 세부 카테고리 목록을 다시 불러옴.
+  useEffect(() => {
+    if (categoryId == null) {
+      setSubcategories([]);
+      return;
+    }
+
+    let active = true;
+    supabase
+      .from("product_subcategories")
+      .select("id, name, category_id")
+      .eq("category_id", categoryId)
+      .order("name")
+      .then(({ data }) => {
+        if (active) setSubcategories((data as SubcategoryOption[]) || []);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [categoryId]);
 
   const updatePlatform = (index: number, patch: Partial<PlatformRow>) => {
     setPlatforms((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
@@ -114,7 +145,14 @@ export default function ProductForm({ productId }: { productId?: number }) {
     if (isEdit) {
       const { error: updateError } = await supabase
         .from("products")
-        .update({ name, description, primary_link: primaryLink, category: category || null, image_url: imageUrl })
+        .update({
+          name,
+          description,
+          primary_link: primaryLink,
+          category_id: categoryId,
+          subcategory_id: subcategoryId,
+          image_url: imageUrl,
+        })
         .eq("id", productId);
 
       if (updateError) {
@@ -139,7 +177,8 @@ export default function ProductForm({ productId }: { productId?: number }) {
             name,
             description,
             primary_link: primaryLink,
-            category: category || null,
+            category_id: categoryId,
+            subcategory_id: subcategoryId,
             image_url: imageUrl,
             author_id: currentUser.id,
           },
@@ -194,12 +233,38 @@ export default function ProductForm({ productId }: { productId?: number }) {
         className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-2 focus:outline-none focus:ring-2 focus:ring-accent/30"
       />
 
-      <input
-        placeholder="카테고리 (선택, 나중에 필터에 쓰일 값)"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        className="w-full px-3 py-2.5 rounded-lg border border-border bg-surface text-sm text-ink placeholder:text-ink-soft mb-3 focus:outline-none focus:ring-2 focus:ring-accent/30"
-      />
+      <div className="flex gap-2 mb-3">
+        <select
+          value={categoryId ?? ""}
+          onChange={(e) => {
+            const id = e.target.value === "" ? null : Number(e.target.value);
+            setCategoryId(id);
+            setSubcategoryId(null);
+          }}
+          className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30"
+        >
+          <option value="">카테고리 선택 안 함</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={subcategoryId ?? ""}
+          onChange={(e) => setSubcategoryId(e.target.value === "" ? null : Number(e.target.value))}
+          disabled={categoryId == null}
+          className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:bg-border/30 disabled:text-ink-soft disabled:cursor-not-allowed"
+        >
+          <option value="">세부 카테고리 선택 안 함</option>
+          {subcategories.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="flex items-center gap-2 mb-3 text-xs text-ink-soft">
         <input
