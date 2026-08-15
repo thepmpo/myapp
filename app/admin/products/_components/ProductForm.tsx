@@ -72,6 +72,15 @@ export default function ProductForm({ productId }: { productId?: number }) {
     init();
   }, [productId, isEdit]);
 
+  const reloadSubcategories = async (catId: number) => {
+    const { data } = await supabase
+      .from("product_subcategories")
+      .select("id, name, category_id")
+      .eq("category_id", catId)
+      .order("name");
+    setSubcategories((data as SubcategoryOption[]) || []);
+  };
+
   // 선택된 메인 카테고리가 바뀔 때마다 그 하위 세부 카테고리 목록을 다시 불러옴.
   useEffect(() => {
     if (categoryId == null) {
@@ -93,6 +102,52 @@ export default function ProductForm({ productId }: { productId?: number }) {
       active = false;
     };
   }, [categoryId]);
+
+  // 메인 카테고리를 그 자리에서 새로 만들고, 만든 항목을 바로 선택 상태로 전환.
+  const createCategory = async () => {
+    const name = window.prompt("새 메인 카테고리 이름을 입력하세요");
+    const trimmed = name?.trim();
+    if (!trimmed) return;
+
+    const { data, error: insertError } = await supabase
+      .from("product_categories")
+      .insert([{ name: trimmed }])
+      .select("id")
+      .single();
+
+    if (insertError || !data) {
+      setError(insertError?.message ?? "카테고리 생성에 실패했습니다");
+      return;
+    }
+
+    const { data: categoryRows } = await supabase.from("product_categories").select("id, name").order("name");
+    setCategories((categoryRows as CategoryOption[]) || []);
+    setCategoryId(data.id);
+    setSubcategoryId(null);
+  };
+
+  // 세부 카테고리를 그 자리에서 새로 만들고, 만든 항목을 바로 선택 상태로 전환.
+  const createSubcategory = async () => {
+    if (categoryId == null) return;
+
+    const name = window.prompt("새 세부 카테고리 이름을 입력하세요");
+    const trimmed = name?.trim();
+    if (!trimmed) return;
+
+    const { data, error: insertError } = await supabase
+      .from("product_subcategories")
+      .insert([{ category_id: categoryId, name: trimmed }])
+      .select("id")
+      .single();
+
+    if (insertError || !data) {
+      setError(insertError?.message ?? "세부 카테고리 생성에 실패했습니다");
+      return;
+    }
+
+    await reloadSubcategories(categoryId);
+    setSubcategoryId(data.id);
+  };
 
   const updatePlatform = (index: number, patch: Partial<PlatformRow>) => {
     setPlatforms((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
@@ -237,6 +292,10 @@ export default function ProductForm({ productId }: { productId?: number }) {
         <select
           value={categoryId ?? ""}
           onChange={(e) => {
+            if (e.target.value === "__new__") {
+              createCategory();
+              return;
+            }
             const id = e.target.value === "" ? null : Number(e.target.value);
             setCategoryId(id);
             setSubcategoryId(null);
@@ -249,11 +308,18 @@ export default function ProductForm({ productId }: { productId?: number }) {
               {c.name}
             </option>
           ))}
+          <option value="__new__">+ 새 카테고리 만들기</option>
         </select>
 
         <select
           value={subcategoryId ?? ""}
-          onChange={(e) => setSubcategoryId(e.target.value === "" ? null : Number(e.target.value))}
+          onChange={(e) => {
+            if (e.target.value === "__new__") {
+              createSubcategory();
+              return;
+            }
+            setSubcategoryId(e.target.value === "" ? null : Number(e.target.value));
+          }}
           disabled={categoryId == null}
           className="flex-1 px-3 py-2 rounded-lg border border-border bg-surface text-sm text-ink focus:outline-none focus:ring-2 focus:ring-accent/30 disabled:bg-border/30 disabled:text-ink-soft disabled:cursor-not-allowed"
         >
@@ -263,6 +329,7 @@ export default function ProductForm({ productId }: { productId?: number }) {
               {s.name}
             </option>
           ))}
+          {categoryId != null && <option value="__new__">+ 새 카테고리 만들기</option>}
         </select>
       </div>
 
