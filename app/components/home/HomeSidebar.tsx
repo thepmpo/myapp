@@ -68,7 +68,10 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
                   <p className="mt-1.5 flex items-center gap-1 text-xs text-ink-soft">
                     <LikeIcon /> {reactionCounts[post.id] || 0}
                     <span aria-hidden="true">·</span>
-                    💬 {commentCounts[post.id] || 0}
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                    </svg>
+                    {commentCounts[post.id] || 0}
                   </p>
                 </li>
               ))}
@@ -83,7 +86,7 @@ export default function HomeSidebar({ posts, commentCounts, reactionCounts, nick
             추천 주제
           </h2>
           <div className="flex flex-wrap gap-2">
-            <Link href="/" className="rounded-full border border-[#f1efed] px-3.5 py-2 text-xs text-ink hover:border-ink">
+            <Link href="/circle" className="rounded-full border border-[#f1efed] px-3.5 py-2 text-xs text-ink hover:border-ink">
               Circle
             </Link>
             {INSIGHTS_CATEGORIES.map((category) => (

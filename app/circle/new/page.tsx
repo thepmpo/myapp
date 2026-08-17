@@ -80,7 +80,7 @@ export default function NewCirclePostPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/circle");
   };
 
   if (checkingAuth) return <div className="px-5 py-8 text-sm text-ink-soft sm:px-8">로딩중...</div>;
@@ -98,7 +98,7 @@ export default function NewCirclePostPage() {
 
   return (
     <div className="w-full max-w-[680px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
-      <Link href="/" className="inline-block mb-4 text-sm text-ink-soft hover:text-accent">
+      <Link href="/circle" className="inline-block mb-4 text-sm text-ink-soft hover:text-accent">
         ← Circle로
       </Link>
 

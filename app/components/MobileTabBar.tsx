@@ -48,7 +48,7 @@ export default function MobileTabBar() {
     setIsInsightsMenuOpen(false);
   }, [pathname]);
 
-  const isCircle = pathname === "/" || pathname.startsWith("/post");
+  const isCircle = pathname === "/circle" || pathname.startsWith("/post");
   const isInsights = pathname.startsWith("/insights");
   const isProfile = pathname.startsWith("/profile");
 
@@ -106,7 +106,7 @@ export default function MobileTabBar() {
         )}
 
         {showCircleTab && (
-        <Link href="/" className={tabClass(isCircle)}>
+        <Link href="/circle" className={tabClass(isCircle)}>
           <CircleIcon />
           Circle
         </Link>

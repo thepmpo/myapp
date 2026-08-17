@@ -111,7 +111,7 @@ export default function EditCirclePostPage() {
     return (
       <div className="px-5 py-8 sm:px-8">
         <p className="text-sm text-ink-soft mb-3">수정 권한이 없습니다</p>
-        <Link href="/" className="text-sm text-accent hover:underline">
+        <Link href="/circle" className="text-sm text-accent hover:underline">
           Circle로 돌아가기
         </Link>
       </div>

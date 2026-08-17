@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <AdminChangesProvider>
       <div className={`mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8 ${isInsightsWriteForm ? "max-w-[1100px]" : "max-w-[720px]"}`}>
         <div className="mb-5">
-          <Link href="/" className="text-sm text-ink-soft hover:text-accent">
+          <Link href="/circle" className="text-sm text-ink-soft hover:text-accent">
             ← Circle로
           </Link>
         </div>

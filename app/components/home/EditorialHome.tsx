@@ -219,7 +219,7 @@ export default function EditorialHome() {
     }, []);
 
     const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + article.id;
-    const postHref = (post: EditorialPost) => post.isFallback ? "/" : "/post/" + post.id;
+    const postHref = (post: EditorialPost) => post.isFallback ? "/circle" : "/post/" + post.id;
 
     const handlePostClick = (event: React.MouseEvent, post: EditorialPost) => {
         if (!post.isFallback && !currentUser) {
@@ -235,7 +235,7 @@ export default function EditorialHome() {
                     <button type="button" onClick={() => setIsMenuOpen(true)} aria-label="주요 메뉴 열기" className="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center text-black">
                         <span className="flex w-5 flex-col gap-[5px]" aria-hidden="true"><span className="h-px bg-current" /><span className="h-px bg-current" /><span className="h-px bg-current" /></span>
                     </button>
-                    <Link href="/home" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[36px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[86px]">The PMPO</Link>
+                    <Link href="/" className="absolute left-1/2 top-7 -translate-x-1/2 whitespace-nowrap font-serif text-[36px] font-bold leading-none tracking-[-0.055em] md:top-12 md:text-[86px]">The PMPO</Link>
                     {currentUser ? (
                         <ProfileMenu userId={currentUser.id} isAdmin={isAdmin} className="ml-auto hidden md:block">
                             <span className="flex items-center gap-2 pt-1 text-[13px] font-medium text-[#161616]/80 hover:text-black">
@@ -320,6 +320,13 @@ export default function EditorialHome() {
                                         </li>
                                     ))}
                                 </ol>
+
+                                <Link
+                                    href="/circle"
+                                    className="mt-7 flex items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-hover"
+                                >
+                                    소통하러 가기
+                                </Link>
                             </aside>
                         </div>
                     )}
@@ -330,7 +337,7 @@ export default function EditorialHome() {
                 <button type="button" aria-label="메뉴 닫기" onClick={() => setIsMenuOpen(false)} className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isMenuOpen ? "opacity-100" : "opacity-0"}`} />
                 <aside className={`absolute inset-y-0 left-0 w-[min(82vw,218px)] border-r border-[#f1efed] bg-surface px-5 py-6 shadow-xl transition-transform duration-300 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="mb-8 flex items-center justify-between">
-                        <Link href="/home" onClick={() => setIsMenuOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
+                        <Link href="/" onClick={() => setIsMenuOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
                         <button type="button" onClick={() => setIsMenuOpen(false)} aria-label="내비게이션 닫기" className="h-9 w-9 text-xl text-ink-soft">×</button>
                     </div>
                     <WorkspaceNavigation onNavigate={() => setIsMenuOpen(false)} />

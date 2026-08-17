@@ -362,7 +362,7 @@ export default function PostDetail() {
     return (
       <WorkspaceFrame>
         <div className="px-5 py-8 sm:px-8">
-          <LoginPromptModal onClose={() => router.push('/')} />
+          <LoginPromptModal onClose={() => router.push('/circle')} />
         </div>
       </WorkspaceFrame>
     );

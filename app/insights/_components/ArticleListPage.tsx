@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArticleCategory, CATEGORY_LABELS } from "@/app/lib/insightsCategories";
 import { useCategoryArticles } from "./useCategoryArticles";
+import { LikeIcon } from "@/app/components/icons";
 
 export default function ArticleListPage({ category }: { category: ArticleCategory }) {
   const { articles, nicknames, commentCounts, likeCounts, isAdmin } = useCategoryArticles(category);
@@ -47,9 +48,19 @@ export default function ArticleListPage({ category }: { category: ArticleCategor
                   {nicknames[article.author_id] ?? article.author}
                 </div>
 
-                <div className="mt-1 text-xs font-mono text-ink-soft">
-                  {new Date(article.created_at).toLocaleDateString("ko-KR")} · ❤️ {likeCounts[article.id] || 0} · 💬{" "}
-                  {commentCounts[article.id] || 0}
+                <div className="mt-1 flex items-center gap-1.5 text-xs font-mono text-ink-soft">
+                  <span>{new Date(article.created_at).toLocaleDateString("ko-KR")}</span>
+                  <span aria-hidden="true">·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <LikeIcon className="h-3.5 w-3.5" />
+                    {likeCounts[article.id] || 0}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+                      <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z" />
+                    </svg>
+                    {commentCounts[article.id] || 0}
+                  </span>
                 </div>
               </div>
 

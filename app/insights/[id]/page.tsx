@@ -396,9 +396,16 @@ export default function ArticleDetail() {
                 <div className="mt-2 flex items-center justify-between text-xs font-mono text-ink-soft">
                   <span>{commentNicknames[comment.user_id] ?? comment.author}</span>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => toggleCommentLike(comment.id)} className="cursor-pointer hover:text-accent">
-                      {commentLikes.some((l) => l.comment_id === comment.id && l.user_id === currentUser?.id) ? '❤️' : '🤍'}{' '}
-                      {commentLikes.filter((l) => l.comment_id === comment.id).length}
+                    <button
+                      onClick={() => toggleCommentLike(comment.id)}
+                      className={`flex items-center gap-1 cursor-pointer ${
+                        commentLikes.some((l) => l.comment_id === comment.id && l.user_id === currentUser?.id)
+                          ? 'text-accent'
+                          : 'text-ink-soft hover:text-ink'
+                      }`}
+                    >
+                      <LikeIcon />
+                      공감해요 {commentLikes.filter((l) => l.comment_id === comment.id).length}
                     </button>
                     {currentUser?.id === comment.user_id && (
                       <button onClick={() => deleteComment(comment.id)} className="cursor-pointer hover:text-accent">

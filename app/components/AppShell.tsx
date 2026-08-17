@@ -10,8 +10,8 @@ const STANDALONE_ROUTES = ["/login", "/signup", "/reset", "/reset/confirm"];
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isStandalone = STANDALONE_ROUTES.includes(pathname);
-  const isHome = pathname === "/home";
-  const isCircle = pathname === "/" || pathname.startsWith("/post/");
+  const isHome = pathname === "/";
+  const isCircle = pathname === "/circle" || pathname.startsWith("/post/");
 
   if (isStandalone) {
     return (

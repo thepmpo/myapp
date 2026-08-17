@@ -9,8 +9,8 @@ import { useWorkspaceData } from "@/app/components/home/WorkspaceDataContext";
 import ProfileMenu from "@/app/components/ProfileMenu";
 
 export const WORKSPACE_NAV_ITEMS = [
-    { label: "Home", href: "/home", icon: "home", navKey: null },
-    { label: "Circle", href: "/", icon: "circle", navKey: "circle" },
+    { label: "Home", href: "/", icon: "home", navKey: null },
+    { label: "Circle", href: "/circle", icon: "circle", navKey: "circle" },
     { label: "Product", href: "/insights/product", icon: "document", navKey: "product" },
     { label: "Trends", href: "/insights/trend", icon: "chart", navKey: "trend" },
     { label: "AI", href: "/insights/ai", icon: "spark", navKey: "ai" },
@@ -143,7 +143,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                                 <span className="block h-px w-4 bg-current" />
                             </span>
                         </button>
-                        <Link href="/home" className="whitespace-nowrap font-serif text-[24px] font-bold leading-none tracking-[-0.04em] text-ink">
+                        <Link href="/" className="whitespace-nowrap font-serif text-[24px] font-bold leading-none tracking-[-0.04em] text-ink">
                             The PMPO
                         </Link>
                     </div>
@@ -201,7 +201,7 @@ export default function WorkspaceFrame({ children, searchQuery = "", onSearchCha
                 <button type="button" aria-label="내비게이션 닫기" onClick={() => setIsMobileNavOpen(false)} className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isMobileNavOpen ? "opacity-100" : "opacity-0"}`} />
                 <aside className={`absolute inset-y-0 left-0 w-[min(82vw,290px)] border-r border-[#f1efed] bg-surface px-5 py-6 shadow-xl transition-transform duration-300 ${isMobileNavOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="mb-8 flex items-center justify-between">
-                        <Link href="/home" onClick={() => setIsMobileNavOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
+                        <Link href="/" onClick={() => setIsMobileNavOpen(false)} className="font-serif text-2xl font-bold tracking-[-0.04em]">The PMPO</Link>
                         <button type="button" onClick={() => setIsMobileNavOpen(false)} aria-label="내비게이션 닫기" className="h-9 w-9 text-xl text-ink-soft">×</button>
                     </div>
                     <WorkspaceNavigation onNavigate={() => setIsMobileNavOpen(false)} />
