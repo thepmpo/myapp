@@ -1,15 +1,37 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import { supabase } from '../../lib/supabase';
 import { CATEGORY_LABELS } from '@/app/lib/insightsCategories';
 import ArticleBody from '../_components/ArticleBody';
 import BackButton from '../_components/BackButton';
 import ArticleEngagement from '../_components/ArticleEngagement';
 import ArticleViewRecorder from '../_components/ArticleViewRecorder';
+import { buildMetaDescription } from '../_components/metaDescription';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id: idParam } = await params;
+  const id = Number(idParam);
+
+  const { data: article } = await supabase.from('articles').select('title, content').eq('id', id).single();
+
+  if (!article) {
+    return { title: 'The PMPO' };
+  }
+
+  return {
+    title: `${article.title} | The PMPO`,
+    description: buildMetaDescription(article.content),
+  };
+}
 
 export default async function ArticleDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id: idParam } = await params;
