@@ -1,13 +1,14 @@
 // Trends/AI 공용: 균일한 크기의 카드 4개를 한 줄로 나열.
 import Link from "next/link";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
+import { buildArticleSlug } from "@/app/lib/articleSlug";
 import type { HomeArticle } from "@/app/components/home/types";
 import ArticleArtwork from "./ArticleArtwork";
 import { excerpt } from "./excerpt";
 
 function UniformCard({ article }: { article: HomeArticle }) {
   return (
-    <Link href={`/insights/${article.id}`} className="group block">
+    <Link href={`/insights/${buildArticleSlug(article.id, article.title)}`} className="group block">
       <div className="aspect-[4/3] overflow-hidden bg-[#eceae5]">
         <ArticleArtwork article={article} />
       </div>

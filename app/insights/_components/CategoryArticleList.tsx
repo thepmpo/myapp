@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { HomeArticle } from "@/app/components/home/types";
 import { LikeIcon } from "@/app/components/icons";
+import { buildArticleSlug } from "@/app/lib/articleSlug";
 
 const INITIAL_COUNT = 7;
 const LOAD_MORE_COUNT = 3;
@@ -65,7 +66,7 @@ export default function CategoryArticleList({
           return (
             <Link
               key={article.id}
-              href={`/insights/${article.id}`}
+              href={`/insights/${buildArticleSlug(article.id, article.title)}`}
               className="block py-6 border-b border-border last:border-b-0 border-l-2 border-l-transparent pl-4 -ml-4 transition-colors hover:border-l-accent"
             >
               <div className="mb-2 flex items-center gap-2 text-xs text-ink-soft">

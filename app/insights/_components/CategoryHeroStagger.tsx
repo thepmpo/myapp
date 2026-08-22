@@ -1,6 +1,7 @@
 // AI 상단 레이아웃: 텍스트/이미지 위치가 엇갈리는 블록 2개.
 import Link from "next/link";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
+import { buildArticleSlug } from "@/app/lib/articleSlug";
 import type { HomeArticle } from "@/app/components/home/types";
 import ArticleArtwork from "./ArticleArtwork";
 import { excerpt } from "./excerpt";
@@ -8,7 +9,7 @@ import { excerpt } from "./excerpt";
 function StaggerBlock({ article, textFirst }: { article: HomeArticle; textFirst: boolean }) {
   return (
     <Link
-      href={`/insights/${article.id}`}
+      href={`/insights/${buildArticleSlug(article.id, article.title)}`}
       className={`group flex flex-col items-center gap-6 border-b border-border py-10 last:border-b-0 lg:flex-row lg:gap-12 ${
         textFirst ? "lg:flex-row-reverse" : ""
       }`}

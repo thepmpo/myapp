@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/app/lib/supabase";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
+import { buildArticleSlug } from "@/app/lib/articleSlug";
 import { WorkspaceNavigation } from "@/app/components/home/WorkspaceFrame";
 import type { HomeArticle, HomePost } from "@/app/components/home/types";
 import LoginPromptModal from "@/app/components/LoginPromptModal";
@@ -218,7 +219,7 @@ export default function EditorialHome() {
         return () => { active = false; };
     }, []);
 
-    const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + article.id;
+    const articleHref = (article: EditorialArticle) => article.isFallback ? "/insights/" + article.category : "/insights/" + buildArticleSlug(article.id, article.title);
     const postHref = (post: EditorialPost) => post.isFallback ? "/circle" : "/post/" + post.id;
 
     const handlePostClick = (event: React.MouseEvent, post: EditorialPost) => {

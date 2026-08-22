@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { supabase } from '../../lib/supabase';
 import { CATEGORY_LABELS } from '@/app/lib/insightsCategories';
+import { buildArticleSlug, parseArticleId } from '@/app/lib/articleSlug';
 import ArticleBody from '../_components/ArticleBody';
 import BackButton from '../_components/BackButton';
 import ArticleEngagement from '../_components/ArticleEngagement';
@@ -16,10 +17,14 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { id: idParam } = await params;
-  const id = Number(idParam);
+  const { slug } = await params;
+  const id = parseArticleId(slug);
+
+  if (id === null) {
+    return { title: 'The PMPO' };
+  }
 
   const { data: article } = await supabase.from('articles').select('title, content').eq('id', id).single();
 
@@ -33,13 +38,24 @@ export async function generateMetadata({
   };
 }
 
-export default async function ArticleDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id: idParam } = await params;
-  const id = Number(idParam);
+export default async function ArticleDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug: rawSlug } = await params;
+  // Next.js가 이 동적 세그먼트 값을 percent-encoded 상태 그대로 넘겨줄 때가 있어 직접 디코딩.
+  const slug = decodeURIComponent(rawSlug);
+  const id = parseArticleId(slug);
+
+  if (id === null) notFound();
 
   const { data: article } = await supabase.from('articles').select('*').eq('id', id).single();
 
   if (!article) notFound();
+
+  const canonicalSlug = buildArticleSlug(id, article.title);
+  if (slug !== canonicalSlug) {
+    // Location 헤더는 non-ASCII(한글)를 그대로 담지 못하므로 percent-encoding 필요.
+    // 브라우저 주소창에는 다시 자동으로 디코딩되어 한글 그대로 표시됨.
+    permanentRedirect(`/insights/${encodeURI(canonicalSlug)}`);
+  }
 
   let authorNickname = article.author;
   let authorAvatarUrl: string | null = null;

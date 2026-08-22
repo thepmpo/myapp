@@ -1,13 +1,14 @@
 // Trends 상단 레이아웃: 큰 카드 1개 + 작은 카드 2개(세로).
 import Link from "next/link";
 import { CATEGORY_LABELS } from "@/app/lib/insightsCategories";
+import { buildArticleSlug } from "@/app/lib/articleSlug";
 import type { HomeArticle } from "@/app/components/home/types";
 import ArticleArtwork from "./ArticleArtwork";
 import { excerpt } from "./excerpt";
 
 function BigCard({ article }: { article: HomeArticle }) {
   return (
-    <Link href={`/insights/${article.id}`} className="group block">
+    <Link href={`/insights/${buildArticleSlug(article.id, article.title)}`} className="group block">
       <div className="aspect-[16/10] overflow-hidden bg-[#eceae5]">
         <ArticleArtwork article={article} large />
       </div>
@@ -24,7 +25,7 @@ function BigCard({ article }: { article: HomeArticle }) {
 
 function SmallCard({ article }: { article: HomeArticle }) {
   return (
-    <Link href={`/insights/${article.id}`} className="group flex items-start gap-4">
+    <Link href={`/insights/${buildArticleSlug(article.id, article.title)}`} className="group flex items-start gap-4">
       <div className="h-24 w-24 shrink-0 overflow-hidden bg-[#eceae5]">
         <ArticleArtwork article={article} />
       </div>
