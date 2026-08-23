@@ -7,9 +7,11 @@
 type Props = {
   checked: boolean;
   onChange: (checked: boolean) => void;
+  // 여러 카드가 모인 통합 대시보드처럼 화면을 깔끔하게 유지하고 싶을 때 안내 문구를 생략.
+  showNotice?: boolean;
 };
 
-export default function SeedDataToggle({ checked, onChange }: Props) {
+export default function SeedDataToggle({ checked, onChange, showNotice = true }: Props) {
   return (
     <div className="mb-5">
       <label className="flex w-fit cursor-pointer items-center gap-2 text-sm text-ink-soft">
@@ -21,7 +23,7 @@ export default function SeedDataToggle({ checked, onChange }: Props) {
           className="h-4 w-4 rounded border-border accent-accent"
         />
       </label>
-      {checked && <p className="mt-2 text-xs font-medium text-amber-600">시드 데이터 포함 중</p>}
+      {showNotice && checked && <p className="mt-2 text-xs font-medium text-amber-600">시드 데이터 포함 중</p>}
     </div>
   );
 }

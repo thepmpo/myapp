@@ -1,11 +1,25 @@
 "use client";
 
+import { useState } from "react";
+import { useAnswerRateStats } from "./_lib/useAnswerRateStats";
+import { useSignupStats } from "./_lib/useSignupStats";
+import AnswerRateCards from "./_components/AnswerRateCards";
+import SignupStatsCards from "./_components/SignupStatsCards";
+import SeedDataToggle from "./_components/SeedDataToggle";
+
 export default function AdminDashboardPage() {
+  const [includeSeedData, setIncludeSeedData] = useState(false);
+  const answerRateStats = useAnswerRateStats(includeSeedData);
+  const signupStats = useSignupStats(includeSeedData);
+
   return (
-    <div className="bg-surface border border-border rounded-xl p-8 text-center shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
-      <p className="text-sm text-ink-soft">
-        대시보드는 준비 중이에요. 답변률/응답시간 대시보드와 가입 유저 통계가 이곳으로 통합될 예정이에요.
-      </p>
+    <div>
+      <SeedDataToggle checked={includeSeedData} onChange={setIncludeSeedData} showNotice={false} />
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <AnswerRateCards {...answerRateStats} showSeedCaption={false} />
+        <SignupStatsCards {...signupStats} />
+      </div>
     </div>
   );
 }
