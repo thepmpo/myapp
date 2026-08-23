@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabase";
+import { getSeedUserIds } from "../_lib/seedAccounts";
 
 // PRD 성공 지표: 질문 태그 글 중 답변률 80% 이상, 첫 답변까지 2시간 이내
 const ANSWER_RATE_TARGET = 80;
 const RESPONSE_TIME_TARGET_MS = 2 * 60 * 60 * 1000;
 
-type Post = { id: number; created_at: string };
+type Post = { id: number; created_at: string; user_id: string };
 type Comment = { post_id: number; created_at: string };
 
 function formatDuration(ms: number): string {
@@ -46,6 +47,7 @@ export default function AdminAnswerRatePage() {
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [responseTimes, setResponseTimes] = useState<number[]>([]);
+  const [excludedSeedCount, setExcludedSeedCount] = useState(0);
 
   useEffect(() => {
     const load = async () => {
@@ -54,10 +56,10 @@ export default function AdminAnswerRatePage() {
 
       // "질문" 판정 기준은 Circle 목록의 "답변 없는 질문만 보기" 필터(app/circle/page.tsx)와 동일하게
       // is_question = true 로만 판단함(태그 없는 일반 공유 글은 분모에서 제외).
-      const { data: postsData, error: postsError } = await supabase
-        .from("posts")
-        .select("id, created_at")
-        .eq("is_question", true);
+      const [{ data: postsData, error: postsError }, seedUserIds] = await Promise.all([
+        supabase.from("posts").select("id, created_at, user_id").eq("is_question", true),
+        getSeedUserIds(),
+      ]);
 
       if (postsError) {
         setError(postsError.message);
@@ -65,8 +67,11 @@ export default function AdminAnswerRatePage() {
         return;
       }
 
-      const posts = (postsData as Post[]) || [];
+      const allQuestionPosts = (postsData as Post[]) || [];
+      // 통계를 왜곡하지 않도록 시드(더미) 계정이 작성한 질문 글은 분모/분자에서 전부 제외.
+      const posts = allQuestionPosts.filter((p) => !seedUserIds.has(p.user_id));
       setTotalQuestions(posts.length);
+      setExcludedSeedCount(allQuestionPosts.length - posts.length);
 
       if (posts.length === 0) {
         setAnsweredQuestions(0);
@@ -134,29 +139,36 @@ export default function AdminAnswerRatePage() {
         <h2 className="text-sm font-bold text-ink mb-1">답변률</h2>
         <p className="text-3xl font-bold text-ink">{totalQuestions > 0 ? `${answerRate.toFixed(1)}%` : "-"}</p>
         <p className="mt-1 text-xs text-ink-soft">
-          {totalQuestions > 0 ? `${totalQuestions}개 중 ${answeredQuestions}개 답변됨` : "질문 태그가 붙은 글이 아직 없어요"}
+          {totalQuestions > 0
+            ? `${totalQuestions}개 중 ${answeredQuestions}개 답변됨`
+            : excludedSeedCount > 0
+              ? "아직 답변할 실제 질문이 없어요"
+              : "질문 태그가 붙은 글이 아직 없어요"}
         </p>
+        {excludedSeedCount > 0 && <p className="mt-0.5 text-[11px] text-ink-soft">시드 데이터 {excludedSeedCount}개 제외</p>}
         {totalQuestions > 0 && (
-          <p className={`mt-2 text-xs font-medium ${meetsRateTarget ? "text-emerald-600" : "text-red-500"}`}>
-            목표(80% 이상) {meetsRateTarget ? "달성" : "미달성"}
-          </p>
-        )}
+          <>
+            <p className={`mt-2 text-xs font-medium ${meetsRateTarget ? "text-emerald-600" : "text-red-500"}`}>
+              목표(80% 이상) {meetsRateTarget ? "달성" : "미달성"}
+            </p>
 
-        <div className="relative mt-5 pb-5">
-          <div className="relative h-2.5 w-full rounded-full bg-border">
-            <div
-              className="h-full rounded-full bg-emerald-500"
-              style={{ width: `${Math.min(answerRate, 100)}%` }}
-            />
-            <div className="absolute inset-y-0 w-0.5 bg-red-500" style={{ left: `${ANSWER_RATE_TARGET}%` }} />
-          </div>
-          <span
-            className="absolute top-4 -translate-x-1/2 whitespace-nowrap text-[11px] font-medium text-red-500"
-            style={{ left: `${ANSWER_RATE_TARGET}%` }}
-          >
-            목표 {ANSWER_RATE_TARGET}%
-          </span>
-        </div>
+            <div className="relative mt-5 pb-5">
+              <div className="relative h-2.5 w-full rounded-full bg-border">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{ width: `${Math.min(answerRate, 100)}%` }}
+                />
+                <div className="absolute inset-y-0 w-0.5 bg-red-500" style={{ left: `${ANSWER_RATE_TARGET}%` }} />
+              </div>
+              <span
+                className="absolute top-4 -translate-x-1/2 whitespace-nowrap text-[11px] font-medium text-red-500"
+                style={{ left: `${ANSWER_RATE_TARGET}%` }}
+              >
+                목표 {ANSWER_RATE_TARGET}%
+              </span>
+            </div>
+          </>
+        )}
       </section>
 
       <section className="flex h-full flex-col bg-surface border border-border rounded-xl p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
