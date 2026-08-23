@@ -5,6 +5,8 @@ import { supabase } from "@/app/lib/supabase";
 
 type Profile = { id: string; nickname: string; email: string; is_admin: boolean; is_seed: boolean; created_at: string };
 
+const ROW_GRID = "grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_88px_96px] gap-3 items-center";
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,22 +63,25 @@ export default function AdminUsersPage() {
         <p className="text-sm text-ink-soft">검색 결과가 없어요</p>
       ) : (
         <div className="flex flex-col">
+          <div className={`${ROW_GRID} border-b border-border pb-2 text-xs font-medium text-ink-soft`}>
+            <span>닉네임</span>
+            <span>이메일</span>
+            <span>상태</span>
+            <span className="text-right">가입일</span>
+          </div>
+
           {filteredUsers.map((u, i) => (
             <div
               key={u.id}
-              className={`flex items-center justify-between gap-3 py-3 ${
-                i !== filteredUsers.length - 1 ? "border-b border-border" : ""
-              }`}
+              className={`${ROW_GRID} py-3 ${i !== filteredUsers.length - 1 ? "border-b border-border" : ""}`}
             >
-              <div className="min-w-0">
-                <p className="text-sm text-ink truncate">
-                  {u.nickname}
-                  {u.is_admin && <span className="ml-1.5 text-xs font-medium text-accent">관리자</span>}
-                  {u.is_seed && <span className="ml-1.5 text-xs font-medium text-ink-soft">시드 계정</span>}
-                </p>
-                <p className="text-xs text-ink-soft truncate">{u.email}</p>
-              </div>
-              <span className="shrink-0 text-xs font-mono text-ink-soft">
+              <p className="min-w-0 text-sm text-ink truncate">
+                {u.nickname}
+                {u.is_admin && <span className="ml-1.5 text-xs font-medium text-accent">관리자</span>}
+              </p>
+              <p className="min-w-0 text-xs text-ink-soft truncate">{u.email}</p>
+              <span className="text-xs font-medium text-blue-600">{u.is_seed ? "시드 계정" : ""}</span>
+              <span className="text-right text-xs font-mono text-ink-soft">
                 {new Date(u.created_at).toLocaleDateString("ko-KR")}
               </span>
             </div>
