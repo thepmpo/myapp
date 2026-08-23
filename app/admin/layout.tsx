@@ -59,8 +59,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isUsers = pathname.startsWith("/admin/users");
   const isCategories = pathname.startsWith("/admin/categories");
   const isProductCategories = pathname.startsWith("/admin/product-categories");
-  // 좌우 분할 마크다운 미리보기가 있는 글쓰기/수정 화면은 다른 관리자 탭보다 더 넓은 폭이 필요함.
-  const isInsightsWriteForm = pathname === "/admin/insights/new" || /^\/admin\/insights\/[^/]+\/edit$/.test(pathname);
   const isReports =
     !isInsights &&
     !isProducts &&
@@ -94,18 +92,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AdminChangesProvider>
       <div className="flex min-w-0">
-        <aside className="hidden shrink-0 border-r border-border px-4 py-8 lg:block lg:w-[200px]">
-          <p className="mb-3 px-2 text-xs font-bold uppercase tracking-wide text-ink-soft">관리자 메뉴</p>
+        <aside className="hidden shrink-0 bg-black px-4 py-8 lg:block lg:w-[200px]">
+          <p className="mb-3 px-2 text-xs font-bold uppercase tracking-wide text-white/60">관리자 메뉴</p>
           <nav>
             <ul className="space-y-0.5">
               {tabs.map((tab) => (
                 <li key={tab.href}>
                   <Link
                     href={tab.href}
-                    className={`block rounded-r-md border-l-2 px-2 py-2 text-sm leading-snug ${
-                      tab.active
-                        ? "border-accent bg-accent/5 font-bold text-accent"
-                        : "border-transparent text-ink-soft hover:bg-black/[0.02] hover:text-ink"
+                    className={`block rounded-md px-2 py-2 text-sm leading-snug ${
+                      tab.active ? "bg-white font-bold text-black" : "text-white hover:bg-white/10"
                     }`}
                   >
                     {tab.label}
@@ -116,13 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </aside>
 
-        <div className={`min-w-0 flex-1 mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8 ${isInsightsWriteForm ? "max-w-[1100px]" : "max-w-[720px]"}`}>
-          <div className="mb-5">
-            <Link href="/circle" className="text-sm text-ink-soft hover:text-accent">
-              ← Circle로
-            </Link>
-          </div>
-
+        <div className="min-w-0 flex-1 mx-auto max-w-[1400px] px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
           <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
 
           <div className="mb-6 flex flex-wrap gap-x-6 gap-y-2 border-b border-border lg:hidden">
