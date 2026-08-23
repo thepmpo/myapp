@@ -93,30 +93,54 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminChangesProvider>
-      <div className={`mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8 ${isInsightsWriteForm ? "max-w-[1100px]" : "max-w-[720px]"}`}>
-        <div className="mb-5">
-          <Link href="/circle" className="text-sm text-ink-soft hover:text-accent">
-            ← Circle로
-          </Link>
-        </div>
+      <div className="flex min-w-0">
+        <aside className="hidden shrink-0 border-r border-border px-4 py-8 lg:block lg:w-[200px]">
+          <p className="mb-3 px-2 text-xs font-bold uppercase tracking-wide text-ink-soft">관리자 메뉴</p>
+          <nav>
+            <ul className="space-y-0.5">
+              {tabs.map((tab) => (
+                <li key={tab.href}>
+                  <Link
+                    href={tab.href}
+                    className={`block rounded-r-md border-l-2 px-2 py-2 text-sm leading-snug ${
+                      tab.active
+                        ? "border-accent bg-accent/5 font-bold text-accent"
+                        : "border-transparent text-ink-soft hover:bg-black/[0.02] hover:text-ink"
+                    }`}
+                  >
+                    {tab.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
 
-        <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
-
-        <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-border mb-6">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`-mb-px pb-3 text-sm font-medium border-b-2 whitespace-nowrap ${
-                tab.active ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
-              }`}
-            >
-              {tab.label}
+        <div className={`min-w-0 flex-1 mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8 ${isInsightsWriteForm ? "max-w-[1100px]" : "max-w-[720px]"}`}>
+          <div className="mb-5">
+            <Link href="/circle" className="text-sm text-ink-soft hover:text-accent">
+              ← Circle로
             </Link>
-          ))}
-        </div>
+          </div>
 
-        {children}
+          <h1 className="text-2xl font-bold text-ink mb-6">관리자 페이지</h1>
+
+          <div className="mb-6 flex flex-wrap gap-x-6 gap-y-2 border-b border-border lg:hidden">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`-mb-px pb-3 text-sm font-medium border-b-2 whitespace-nowrap ${
+                  tab.active ? "text-accent border-accent" : "text-ink-soft border-transparent hover:text-ink"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            ))}
+          </div>
+
+          {children}
+        </div>
       </div>
 
       <AdminSaveBar />
