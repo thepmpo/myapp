@@ -129,8 +129,8 @@ export default function AdminAnswerRatePage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <section className="bg-surface border border-border rounded-xl p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="flex h-full flex-col bg-surface border border-border rounded-xl p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
         <h2 className="text-sm font-bold text-ink mb-1">답변률</h2>
         <p className="text-3xl font-bold text-ink">{totalQuestions > 0 ? `${answerRate.toFixed(1)}%` : "-"}</p>
         <p className="mt-1 text-xs text-ink-soft">
@@ -141,9 +141,25 @@ export default function AdminAnswerRatePage() {
             목표(80% 이상) {meetsRateTarget ? "달성" : "미달성"}
           </p>
         )}
+
+        <div className="relative mt-5 pb-5">
+          <div className="relative h-2.5 w-full rounded-full bg-border">
+            <div
+              className="h-full rounded-full bg-emerald-500"
+              style={{ width: `${Math.min(answerRate, 100)}%` }}
+            />
+            <div className="absolute inset-y-0 w-0.5 bg-red-500" style={{ left: `${ANSWER_RATE_TARGET}%` }} />
+          </div>
+          <span
+            className="absolute top-4 -translate-x-1/2 whitespace-nowrap text-[11px] font-medium text-red-500"
+            style={{ left: `${ANSWER_RATE_TARGET}%` }}
+          >
+            목표 {ANSWER_RATE_TARGET}%
+          </span>
+        </div>
       </section>
 
-      <section className="bg-surface border border-border rounded-xl p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
+      <section className="flex h-full flex-col bg-surface border border-border rounded-xl p-6 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
         <h2 className="text-sm font-bold text-ink mb-1">응답 시간</h2>
         {medianMs !== null ? (
           <>
