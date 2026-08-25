@@ -16,6 +16,9 @@ type HiddenPost = {
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// /admin/users의 표 형태(고정 grid 컬럼 + 헤더 행)를 그대로 재사용.
+const ROW_GRID = "grid grid-cols-[minmax(0,1.4fr)_140px_130px_140px_120px] gap-3 items-center";
+
 export default function AdminCirclePage() {
   const { pendingUnhidePostIds, stagePostUnhide, version } = useAdminChanges();
   const [posts, setPosts] = useState<HiddenPost[]>([]);
@@ -102,31 +105,48 @@ export default function AdminCirclePage() {
       ) : filteredPosts.length === 0 ? (
         <p className="text-sm text-ink-soft">검색 결과가 없어요</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col overflow-x-auto">
+          <div className={`${ROW_GRID} min-w-[720px] border-b border-border pb-2 text-xs font-medium text-ink-soft`}>
+            <span>제목</span>
+            <span>작성자</span>
+            <span className="text-right">비공개 처리일</span>
+            <span>처리한 관리자</span>
+            <span className="text-right">액션</span>
+          </div>
+
           {filteredPosts.map((post, i) => {
             const isStaged = post.id in pendingUnhidePostIds;
 
             return (
               <div
                 key={post.id}
-                className={`py-3 ${i !== filteredPosts.length - 1 ? "border-b border-border" : ""}`}
+                className={`${ROW_GRID} min-w-[720px] py-3 ${
+                  i !== filteredPosts.length - 1 ? "border-b border-border" : ""
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <a
-                    href={`/post/${post.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="min-w-0 flex-1 truncate text-sm text-ink hover:text-accent hover:underline"
-                  >
-                    {post.title}
-                    {isStaged && <span className="ml-1.5 text-xs font-bold text-accent">정상처리 예정</span>}
-                  </a>
-                  <span className="w-28 shrink-0 truncate text-xs text-ink-soft">
-                    {nicknames[post.user_id] ?? post.author}
-                  </span>
-                  <span className="w-20 shrink-0 text-right text-xs font-mono text-ink-soft">
-                    {new Date(post.created_at).toLocaleDateString("ko-KR")}
-                  </span>
+                <a
+                  href={`/post/${post.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="min-w-0 truncate text-sm text-ink hover:text-accent hover:underline"
+                >
+                  {post.title}
+                </a>
+
+                <span className="min-w-0 truncate text-xs text-ink-soft">
+                  {nicknames[post.user_id] ?? post.author}
+                </span>
+
+                <span className="text-right text-xs font-mono text-ink-soft">
+                  {post.hidden_at ? new Date(post.hidden_at).toLocaleDateString("ko-KR") : "-"}
+                </span>
+
+                <span className="min-w-0 truncate text-xs text-ink-soft">
+                  {post.hidden_by ? nicknames[post.hidden_by] ?? "알 수 없음" : "-"}
+                </span>
+
+                <div className="flex items-center justify-end gap-2">
+                  {isStaged && <span className="text-xs font-bold text-accent">정상처리 예정</span>}
 
                   <details className="relative shrink-0">
                     <summary className="cursor-pointer list-none px-2 text-lg leading-none text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
@@ -153,13 +173,6 @@ export default function AdminCirclePage() {
                     </div>
                   </details>
                 </div>
-
-                {post.hidden_at && (
-                  <p className="mt-1 text-[11px] text-ink-soft">
-                    비공개 처리: {new Date(post.hidden_at).toLocaleString("ko-KR")}
-                    {post.hidden_by && ` · ${nicknames[post.hidden_by] ?? "알 수 없음"}`}
-                  </p>
-                )}
               </div>
             );
           })}
