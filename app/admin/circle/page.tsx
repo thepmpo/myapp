@@ -15,6 +15,7 @@ type HiddenPost = {
 };
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PAGE_SIZE = 15;
 
 // /admin/users의 표 형태(고정 grid 컬럼 + 헤더 행)를 그대로 재사용.
 const ROW_GRID = "grid grid-cols-[minmax(0,1.4fr)_140px_130px_140px_120px] gap-3 items-center";
@@ -26,6 +27,7 @@ export default function AdminCirclePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const load = async () => {
     setLoading(true);
@@ -81,6 +83,15 @@ export default function AdminCirclePage() {
     });
   }, [posts, nicknames, searchTerm]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+
+  // 검색어가 바뀌면 이전 페이지 번호가 새 결과 범위를 벗어날 수 있으니 1페이지로 되돌림.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const pagePosts = filteredPosts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   return (
     <section className="bg-surface border border-border rounded-xl p-5 shadow-[0_1px_3px_rgba(23,27,35,0.045)]">
       <h2 className="text-base font-bold text-ink mb-1">Circle 글 관리</h2>
@@ -105,78 +116,122 @@ export default function AdminCirclePage() {
       ) : filteredPosts.length === 0 ? (
         <p className="text-sm text-ink-soft">검색 결과가 없어요</p>
       ) : (
-        <div className="flex flex-col overflow-x-auto">
-          <div className={`${ROW_GRID} min-w-[720px] border-b border-border pb-2 text-xs font-medium text-ink-soft`}>
-            <span>제목</span>
-            <span>작성자</span>
-            <span className="text-right">비공개 처리일</span>
-            <span>처리한 관리자</span>
-            <span className="text-right">액션</span>
+        <>
+          <div className="flex flex-col overflow-x-auto">
+            <div className={`${ROW_GRID} min-w-[720px] border-b border-border pb-2 text-xs font-medium text-ink-soft`}>
+              <span>제목</span>
+              <span>작성자</span>
+              <span>비공개 처리일</span>
+              <span>처리한 관리자</span>
+              <span>액션</span>
+            </div>
+
+            {pagePosts.map((post, i) => {
+              const isStaged = post.id in pendingUnhidePostIds;
+
+              return (
+                <div
+                  key={post.id}
+                  className={`${ROW_GRID} min-w-[720px] py-3 ${
+                    i !== pagePosts.length - 1 ? "border-b border-border" : ""
+                  }`}
+                >
+                  <a
+                    href={`/post/${post.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-w-0 truncate text-sm text-ink hover:text-accent hover:underline"
+                  >
+                    {post.title}
+                  </a>
+
+                  <span className="min-w-0 truncate text-xs text-ink-soft">
+                    {nicknames[post.user_id] ?? post.author}
+                  </span>
+
+                  <span className="text-xs font-mono text-ink-soft">
+                    {post.hidden_at ? new Date(post.hidden_at).toLocaleDateString("ko-KR") : "-"}
+                  </span>
+
+                  <span className="min-w-0 truncate text-xs text-ink-soft">
+                    {post.hidden_by ? nicknames[post.hidden_by] ?? "알 수 없음" : "-"}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+                    {isStaged && <span className="text-xs font-bold text-accent">정상처리 예정</span>}
+
+                    {/* 드롭다운을 아래로 열면 목록 마지막 줄 근처에서 페이지 전체 스크롤 높이가
+                        늘어나므로(절대 위치 요소도 화면 밖으로 나가면 문서 높이에 반영됨),
+                        항상 위로 열어서 행 위치/페이지 높이가 변하지 않게 함. */}
+                    <details className="relative shrink-0">
+                      <summary className="cursor-pointer list-none px-2 text-lg leading-none text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
+                        ⋯
+                      </summary>
+                      {/* 저장바(AdminSaveBar)가 z-50 고정 요소라 하단 근처 행의 드롭다운이 가려질 수 있어
+                          그보다 높은 z-index를 줌. */}
+                      <div className="absolute left-0 bottom-full z-[60] mb-1 w-28 rounded-lg border border-border bg-surface shadow-[0_2px_8px_rgba(23,27,35,0.1)]">
+                        {isStaged ? (
+                          <button
+                            type="button"
+                            onClick={() => stagePostUnhide(post.id, false)}
+                            className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+                          >
+                            취소
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => stagePostUnhide(post.id, true)}
+                            className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+                          >
+                            정상처리
+                          </button>
+                        )}
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {filteredPosts.map((post, i) => {
-            const isStaged = post.id in pendingUnhidePostIds;
-
-            return (
-              <div
-                key={post.id}
-                className={`${ROW_GRID} min-w-[720px] py-3 ${
-                  i !== filteredPosts.length - 1 ? "border-b border-border" : ""
-                }`}
+          {totalPages > 1 && (
+            <div className="mt-5 flex items-center justify-center gap-1">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-2.5 py-1.5 rounded-md text-xs text-ink-soft hover:bg-black/[0.03] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                <a
-                  href={`/post/${post.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="min-w-0 truncate text-sm text-ink hover:text-accent hover:underline"
+                이전
+              </button>
+
+              {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  type="button"
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`min-w-[28px] px-2 py-1.5 rounded-md text-xs cursor-pointer ${
+                    pageNum === currentPage
+                      ? "bg-accent text-white font-medium"
+                      : "text-ink-soft hover:bg-black/[0.03]"
+                  }`}
                 >
-                  {post.title}
-                </a>
+                  {pageNum}
+                </button>
+              ))}
 
-                <span className="min-w-0 truncate text-xs text-ink-soft">
-                  {nicknames[post.user_id] ?? post.author}
-                </span>
-
-                <span className="text-right text-xs font-mono text-ink-soft">
-                  {post.hidden_at ? new Date(post.hidden_at).toLocaleDateString("ko-KR") : "-"}
-                </span>
-
-                <span className="min-w-0 truncate text-xs text-ink-soft">
-                  {post.hidden_by ? nicknames[post.hidden_by] ?? "알 수 없음" : "-"}
-                </span>
-
-                <div className="flex items-center justify-end gap-2">
-                  {isStaged && <span className="text-xs font-bold text-accent">정상처리 예정</span>}
-
-                  <details className="relative shrink-0">
-                    <summary className="cursor-pointer list-none px-2 text-lg leading-none text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
-                      ⋯
-                    </summary>
-                    <div className="absolute right-0 top-full z-10 mt-1 w-28 rounded-lg border border-border bg-surface shadow-[0_2px_8px_rgba(23,27,35,0.1)]">
-                      {isStaged ? (
-                        <button
-                          type="button"
-                          onClick={() => stagePostUnhide(post.id, false)}
-                          className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
-                        >
-                          취소
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => stagePostUnhide(post.id, true)}
-                          className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
-                        >
-                          정상처리
-                        </button>
-                      )}
-                    </div>
-                  </details>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-2.5 py-1.5 rounded-md text-xs text-ink-soft hover:bg-black/[0.03] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                다음
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );
