@@ -10,6 +10,7 @@ export type HomePost = {
   image_url: string | null;
   created_at?: string | null;
   is_featured?: boolean;
+  is_hidden?: boolean;
 };
 
 export type HomeArticle = {

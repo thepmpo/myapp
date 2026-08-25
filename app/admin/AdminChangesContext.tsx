@@ -15,6 +15,7 @@ type AdminChanges = {
   pendingNavVisibility: Partial<Record<NavMenuKey, Visibility>>;
   pendingAdminFlags: Record<string, boolean>;
   pendingHomeSlots: Partial<Record<HomeSlotKey, HomeSlotValue>>;
+  pendingUnhidePostIds: Record<number, true>;
   pendingCount: number;
   saving: boolean;
   error: string;
@@ -22,6 +23,7 @@ type AdminChanges = {
   setNavVisibility: (key: NavMenuKey, value: Visibility, original: Visibility) => void;
   setAdminFlag: (userId: string, value: boolean, original: boolean) => void;
   setHomeSlot: (slotKey: HomeSlotKey, value: HomeSlotValue, original: HomeSlotValue) => void;
+  stagePostUnhide: (postId: number, shouldUnhide: boolean) => void;
   saveAll: () => Promise<void>;
 };
 
@@ -31,6 +33,7 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
   const [pendingNavVisibility, setPendingNavVisibilityState] = useState<Partial<Record<NavMenuKey, Visibility>>>({});
   const [pendingAdminFlags, setPendingAdminFlagsState] = useState<Record<string, boolean>>({});
   const [pendingHomeSlots, setPendingHomeSlotsState] = useState<Partial<Record<HomeSlotKey, HomeSlotValue>>>({});
+  const [pendingUnhidePostIds, setPendingUnhidePostIdsState] = useState<Record<number, true>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
@@ -58,6 +61,15 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       const next = { ...prev };
       if (slotValuesEqual(value, original)) delete next[slotKey];
       else next[slotKey] = value;
+      return next;
+    });
+  }, []);
+
+  const stagePostUnhide = useCallback((postId: number, shouldUnhide: boolean) => {
+    setPendingUnhidePostIdsState((prev) => {
+      const next = { ...prev };
+      if (shouldUnhide) next[postId] = true;
+      else delete next[postId];
       return next;
     });
   }, []);
@@ -108,6 +120,14 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       })
     );
 
+    const unhidePostIds = Object.keys(pendingUnhidePostIds).map(Number);
+    const unhideResults = await Promise.all(
+      unhidePostIds.map(async (postId) => {
+        const { error: updateError } = await supabase.from("posts").update({ is_hidden: false }).eq("id", postId);
+        return { postId, ok: !updateError };
+      })
+    );
+
     setPendingNavVisibilityState((prev) => {
       const next = { ...prev };
       navResults.filter((r) => r.ok).forEach((r) => delete next[r.key]);
@@ -126,21 +146,34 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       return next;
     });
 
+    setPendingUnhidePostIdsState((prev) => {
+      const next = { ...prev };
+      unhideResults.filter((r) => r.ok).forEach((r) => delete next[r.postId]);
+      return next;
+    });
+
     const hasFailure =
-      navResults.some((r) => !r.ok) || adminResults.some((r) => !r.ok) || homeSlotResults.some((r) => !r.ok);
+      navResults.some((r) => !r.ok) ||
+      adminResults.some((r) => !r.ok) ||
+      homeSlotResults.some((r) => !r.ok) ||
+      unhideResults.some((r) => !r.ok);
     setError(hasFailure ? "일부 변경사항 저장에 실패했어요. 다시 시도해주세요." : "");
     setVersion((v) => v + 1);
     setSaving(false);
-  }, [pendingNavVisibility, pendingAdminFlags, pendingHomeSlots]);
+  }, [pendingNavVisibility, pendingAdminFlags, pendingHomeSlots, pendingUnhidePostIds]);
 
   const pendingCount =
-    Object.keys(pendingNavVisibility).length + Object.keys(pendingAdminFlags).length + Object.keys(pendingHomeSlots).length;
+    Object.keys(pendingNavVisibility).length +
+    Object.keys(pendingAdminFlags).length +
+    Object.keys(pendingHomeSlots).length +
+    Object.keys(pendingUnhidePostIds).length;
 
   const value = useMemo(
     () => ({
       pendingNavVisibility,
       pendingAdminFlags,
       pendingHomeSlots,
+      pendingUnhidePostIds,
       pendingCount,
       saving,
       error,
@@ -148,12 +181,14 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       setNavVisibility,
       setAdminFlag,
       setHomeSlot,
+      stagePostUnhide,
       saveAll,
     }),
     [
       pendingNavVisibility,
       pendingAdminFlags,
       pendingHomeSlots,
+      pendingUnhidePostIds,
       pendingCount,
       saving,
       error,
@@ -161,6 +196,7 @@ export function AdminChangesProvider({ children }: { children: React.ReactNode }
       setNavVisibility,
       setAdminFlag,
       setHomeSlot,
+      stagePostUnhide,
       saveAll,
     ]
   );

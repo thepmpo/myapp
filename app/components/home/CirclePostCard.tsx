@@ -12,6 +12,7 @@ type CirclePostCardProps = {
   authorName: string;
   authorAvatarUrl?: string;
   currentUserId?: string;
+  isAdmin?: boolean;
   commentCount: number;
   reactionCount: number;
   previewComments: HomePreviewComment[];
@@ -30,6 +31,7 @@ export default function CirclePostCard({
   authorName,
   authorAvatarUrl,
   currentUserId,
+  isAdmin,
   commentCount,
   reactionCount,
   previewComments,
@@ -104,6 +106,9 @@ export default function CirclePostCard({
                 <span aria-hidden="true">·</span>
                 <span className="font-medium text-question">질문</span>
               </>
+            )}
+            {isAdmin && post.is_hidden && (
+              <span className="ml-auto shrink-0 font-bold text-red-500">비공개 처리</span>
             )}
           </div>
 

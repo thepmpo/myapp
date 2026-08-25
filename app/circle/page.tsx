@@ -14,6 +14,7 @@ const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 export default function CirclePage() {
   const [posts, setPosts] = useState<HomePost[]>([]);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
   const [avatars, setAvatars] = useState<Record<string, string>>({});
   const [commentCounts, setCommentCounts] = useState<Record<number, number>>({});
@@ -138,6 +139,9 @@ export default function CirclePage() {
       if (!isActive || !userData.user) return;
       setCurrentUser({ id: userData.user.id, email: userData.user.email ?? "" });
       await fetchNicknames([userData.user.id]);
+
+      const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", userData.user.id).maybeSingle();
+      if (isActive) setIsAdmin(!!profile?.is_admin);
     };
 
     void loadFeed();
@@ -272,6 +276,7 @@ export default function CirclePage() {
                     authorName={nicknames[post.user_id] ?? post.author}
                     authorAvatarUrl={avatars[post.user_id]}
                     currentUserId={currentUser?.id}
+                    isAdmin={isAdmin}
                     commentCount={commentCounts[post.id] || 0}
                     reactionCount={reactionCounts[post.id] || 0}
                     previewComments={topComments[post.id] || []}

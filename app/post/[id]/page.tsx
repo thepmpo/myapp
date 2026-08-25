@@ -34,8 +34,13 @@ export default function PostDetail() {
   const id = Number(params.id);
 
   const [post, setPost] = useState<any>(null);
+  const [postNotFound, setPostNotFound] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string } | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminMenu, setShowAdminMenu] = useState(false);
+  const [showHideConfirm, setShowHideConfirm] = useState(false);
+  const [hidingPost, setHidingPost] = useState(false);
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -69,6 +74,13 @@ export default function PostDetail() {
     return () => document.removeEventListener('click', closeMenu);
   }, [openCommentMenuId]);
 
+  useEffect(() => {
+    if (!showAdminMenu) return;
+    const closeMenu = () => setShowAdminMenu(false);
+    document.addEventListener('click', closeMenu);
+    return () => document.removeEventListener('click', closeMenu);
+  }, [showAdminMenu]);
+
   const fetchNicknames = async (userIds: string[]) => {
     const uniqueIds = Array.from(new Set(userIds.filter((uid) => uid && UUID_REGEX.test(uid))));
 
@@ -98,6 +110,9 @@ export default function PostDetail() {
         fetchComments();
         fetchPostLikes();
         fetchSidebarData();
+
+        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', data.user.id).maybeSingle();
+        setIsAdmin(!!profile?.is_admin);
       }
 
       setAuthChecked(true);
@@ -167,6 +182,10 @@ export default function PostDetail() {
     if (data) {
       setPost(data);
       await fetchNicknames([data.user_id]);
+    } else {
+      // 비공개 처리된 글을 작성자/관리자가 아닌 계정으로 직접 URL 접근했을 때도
+      // RLS가 조용히 빈 결과를 돌려주므로, 무한 로딩 대신 명확히 "찾을 수 없음"으로 처리.
+      setPostNotFound(true);
     }
   };
 
@@ -350,6 +369,22 @@ export default function PostDetail() {
     window.location.href = '/';
   };
 
+  const confirmHidePost = async () => {
+    setHidingPost(true);
+
+    const { error } = await supabase.from('posts').update({ is_hidden: true }).eq('id', id);
+
+    setHidingPost(false);
+    setShowHideConfirm(false);
+
+    if (error) {
+      setToast(error.message);
+    } else {
+      setPost((prev: any) => (prev ? { ...prev, is_hidden: true } : prev));
+      setToast('비공개 처리했어요');
+    }
+  };
+
   if (!authChecked) {
     return (
       <WorkspaceFrame>
@@ -364,6 +399,14 @@ export default function PostDetail() {
         <div className="px-5 py-8 sm:px-8">
           <LoginPromptModal onClose={() => router.push('/circle')} />
         </div>
+      </WorkspaceFrame>
+    );
+  }
+
+  if (postNotFound) {
+    return (
+      <WorkspaceFrame>
+        <div className="px-5 py-8 text-sm text-ink-soft sm:px-8">이 게시글을 찾을 수 없어요.</div>
       </WorkspaceFrame>
     );
   }
@@ -416,6 +459,10 @@ export default function PostDetail() {
           </div>
 
           <div className="flex items-center gap-2">
+            {isAdmin && post.is_hidden && (
+              <span className="text-xs font-bold text-red-500">비공개 처리</span>
+            )}
+
             {post.is_question && (
               <span className="text-xs font-bold text-question">
                 🙋 질문있어요
@@ -487,6 +534,37 @@ export default function PostDetail() {
               >
                 🚨 신고
               </button>
+            )}
+
+            {isAdmin && (
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAdminMenu((v) => !v);
+                  }}
+                  className="text-xs text-ink-soft/60 hover:text-ink-soft cursor-pointer"
+                >
+                  관리자 기능
+                </button>
+
+                {showAdminMenu && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute right-0 top-full z-10 mt-1 w-28 rounded-lg border border-border bg-surface shadow-[0_2px_8px_rgba(23,27,35,0.1)]"
+                  >
+                    <button
+                      onClick={() => {
+                        setShowAdminMenu(false);
+                        setShowHideConfirm(true);
+                      }}
+                      className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:text-red-500 cursor-pointer"
+                    >
+                      비공개 처리
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -643,6 +721,31 @@ export default function PostDetail() {
               className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium cursor-pointer hover:bg-red-600 disabled:opacity-60"
             >
               {reporting ? '신고 중...' : '신고하기'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {showHideConfirm && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="w-full max-w-[340px] bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(23,27,35,0.045)] p-6">
+          <h2 className="text-base font-bold text-ink mb-2">정말 비공개 처리하시겠어요?</h2>
+          <p className="text-sm text-ink-soft mb-6">비공개 처리하면 작성자 본인과 관리자에게만 보여요.</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowHideConfirm(false)}
+              disabled={hidingPost}
+              className="flex-1 py-2.5 rounded-lg border border-border bg-surface text-sm font-medium text-ink cursor-pointer hover:bg-black/[0.03] disabled:opacity-60"
+            >
+              취소
+            </button>
+            <button
+              onClick={confirmHidePost}
+              disabled={hidingPost}
+              className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium cursor-pointer hover:bg-red-600 disabled:opacity-60"
+            >
+              {hidingPost ? '처리 중...' : '비공개 처리'}
             </button>
           </div>
         </div>
