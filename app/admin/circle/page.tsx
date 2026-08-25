@@ -4,7 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/app/lib/supabase";
 import { useAdminChanges } from "../AdminChangesContext";
 
-type HiddenPost = { id: number; title: string; author: string; user_id: string; created_at: string };
+type HiddenPost = {
+  id: number;
+  title: string;
+  author: string;
+  user_id: string;
+  created_at: string;
+  hidden_by: string | null;
+  hidden_at: string | null;
+};
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -22,7 +30,7 @@ export default function AdminCirclePage() {
 
     const { data, error: fetchError } = await supabase
       .from("posts")
-      .select("id, title, author, user_id, created_at")
+      .select("id, title, author, user_id, created_at, hidden_by, hidden_at")
       .eq("is_hidden", true)
       .order("created_at", { ascending: false });
 
@@ -35,7 +43,14 @@ export default function AdminCirclePage() {
     const rows = (data as HiddenPost[]) || [];
     setPosts(rows);
 
-    const userIds = Array.from(new Set(rows.map((p) => p.user_id).filter((id) => id && UUID_REGEX.test(id))));
+    // 작성자(user_id)와 비공개 처리한 관리자(hidden_by) 닉네임을 한 번에 조회.
+    const userIds = Array.from(
+      new Set(
+        rows
+          .flatMap((p) => [p.user_id, p.hidden_by])
+          .filter((id): id is string => !!id && UUID_REGEX.test(id))
+      )
+    );
     if (userIds.length > 0) {
       const { data: profiles } = await supabase.from("profiles").select("id, nickname").in("id", userIds);
       const map: Record<string, string> = {};
@@ -94,44 +109,57 @@ export default function AdminCirclePage() {
             return (
               <div
                 key={post.id}
-                className={`flex items-center justify-between gap-3 py-3 ${
-                  i !== filteredPosts.length - 1 ? "border-b border-border" : ""
-                }`}
+                className={`py-3 ${i !== filteredPosts.length - 1 ? "border-b border-border" : ""}`}
               >
-                <div className="min-w-0">
-                  <p className="text-sm text-ink truncate">
+                <div className="flex items-center gap-3">
+                  <a
+                    href={`/post/${post.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-w-0 flex-1 truncate text-sm text-ink hover:text-accent hover:underline"
+                  >
                     {post.title}
                     {isStaged && <span className="ml-1.5 text-xs font-bold text-accent">정상처리 예정</span>}
-                  </p>
-                  <p className="text-xs text-ink-soft truncate">
-                    {nicknames[post.user_id] ?? post.author} · {new Date(post.created_at).toLocaleDateString("ko-KR")}
-                  </p>
+                  </a>
+                  <span className="w-28 shrink-0 truncate text-xs text-ink-soft">
+                    {nicknames[post.user_id] ?? post.author}
+                  </span>
+                  <span className="w-20 shrink-0 text-right text-xs font-mono text-ink-soft">
+                    {new Date(post.created_at).toLocaleDateString("ko-KR")}
+                  </span>
+
+                  <details className="relative shrink-0">
+                    <summary className="cursor-pointer list-none px-2 text-lg leading-none text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
+                      ⋯
+                    </summary>
+                    <div className="absolute right-0 top-full z-10 mt-1 w-28 rounded-lg border border-border bg-surface shadow-[0_2px_8px_rgba(23,27,35,0.1)]">
+                      {isStaged ? (
+                        <button
+                          type="button"
+                          onClick={() => stagePostUnhide(post.id, false)}
+                          className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+                        >
+                          취소
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => stagePostUnhide(post.id, true)}
+                          className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
+                        >
+                          정상처리
+                        </button>
+                      )}
+                    </div>
+                  </details>
                 </div>
 
-                <details className="relative shrink-0">
-                  <summary className="cursor-pointer list-none px-2 text-lg leading-none text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
-                    ⋯
-                  </summary>
-                  <div className="absolute right-0 top-full z-10 mt-1 w-28 rounded-lg border border-border bg-surface shadow-[0_2px_8px_rgba(23,27,35,0.1)]">
-                    {isStaged ? (
-                      <button
-                        type="button"
-                        onClick={() => stagePostUnhide(post.id, false)}
-                        className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
-                      >
-                        취소
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => stagePostUnhide(post.id, true)}
-                        className="w-full px-3 py-2 text-left text-xs text-ink-soft hover:bg-black/[0.03] cursor-pointer"
-                      >
-                        정상처리
-                      </button>
-                    )}
-                  </div>
-                </details>
+                {post.hidden_at && (
+                  <p className="mt-1 text-[11px] text-ink-soft">
+                    비공개 처리: {new Date(post.hidden_at).toLocaleString("ko-KR")}
+                    {post.hidden_by && ` · ${nicknames[post.hidden_by] ?? "알 수 없음"}`}
+                  </p>
+                )}
               </div>
             );
           })}

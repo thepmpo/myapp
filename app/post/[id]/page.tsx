@@ -370,9 +370,15 @@ export default function PostDetail() {
   };
 
   const confirmHidePost = async () => {
+    if (!currentUser) return;
+
     setHidingPost(true);
 
-    const { error } = await supabase.from('posts').update({ is_hidden: true }).eq('id', id);
+    const hiddenAt = new Date().toISOString();
+    const { error } = await supabase
+      .from('posts')
+      .update({ is_hidden: true, hidden_by: currentUser.id, hidden_at: hiddenAt })
+      .eq('id', id);
 
     setHidingPost(false);
     setShowHideConfirm(false);
@@ -380,7 +386,7 @@ export default function PostDetail() {
     if (error) {
       setToast(error.message);
     } else {
-      setPost((prev: any) => (prev ? { ...prev, is_hidden: true } : prev));
+      setPost((prev: any) => (prev ? { ...prev, is_hidden: true, hidden_by: currentUser.id, hidden_at: hiddenAt } : prev));
       setToast('비공개 처리했어요');
     }
   };
