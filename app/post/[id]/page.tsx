@@ -427,6 +427,13 @@ export default function PostDetail() {
 
   const isPostLiked = postLikes.some((l) => l.user_id === currentUser?.id);
 
+  // CirclePostCard.tsx(목록 카드)가 쓰는 것과 동일한 포맷/로직 — 새 포맷을 만들지 않고 그대로 재사용.
+  const createdDate = post.created_at ? new Date(post.created_at) : null;
+  const formattedDate =
+    createdDate && !Number.isNaN(createdDate.getTime())
+      ? new Intl.DateTimeFormat('ko-KR', { month: 'short', day: 'numeric' }).format(createdDate)
+      : null;
+
   return (
     <WorkspaceFrame>
     <div className="min-h-[calc(100vh-57px)] overflow-x-clip bg-surface">
@@ -462,6 +469,14 @@ export default function PostDetail() {
             >
               {nicknames[post.user_id] ?? post.author}
             </Link>
+            {formattedDate && (
+              <>
+                <span className="text-sm text-ink-soft" aria-hidden="true">·</span>
+                <time className="text-sm font-mono text-ink-soft" dateTime={post.created_at ?? undefined}>
+                  {formattedDate}
+                </time>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
