@@ -14,6 +14,9 @@ type WorkspaceData = {
     recentFollows: RecentFollow[];
     followCount: number;
     isAdmin: boolean;
+    // 로그인 여부/관리자 여부 조회(비동기)가 끝났는지. GA4처럼 "관리자면 아예 로드하지 않기"가
+    // 필요한 소비자가, isAdmin이 아직 기본값(false)인 잠깐 사이에 잘못 판단하지 않도록 함.
+    authChecked: boolean;
     navVisibility: NavVisibility;
 };
 
@@ -22,6 +25,7 @@ const WorkspaceDataContext = createContext<WorkspaceData>({
     recentFollows: [],
     followCount: 0,
     isAdmin: false,
+    authChecked: false,
     navVisibility: DEFAULT_NAV_VISIBILITY,
 });
 
@@ -30,6 +34,7 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
     const [recentFollows, setRecentFollows] = useState<RecentFollow[]>([]);
     const [followCount, setFollowCount] = useState(0);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [authChecked, setAuthChecked] = useState(false);
     const [navVisibility, setNavVisibility] = useState<NavVisibility>(DEFAULT_NAV_VISIBILITY);
 
     useEffect(() => {
@@ -55,11 +60,17 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
         let active = true;
         const load = async () => {
             const { data } = await supabase.auth.getUser();
-            if (!active || !data.user) return;
+            if (!active) return;
+            if (!data.user) {
+                setAuthChecked(true);
+                return;
+            }
             setCurrentUserId(data.user.id);
 
             const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
-            if (active) setIsAdmin(!!profile?.is_admin);
+            if (!active) return;
+            setIsAdmin(!!profile?.is_admin);
+            setAuthChecked(true);
 
             const { count } = await supabase
                 .from("follows")
@@ -90,8 +101,8 @@ export function WorkspaceDataProvider({ children }: { children: React.ReactNode 
     }, []);
 
     const value = useMemo(
-        () => ({ currentUserId, recentFollows, followCount, isAdmin, navVisibility }),
-        [currentUserId, recentFollows, followCount, isAdmin, navVisibility]
+        () => ({ currentUserId, recentFollows, followCount, isAdmin, authChecked, navVisibility }),
+        [currentUserId, recentFollows, followCount, isAdmin, authChecked, navVisibility]
     );
 
     return <WorkspaceDataContext.Provider value={value}>{children}</WorkspaceDataContext.Provider>;

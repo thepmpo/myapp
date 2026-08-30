@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 import AppShell from "@/app/components/AppShell";
+import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import { WorkspaceDataProvider } from "@/app/components/home/WorkspaceDataContext";
 import "./globals.css";
 
@@ -24,6 +25,7 @@ export default function RootLayout({
     <html lang="ko" className={`${notoSansKR.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-paper text-ink">
         <WorkspaceDataProvider>
+          <GoogleAnalytics />
           <AppShell>{children}</AppShell>
         </WorkspaceDataProvider>
       </body>
