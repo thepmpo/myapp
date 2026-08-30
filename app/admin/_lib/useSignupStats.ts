@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/app/lib/supabase";
-import { getSeedUserIds } from "./seedAccounts";
+import { getAdminUserIds, getSeedUserIds } from "./seedAccounts";
 
 type ArticleView = { viewer_key: string };
 
@@ -19,7 +19,7 @@ export function useSignupStats(includeSeedData: boolean) {
       setLoading(true);
       setError("");
 
-      const seedUserIds = await getSeedUserIds();
+      const [seedUserIds, adminUserIds] = await Promise.all([getSeedUserIds(), getAdminUserIds()]);
 
       const now = Date.now();
       // "오늘"/"최근 7일"은 달력 자정 기준이 아니라 지금으로부터의 rolling 24시간/7일 기준
@@ -53,7 +53,7 @@ export function useSignupStats(includeSeedData: boolean) {
       const views = (viewsRes.data as ArticleView[]) || [];
       const filteredViewCount = includeSeedData
         ? views.length
-        : views.filter((v) => !seedUserIds.has(v.viewer_key)).length;
+        : views.filter((v) => !seedUserIds.has(v.viewer_key) && !adminUserIds.has(v.viewer_key)).length;
 
       setTodayCount(todayRes.count ?? 0);
       setLast7DaysCount(last7Res.count ?? 0);

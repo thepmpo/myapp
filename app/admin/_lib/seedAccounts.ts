@@ -11,3 +11,14 @@ export async function getSeedUserIds(): Promise<Set<string>> {
 
   return new Set((data ?? []).map((row: { id: string }) => row.id));
 }
+
+// 관리자 본인이 아티클을 열람해서 생긴 조회수처럼, "실제 유저 지표"를 왜곡하는 관리자
+// 계정 데이터를 제외하기 위한 헬퍼. getSeedUserIds()와 동일한 패턴으로 SeedDataToggle의
+// "데이터 표시" 체크박스가 켜졌을 때만 이 계정들의 데이터도 함께 집계하도록 사용.
+export async function getAdminUserIds(): Promise<Set<string>> {
+  const { data, error } = await supabase.from("profiles").select("id").eq("is_admin", true);
+
+  if (error) throw error;
+
+  return new Set((data ?? []).map((row: { id: string }) => row.id));
+}
