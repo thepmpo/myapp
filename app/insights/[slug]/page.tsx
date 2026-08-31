@@ -106,8 +106,28 @@ export default async function ArticleDetail({ params }: { params: Promise<{ slug
 
   const categoryLabel = CATEGORY_LABELS[article.category as keyof typeof CATEGORY_LABELS];
 
+  // 검색엔진용 Article 구조화 데이터(schema.org). </script>로 스크립트가 중간에 끊기지
+  // 않도록(제목에 이론상 그 문자열이 들어갈 경우 대비) 이스케이프 처리.
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    datePublished: article.created_at,
+    dateModified: article.created_at,
+    author: { "@type": "Person", name: authorNickname },
+    ...(article.image_url ? { image: [article.image_url] } : {}),
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://thepmpo.com/insights/${encodeURI(canonicalSlug)}`,
+    },
+  };
+
   return (
     <div className="max-w-[1280px] mx-auto px-5 sm:px-8 pt-8 pb-24 lg:pb-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
+      />
       <ArticleViewRecorder articleId={id} />
 
       <BackButton label={categoryLabel} />
