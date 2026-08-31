@@ -14,6 +14,9 @@ const notoSansKR = Noto_Sans_KR({
 export const metadata: Metadata = {
   title: "The PMPO",
   description: "PM·PO를 위한 질문·정보 커뮤니티",
+  verification: {
+    google: "S18jlc1bMJWz2Z31adfPotCE1LodaAx9gJe6DaFNH3k",
+  },
 };
 
 export default function RootLayout({
